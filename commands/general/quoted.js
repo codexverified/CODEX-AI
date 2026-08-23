@@ -18,14 +18,17 @@ module.exports = {
         // OR media (image/video/audio/document/sticker) that was sent as a
         // reply, and it may be wrapped in a disappearing-message/view-once
         // envelope — look through all of those, not just extendedTextMessage.
-        const taggedReply = getContextInfo(quoted) || getContextInfo(m.quoted?.msg) || getContextInfo(m.quoted?.message);
+        const repliedMessage = m.quoted?.key ? store.getMessage(m.quoted.key) : null;
+        const taggedReply = getContextInfo(repliedMessage?.message || repliedMessage) ||
+            getContextInfo(quoted) || getContextInfo(m.quoted?.msg) || getContextInfo(m.quoted?.message);
         const original = taggedReply?.quotedMessage || quoted;
         const originalCtx = taggedReply || ctx;
         const quotedSender = originalCtx.participant || originalCtx.participantAlt || ctx.participant || m.quoted?.sender;
         const key = {
             remoteJid: originalCtx.remoteJid || m.chat,
-            id: originalCtx.stanzaId || `quoted-${Date.now()}`,
-            participant: originalCtx.participant,
+            id: originalCtx.stanzaId || m.quoted?.key?.id || `quoted-${Date.now()}`,
+            participant: originalCtx.participant || m.quoted?.key?.participant,
+            fromMe: false,
         };
         store.saveMessage({ key, message: original, pushName: originalCtx.pushName || '' });
         return forward(sock, m.chat, original, quotedSender, m);
