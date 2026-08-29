@@ -1,0 +1,4 @@
+'use strict';
+const MAP={a:'.-',b:'-...',c:'-.-.',d:'-..',e:'.',f:'..-.',g:'--.',h:'....',i:'..',j:'.---',k:'-.-',l:'.-..',m:'--',n:'-.',o:'---',p:'.--.',q:'--.-',r:'.-.',s:'...',t:'-',u:'..-',v:'...-',w:'.--',x:'-..-',y:'-.--',z:'--..',' ':'/'};
+const REV=Object.fromEntries(Object.entries(MAP).map(([k,v])=>[v,k]));
+module.exports={name:'morse',alias:['morseencode','morsedecode'],category:'tools',desc:'Encode or decode Morse code',execute:async(sock,m,args)=>{const mode=String(args.shift()||'').toLowerCase(), input=args.join(' ');if(!['encode','decode','enc','dec'].includes(mode)||!input)return m.reply('Usage: morse encode <text> or morse decode <code>');const out=mode==='encode'||mode==='enc'?input.toLowerCase().split('').map(c=>MAP[c]||'').filter(Boolean).join(' '):input.split(' ').map(c=>REV[c]||'?').join('');return m.reply(out);}};
