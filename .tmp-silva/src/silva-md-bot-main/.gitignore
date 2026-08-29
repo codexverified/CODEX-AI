@@ -1,0 +1,17 @@
+node_modules/
+session/
+temp/
+.cache/
+.cache_src/
+_assets/
+.config/
+*.log
+.env
+.replit
+replit.nix
+data/lid-phone-cache.json
+data/push-names.json
+.local/
+.agents/
+attached_assets/
+replit.md
