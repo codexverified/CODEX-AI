@@ -1,6 +1,6 @@
 'use strict';
  
-const { Sticker }     = require('wa-sticker-formatter');
+let Sticker;
 const config          = require('../config');
 const { getStr, fmt } = require('../lib/theme');
 const { dlBuffer }    = require('../lib/dlmedia');
@@ -13,6 +13,7 @@ module.exports = {
     private:     true,
  
     run: async (sock, message, args, { jid, contextInfo, reply }) => {
+        if (!Sticker) ({ Sticker } = require('wa-sticker-formatter'));
         const msg = message.message;
  
         const imgMsg    = msg?.imageMessage;

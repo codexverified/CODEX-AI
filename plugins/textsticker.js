@@ -1,6 +1,6 @@
 'use strict';
  
-const { Sticker, StickerTypes } = require('wa-sticker-formatter');
+let Sticker, StickerTypes;
  
 const styles = {
     default: { bg: '#000000', color: '#FFFFFF', font: 'bold 60px sans-serif' },
@@ -53,6 +53,7 @@ module.exports = {
     private: true,
  
     run: async (sock, message, args, ctx) => {
+        if (!Sticker) ({ Sticker, StickerTypes } = require('wa-sticker-formatter'));
         const { jid, contextInfo } = ctx;
  
         if (!args.length) {

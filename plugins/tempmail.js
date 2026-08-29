@@ -1,8 +1,8 @@
 'use strict';
  
-const { TempMail } = require('tempmail.lol');
+let TempMail;
  
-module.exports = {
+ module.exports = {
     commands:    ['tempmail', 'tmpmail', 'fakemail', 'disposable'],
     description: 'Generate a temporary disposable email address and check its inbox',
     usage:       '.tempmail | .tempmail inbox <address>',
@@ -11,6 +11,7 @@ module.exports = {
     private:     true,
  
     run: async (sock, message, args, ctx) => {
+        if (!TempMail) ({ TempMail } = require('tempmail.lol'));
         const { jid, contextInfo } = ctx;
         const sub = (args[0] || '').toLowerCase();
  
