@@ -19,8 +19,14 @@ module.exports = {
         // reply, and it may be wrapped in a disappearing-message/view-once
         // envelope — look through all of those, not just extendedTextMessage.
         const repliedMessage = m.quoted?.key ? store.getMessage(m.quoted.key) : null;
-        const taggedReply = getContextInfo(repliedMessage?.message || repliedMessage) ||
+        let taggedReply = getContextInfo(repliedMessage?.message || repliedMessage) ||
             getContextInfo(quoted) || getContextInfo(m.quoted?.msg) || getContextInfo(m.quoted?.message);
+
+        // Fall back to the cached full message when WhatsApp trims nested contextInfo.
+        if (!taggedReply && ctx.stanzaId) {
+            const stored = store.getMessage({ remoteJid: m.chat, id: ctx.stanzaId });
+            if (stored?.message) taggedReply = getContextInfo(stored.message);
+        }
         const original = taggedReply?.quotedMessage || quoted;
         const originalCtx = taggedReply || ctx;
         const quotedSender = originalCtx.participant || originalCtx.participantAlt || ctx.participant || m.quoted?.sender;
@@ -94,5 +100,5 @@ function unwrap(message) {
         if (message?.[key]?.message) return unwrap(message[key].message);
     }
     return message?.message || message;
-                                                              }
-        
+}
+
