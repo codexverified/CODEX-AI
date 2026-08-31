@@ -1,0 +1,29 @@
+const { loadDB, saveDB, getUser, fmt, CURRENCY } = require('../../lib/economyEngine');
+const { requirePin } = require('../../lib/economyPin');
+
+module.exports = {
+    name: 'withdraw',
+    aliases: ['with', 'wd', 'withall'],
+    category: 'economy',
+    reactions: { start: '⚙️' },
+    description: 'Withdraw coins from your bank. Usage: .withdraw <amount|all> (or .withall to withdraw everything)',
+
+    async execute(bot, m, args, cmdName) {
+        const db = loadDB();
+        const user = getUser(db, m.sender);
+
+        const input = cmdName === 'withall' ? 'all' : (args[0] || '').toLowerCase();
+        const amount = input === 'all' ? user.bank : parseInt(input);
+        const pinCheck = requirePin(user, args[1]);
+        if (!pinCheck.ok) return await m.reply(pinCheck.message);
+
+        if (!amount || amount < 1) return await m.reply(`Usage: *.withdraw <amount>* or *.withdraw all*`);
+        if (amount > user.bank) return await m.reply(`❌ You only have *${fmt(user.bank)}* ${CURRENCY} in your bank.`);
+
+        user.bank   -= amount;
+        user.wallet += amount;
+        saveDB(db);
+
+        await m.reply(`🏦 *WITHDRAWAL SUCCESSFUL!*\n─────────────\nWithdrawn: *${fmt(amount)}* ${CURRENCY}\n👜 Wallet: *${fmt(user.wallet)}* ${CURRENCY}\n🏦 Bank:   *${fmt(user.bank)}* ${CURRENCY}`);
+    }
+};
