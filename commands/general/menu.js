@@ -33,8 +33,7 @@ module.exports = {
         const prefix     = bot.prefix || c.prefix || '.';
         const categories = bot.commandHandler.getAllCommands();
 
-        const uniqueCount = Object.values(categories)
-            .reduce((sum, cmds) => sum + cmds.length, 0);
+        const uniqueCount = bot.commandHandler.getCommandCount();
 
         // --- NEW UPTIME PATTERN LOGIC ---
         const up  = process.uptime();
