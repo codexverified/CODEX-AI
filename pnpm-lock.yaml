@@ -12,8 +12,8 @@ importers:
         specifier: ^0.2.4
         version: 0.2.4
       '@codexverified/baileys':
-        specifier: 2.10.12
-        version: 2.10.12(jimp@1.6.1)(sharp@0.35.3)
+        specifier: 2.11.12
+        version: 2.11.12(jimp@1.6.1)(sharp@0.35.3)
       '@distube/ytdl-core':
         specifier: ^4.16.12
         version: 4.16.12
@@ -167,6 +167,9 @@ importers:
       staticmaps:
         specifier: ^1.13.1
         version: 1.13.1
+      temp-mail-io:
+        specifier: ^0.0.11
+        version: 0.0.11
       terser:
         specifier: ^5.46.1
         version: 5.50.0
@@ -258,8 +261,8 @@ packages:
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
 
-  '@codexverified/baileys@2.10.12':
-    resolution: {integrity: sha512-taV35gdnEfSHxgqeBlkVuZBH7Yie+ECUZsgUh/8dcVbbiVx40D3kwVVVJV4HyB61G7wUj8WMOcrmmHZIaN6h7g==}
+  '@codexverified/baileys@2.11.12':
+    resolution: {integrity: sha512-GbS5BC25RgHAcs6c56UBJQHhstRiU4QOQ2+89wORKyHFVSRDfx/c98BGopb+Xo9XvjMV1/mp7J9aFsr3SIewHA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@napi-rs/image': ~1.12.0
@@ -3023,6 +3026,9 @@ packages:
   teex@1.0.1:
     resolution: {integrity: sha512-eYE6iEI62Ni1H8oIa7KlDU6uQBtqr4Eajni3wX7rpfXD8ysFx8z0+dri+KWEPWpBsxXfxu58x/0jvTVT1ekOSg==}
 
+  temp-mail-io@0.0.11:
+    resolution: {integrity: sha512-GTq1le0dVLc6IJvD4Dshi+Sa6YsRvqKauvQOHBVmy6kS7m/GkqpyJdntTaZZuLL+nE8FfWa9sENxvvr/AXy4Dg==}
+
   terser@5.50.0:
     resolution: {integrity: sha512-CN9BVxWhgS/hRxtUMjtC2uRWSTcSfQFHMDWma6sKKfIivCD91sM+FOPfvwoaRMqCSrUpe1nv3jDamd9eEQ4y+w==}
     engines: {node: '>=10'}
@@ -3382,7 +3388,7 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@codexverified/baileys@2.10.12(jimp@1.6.1)(sharp@0.35.3)':
+  '@codexverified/baileys@2.11.12(jimp@1.6.1)(sharp@0.35.3)':
     dependencies:
       '@adiwajshing/keyed-db': 0.2.4
       '@cacheable/node-cache': 1.7.6
@@ -6391,6 +6397,8 @@ snapshots:
     transitivePeerDependencies:
       - bare-abort-controller
       - react-native-b4a
+
+  temp-mail-io@0.0.11: {}
 
   terser@5.50.0:
     dependencies:
