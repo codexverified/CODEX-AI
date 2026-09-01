@@ -14,7 +14,10 @@ module.exports = {
     description: 'Play interactive Naija Whot against AI or local players',
     usage: '.whot',
     category: 'games',
-    async execute({ sock, msg, from, reply }) {
+    async execute(bot, msg, args) {
+        const sock = bot.sock;
+        const from = msg.chat;
+        const reply = (text, options) => msg.reply(text, options);
         try {
             await sendRichHtml({ sock, jid: from, quoted: msg, html: whotHtml() });
         } catch (error) {

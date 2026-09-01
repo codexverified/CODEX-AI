@@ -71,7 +71,10 @@ module.exports = {
     aliases: ['dashgame', 'xdashgame', 'ninjadash'],
     description: 'Play Cursed Dash, an interactive GenAI HTML mini-game',
     category: 'games',
-    async execute({ sock, msg, from, reply }) {
+    async execute(bot, msg, args) {
+        const sock = bot.sock;
+        const from = msg.chat;
+        const reply = (text, options) => msg.reply(text, options);
         try {
             await sendRichGame({ sock, jid: from, quoted: msg });
         } catch (error) {
