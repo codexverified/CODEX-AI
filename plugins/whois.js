@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['whois', 'domain', 'domaininfo'],
+    category: 'search',
     description: 'WHOIS lookup for a domain',
     permission:  'public',
     group:       true,
@@ -33,7 +34,7 @@ module.exports = {
 ⏰ *Expires:*     ${events.expiration || 'N/A'}
 🖥️ *Nameservers:* ${ns}
  
-_Powered by Silva MD_`,
+_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

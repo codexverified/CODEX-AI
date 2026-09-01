@@ -4,6 +4,7 @@ const config = require('../config');
  
 module.exports = {
     commands:    ['autojoin'],
+    category: 'group',
     description: 'Manually trigger group auto-join (owner only)',
     permission:  'owner',
     group:       false,

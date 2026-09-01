@@ -7,6 +7,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['lyrics', 'lyric'],
+    category: 'search',
     description: 'Search song lyrics by artist and title',
     usage:       '.lyrics <artist> - <song>',
     permission:  'public',
@@ -34,7 +35,7 @@ module.exports = {
         try {
             const res = await axios.get(
                 `https://some-random-api.com/lyrics?title=${encodeURIComponent(searchQ)}`,
-                { headers: { 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 12000 }
+                { headers: { 'User-Agent': 'CODEX AI/2.0' }, timeout: 12000 }
             );
             const d   = res.data;
             const raw = d?.lyrics;

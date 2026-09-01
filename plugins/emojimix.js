@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['emojimix', 'mixemoji', 'emojiblend'],
+    category: 'group',
     description: 'Mix two emojis together using Google Kitchen',
     permission:  'public',
     group:       true,
@@ -25,7 +26,7 @@ module.exports = {
             const { data } = await axios.get(url, { responseType: 'arraybuffer', timeout: 10000 });
             await sock.sendMessage(chatId, {
                 image:   Buffer.from(data),
-                caption: `🎨 *Emoji Mix: ${e1} + ${e2}*\n_Powered by Silva MD_`,
+                caption: `🎨 *Emoji Mix: ${e1} + ${e2}*\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch {

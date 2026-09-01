@@ -3,6 +3,7 @@ const config = require('../config');
  
 module.exports = {
     commands: ['readreceipt', 'bluetick', 'readtick', 'receipt'],
+    category: 'owner',
     description: 'Toggle read receipts (blue ticks) on or off',
     usage: '.bluetick on/off',
     permission: 'owner',

@@ -6,6 +6,7 @@ const FONTS = ['Standard', 'Big', 'Slant', 'Banner', 'Block', 'Doom', 'Ghost', '
  
 module.exports = {
     commands:    ['ascii', 'figlet', 'art', 'textart'],
+    category: 'group',
     description: 'Convert text to ASCII art',
     usage:       '.ascii <text> | .ascii <text> --font Slant',
     permission:  'public',

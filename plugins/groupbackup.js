@@ -10,6 +10,7 @@ function ensureDir() {
  
 module.exports = {
     commands: ['backupgroup', 'restoregroup', 'groupbackup', 'listbackups'],
+    category: 'group',
     description: 'Backup and restore group settings and configurations',
     usage: '.backupgroup [name] | .restoregroup <name> | .listbackups',
     permission: 'admin',

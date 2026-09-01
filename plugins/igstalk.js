@@ -44,6 +44,7 @@ async function fetchViaOEmbed(username) {
  
 module.exports = {
     commands:    ['igstalk', 'instastalk', 'iginfo', 'instagramstalk'],
+    category: 'group',
     description: 'Stalk an Instagram profile — followers, bio, posts and more',
     usage:       '.igstalk <username>',
     permission:  'public',
@@ -158,7 +159,7 @@ module.exports = {
         }
  
         lines.push(`• *Profile:* https://www.instagram.com/${u.username}/`);
-        lines.push(`_Powered by ${getStr('botName') || 'Silva MD'} · Instagram API_`);
+        lines.push(`_Powered by ${getStr('botName') || 'CODEX AI'} · Instagram API_`);
  
         const picUrl = u.profile_pic_url_hd || u.profile_pic_url || null;
  

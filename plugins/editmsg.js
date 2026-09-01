@@ -7,6 +7,7 @@ if (!global.lastBotMsg) global.lastBotMsg = new Map();
  
 module.exports = {
     commands:    ['edit', 'editmsg', 'correct'],
+    category: 'admin',
     description: 'Edit a previously sent bot message (reply to the bot\'s message)',
     usage:       'Reply to a bot message + .edit New text here',
     permission:  'admin',

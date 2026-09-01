@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands:    ['lock', 'unlock', 'close', 'open'],
+    category: 'group',
     description: 'Lock (only admins can send) or unlock (everyone can send) the group',
     usage:       '.lock | .unlock',
     permission:  'admin',

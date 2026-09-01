@@ -4,6 +4,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['apk', 'apkdl', 'getapk'],
+    category: 'downloader',
     description: 'Search and download an APK from Aptoide',
     permission:  'public',
     group:       true,

@@ -14,6 +14,7 @@ function saveExpenses(data) {
  
 module.exports = {
     commands: ['expense', 'addexpense', 'expenses', 'splitbill', 'settle', 'clearexpenses', 'balances'],
+    category: 'group',
     description: 'Group expense tracker and bill splitter (like Splitwise)',
     usage: '.addexpense 500 Dinner | .splitbill 1200 3 Uber | .balances | .expenses',
     permission: 'public',

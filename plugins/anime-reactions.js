@@ -56,6 +56,7 @@ async function fetchReactionGif(type) {
  
 module.exports = {
     commands:   Object.keys(REACTIONS),
+    category:   'fun',
     description: 'Anime reaction GIFs — hug, kiss, pat, slap, poke, bite, bonk, cuddle, wave, blush, smile, cry, laugh, dance, wink, shoot, kick, happy, baka, nod',
     usage:      '.hug @user | .kiss @user | .pat | .cry',
     permission: 'public',

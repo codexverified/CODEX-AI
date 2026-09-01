@@ -15,6 +15,7 @@ const roasts = [
  
 module.exports = {
     commands:    ['roast'],
+    category: 'fun',
     description: 'Roast someone (all in good fun!)',
     permission:  'public',
     group:       true,
@@ -25,7 +26,7 @@ module.exports = {
         const target  = mention ? `@${mention.split('@')[0]}` : (args[0] ? args[0] : 'you');
         const r       = roasts[Math.floor(Math.random() * roasts.length)];
         await sock.sendMessage(chatId, {
-            text: `🔥 *Roasting ${target}*\n\n${r}\n\n_😂 All jokes, no harm! — Silva MD_`,
+            text: `🔥 *Roasting ${target}*\n\n${r}\n\n_😂 All jokes, no harm! — CODEX AI_`,
             mentions: mention ? [mention] : [],
             contextInfo
         }, { quoted: message });

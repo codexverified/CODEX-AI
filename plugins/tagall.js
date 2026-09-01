@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands:    ['tagall', 'mentionall', 'pingall'],
+    category: 'group',
     description: 'Mention all members in the group',
     usage:       '.tagall [message]',
     permission:  'admin',
@@ -38,7 +39,7 @@ module.exports = {
         const customMsg = args.join(' ').trim();
         const header = customMsg || '📢 *Attention Everyone!*';
  
-        const mentions = participants.map(p => p.id);
+        const mentions = participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean);
         const memberLines = participants
             .map(p => `• @${p.id.split('@')[0]}`)
             .join('\n');

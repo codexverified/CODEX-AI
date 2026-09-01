@@ -6,6 +6,7 @@ const VT_KEY = '23e62ab81fe1c82d865f39fc674dead42b1ae2b3079fffebf96be5b19aebcf47
  
 module.exports = {
     commands:    ['scanurl', 'urlscan', 'checksafe'],
+    category: 'group',
     description: 'Scan a URL with VirusTotal',
     permission:  'public',
     group:       true,

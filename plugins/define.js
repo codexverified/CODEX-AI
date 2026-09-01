@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['define', 'dict', 'meaning', 'definition'],
+    category: 'search',
     description: 'Look up the definition of an English word',
     usage:       '.define <word>',
     permission:  'public',

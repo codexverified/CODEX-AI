@@ -8,6 +8,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['twitter', 'xdl', 'twdl', 'tw'],
+    category: 'downloader',
     description: 'Download Twitter/X videos',
     permission:  'public',
     group:       true,
@@ -95,7 +96,7 @@ module.exports = {
             try {
                 await sock.sendMessage(sender, {
                     [isVideo ? 'video' : 'image']: { url: item.url },
-                    caption: `🐦 *Twitter Download*\n_Powered by Silva MD_`,
+                    caption: `🐦 *Twitter Download*\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             } catch {

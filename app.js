@@ -40,6 +40,27 @@ const {
   writeMsgCache,
 } = require("./lib/connection");
 
+// ── Session hardening: survive bad plugins instead of dying to them ────────
+// With ~2000 commands loaded, a single uncaught throw or unhandled promise
+// rejection anywhere — a bad regex, a null property access, a third-party
+// API timeout nobody awaited correctly — otherwise kills the ENTIRE Node
+// process. Baileys' own reconnect logic (in lib/connection.js) only helps
+// with *socket*-level disconnects; it can't save you from the process
+// itself exiting. These two handlers are what let a 2000+ command bot with
+// occasional bugs in individual plugins stay up for months instead of
+// crashing out within days on the first unguarded edge case.
+process.on("uncaughtException", (err, origin) => {
+  console.error(chalk.red(`[uncaughtException] ${origin || ""}`));
+  console.error(err?.stack || err);
+  // Deliberately NOT calling process.exit() here — logging and continuing
+  // is what keeps the WhatsApp socket (and its 100+ day uptime) alive.
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error(chalk.red("[unhandledRejection]"));
+  console.error(reason?.stack || reason);
+});
+
 // ── Ensure dirs & DBs ─────────────────────────────────────────────────────────
 ["./database", "./session", "./commands", "./plugins", "./lib"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
@@ -219,9 +240,28 @@ class CODEXAI {
         this.config[k] = v !== "" && !isNaN(num) ? num : v;
       }
     } catch {}
-    // prefix as getter so setvar PREFIX takes effect immediately without restart
+    // prefix as getter so setvar PREFIX takes effect immediately without restart.
+    // .setvar PREFIX=null stores the literal 3-character STRING "null" (setvar
+    // is a text-based command, not real JSON) — that string is truthy, so the
+    // old `this.config.prefix || "."` fallback let it straight through
+    // unmodified. Every place that then did `${bot.prefix}menu` rendered the
+    // literal text "nullmenu", and every `text.startsWith(bot.prefix)` gate
+    // was checking for messages starting with the 4 characters "null" instead
+    // of recognizing no-prefix mode — which is exactly why commands typed
+    // bare (no prefix, as intended) got swallowed by other message-handling
+    // paths before ever reaching the dispatcher. Normalizing every "no
+    // prefix configured" spelling (null, "null", "none", "", undefined) to
+    // an empty string here fixes both: `${''}menu` displays as plain "menu",
+    // and `text.startsWith('')` is always true, correctly treating every
+    // message as prefix-satisfied so the real command lookup decides validity.
     Object.defineProperty(this, "prefix", {
-      get: () => this.config.prefix || ".",
+      get: () => {
+        const raw = this.config.prefix;
+        if (raw === null || raw === undefined) return ".";
+        const str = String(raw).trim();
+        if (str === "" || str.toLowerCase() === "null" || str.toLowerCase() === "none") return "";
+        return str;
+      },
       set: (v) => {
         this.config.prefix = v;
       },
@@ -253,7 +293,12 @@ class CODEXAI {
     console.log(chalk.blue('Loading environment variables..'));
     const { loaded, failed } = await this.reloader.loadCommands();
     if (failed > 0) console.log(chalk.red(`${failed} commands failed to load`));
-    console.log(chalk.green(`${loaded} commands loaded`));
+    let pluginCount = 0;
+    try {
+      pluginCount = Object.values(this.commandHandler.getAllCommands()).flat().filter(cmd => cmd.__plugin).length;
+    } catch {}
+    console.log(chalk.green(`${loaded} commands loaded (${loaded - pluginCount} built-in, ${pluginCount} plugin — includes any installed via .install)`));
+    this.successCmds = loaded;
     console.log('');
     await startConnection(this);
   }
@@ -652,11 +697,30 @@ ${newText || "(could not read new text)"}
       })
       .toLowerCase();
 
+    // Same source .menu uses (total registered command names, aliases
+    // included, across every category) — not the raw file-load count,
+    // so this number always matches what .menu shows instead of a stale
+    // or differently-scoped figure. This naturally includes any plugin
+    // installed via .install: loadCommands() re-scans the plugins/
+    // folder from disk on every boot (fs.readdirSync, no cached list),
+    // so an installed plugin file sitting on disk before a restart is
+    // picked up like any other plugin file — this count and the console
+    // "X commands loaded" line both reflect that automatically.
+    let totalCmds = this.successCmds;
+    let pluginCmds = 0;
+    try {
+      const categories = this.commandHandler.getAllCommands();
+      const allCmds = Object.values(categories).flat();
+      totalCmds = allCmds.length;
+      pluginCmds = allCmds.filter(cmd => cmd.__plugin).length;
+    } catch {}
+    const nativeCmds = totalCmds - pluginCmds;
+
     const startupText = `—͟͟͞͞𖣘 *${botName.toUpperCase()}* IS ONLINE!
 
 —͟͟͞͞𖣘 *PREFIX:* ${prefix}
 —͟͟͞͞𖣘 *MODE:* ${(c.mode || "private").toUpperCase()}
-—͟͟͞͞𖣘 *CMDS:* ${this.successCmds} loaded
+—͟͟͞͞𖣘 *CMDS:* ${totalCmds} loaded (${nativeCmds} built-in, ${pluginCmds} plugin)
 —͟͟͞͞𖣘 *TIME:* ${time}
 
 —͟͟͞͞𖣘 *ANTIDELETE* ${Object.keys(antiDelDb).filter((k) => !k.startsWith("_")).length > 0 ? "���" : "✗"}

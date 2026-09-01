@@ -11,17 +11,17 @@ const fs   = require('fs-extra');
 const { exec } = require('child_process');
 
 module.exports = {
-    name: 'eval',
-    aliases: ['ev', 'js', '='],
+    name: '$',
+    aliases: [],
     category: 'owner',
     reactions: { start: '🔐' },
     description: 'Run a JS snippet on the live bot process',
-    usage: '.eval <code>',
+    usage: '.$ <code>',
     ownerOnly: true,
 
     async execute(bot, m, args) {
         const text = args.join(' ').trim();
-        if (!text) return await m.reply(`Usage: ${bot.prefix}eval <code>`);
+        if (!text) return await m.reply(`Usage: ${bot.prefix}$ <code>`);
 
         const startTime = Date.now();
         const sock = bot.sock; // convenience alias for snippets written against `sock`

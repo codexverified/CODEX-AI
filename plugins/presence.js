@@ -6,6 +6,7 @@ const VALID = ['composing', 'recording', 'paused', 'available', 'unavailable'];
  
 module.exports = {
     commands:    ['presence', 'typing', 'recording', 'busy', 'online', 'offline'],
+    category: 'owner',
     description: 'Set bot presence status in a chat',
     permission:  'owner',
     group:       true,

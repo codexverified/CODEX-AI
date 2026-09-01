@@ -29,6 +29,7 @@ function leagueSlug(text) {
  
 module.exports = {
     commands: ['livescore', 'sportnews', 'standings', 'topscorers', 'upcomingmatches', 'surebet', 'gamehistory'],
+    category: 'group',
     description: 'Sports scores, news, standings and betting tips',
     permission:  'public',
     group:       true,

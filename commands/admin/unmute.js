@@ -25,7 +25,7 @@ module.exports = {
 
         cancelAll({ chat: jid });
         const all = [];
-        try { const meta = await bot.sock.groupMetadata(jid); all.push(...meta.participants.map(p => p.id)); } catch {}
+        try { const meta = await bot.sock.groupMetadata(jid); all.push(...meta.participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean)); } catch {}
 
         // ── Infinite: .unmute ──────────────────────────────────────────────
         await bot.sendMessage(jid, { text: '_Group unmuted (infinite action)_', mentions: all });

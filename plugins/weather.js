@@ -6,6 +6,7 @@ const OWM_KEY = '060a6bcfa19809c2cd4d97a212b19273';
  
 module.exports = {
     commands:    ['weather', 'climate', 'mosam'],
+    category: 'tools',
     description: 'Get current weather for a location',
     permission:  'public',
     group:       true,
@@ -45,7 +46,7 @@ module.exports = {
 💨 Wind: ${data.wind.speed} km/h
 🌤️ ${data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1)}
  
-_Powered by ${getStr('botName') || 'Silva MD'}_`,
+_Powered by ${getStr('botName') || 'CODEX AI'}_`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

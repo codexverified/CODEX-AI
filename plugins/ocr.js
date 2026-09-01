@@ -4,6 +4,7 @@ const { downloadContentFromMessage } = require('../lib/baileys');
  
 module.exports = {
     commands:    ['ocr', 'readtext', 'textfromimage'],
+    category: 'group',
     description: 'Extract text from an image (OCR)',
     permission:  'public',
     group:       true,

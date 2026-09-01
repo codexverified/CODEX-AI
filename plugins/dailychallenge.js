@@ -76,6 +76,7 @@ const activeTimers = new Map();
  
 module.exports = {
     commands: ['dailychallenge', 'challenge', 'setchallenge', 'challengeoff', 'challengenow'],
+    category: 'economy',
     description: 'Auto-post daily trivia, puzzles, or word games in groups',
     usage: '.setchallenge 09:00 | .challenge | .challengenow',
     permission: 'admin',

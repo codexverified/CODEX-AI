@@ -11,7 +11,7 @@ module.exports = {
     async execute(bot, m, args) {
         try {
             const meta = await bot.sock.groupMetadata(m.chat);
-            const participants = meta.participants.map(p => p.id);
+            const participants = meta.participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean);
             const text = args.join(' ') || 'Attention everyone';
 
             await bot.sendMessage(m.chat, { text, mentions: participants });

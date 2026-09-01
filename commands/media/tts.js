@@ -1,23 +1,14 @@
 
 /**
  * .tts <text> — text-to-speech
+ * .tts <voicename> <text> — pick a specific voice (234 available)
+ * .tts voices [language] — list available voice names
  *
- * Fix: the previous version assumed prexzyapis.com/tts/tts-en always
- * returns JSON with a nested audio URL. Elsewhere in this codebase
- * (utils/ttsHelper.js, commands/general/speak.js) the SAME family of TTS
- * endpoints is treated as returning raw audio bytes directly — and that
- * assumption is what's proven to work. The mismatch is the likely cause
- * of '.tts' silently failing.
- *
- * New behaviour:
- * 1. Try prexzyapis.com/tts/tts-en directly, sniffing the response —
- * if it's audio bytes, use them; if it's JSON, walk it for a URL (covers
- * either possible response shape without guessing wrong).
- * 2. Fall back to utils/ttsHelper.js's generateVoice() — already used
- * elsewhere in this bot and known to work, tries several prexzyvilla
- * voice endpoints and transcodes to a real WhatsApp voice note.
- * 3. Fall back to Google Translate TTS (same approach as .speak) — a
- * dependable last resort with no API key needed.
+ * Primary provider: ab-text-voice.abrahamdw882.workers.dev — a dedicated
+ * TTS worker with 234 named voices across ~60 languages. Falls back to the
+ * previous provider chain (prexzyvilla, ttsHelper, Google Translate) if it
+ * doesn't return usable audio, so a single provider outage doesn't take
+ * .tts down entirely.
  */
 'use strict';
 const axios = require('axios');
@@ -25,6 +16,55 @@ const { generateVoice } = require('../../utils/ttsHelper');
 
 const AUDIO_RE = /\.(mp3|ogg|m4a|wav|aac|opus)(\?|$)/i;
 const URL_RE = /^https?:\/\//i;
+const TTS_API_BASE = 'https://ab-text-voice.abrahamdw882.workers.dev/';
+const DEFAULT_VOICE = 'henry';
+
+let _voiceCache = null; // { names: Set, byLang: Map, fetchedAt }
+
+async function getVoiceList() {
+    if (_voiceCache && Date.now() - _voiceCache.fetchedAt < 30 * 60 * 1000) return _voiceCache;
+    try {
+        const res = await axios.get(TTS_API_BASE, { timeout: 15000 });
+        const voices = res.data?.voices || [];
+        const names = new Set(voices.map(v => String(v.name).toLowerCase()));
+        const byLang = new Map();
+        for (const v of voices) {
+            const lang = v.language || 'unknown';
+            if (!byLang.has(lang)) byLang.set(lang, []);
+            byLang.get(lang).push(v.name);
+        }
+        _voiceCache = { names, byLang, fetchedAt: Date.now() };
+        return _voiceCache;
+    } catch {
+        return _voiceCache || { names: new Set([DEFAULT_VOICE]), byLang: new Map(), fetchedAt: 0 };
+    }
+}
+
+// ─── Primary: ab-text-voice worker ───────────────────────────────────────────
+async function tryAbTextVoice(text, voicename) {
+    try {
+        const url = `${TTS_API_BASE}?q=${encodeURIComponent(text)}&voicename=${encodeURIComponent(voicename)}`;
+        const res = await axios.get(url, {
+            responseType: 'arraybuffer',
+            timeout: 30000,
+            headers: { 'User-Agent': 'Mozilla/5.0 (CODEX-AI)' },
+            validateStatus: () => true,
+        });
+        if (res.status >= 400) return null;
+
+        const contentType = String(res.headers['content-type'] || '');
+        // A JSON response here means the request itself was rejected (bad
+        // voice name, missing param, etc.) rather than audio coming back.
+        if (contentType.includes('json')) return null;
+
+        const buf = Buffer.from(res.data);
+        if (buf && buf.length > 512) return { buffer: buf, mimetype: contentType.includes('audio') ? contentType : 'audio/mpeg' };
+        return null;
+    } catch (e) {
+        console.error('[tts] ab-text-voice failed:', e.message);
+        return null;
+    }
+}
 
 function walkAudioUrls(node, out) {
     if (!node) return;
@@ -36,7 +76,7 @@ function walkAudioUrls(node, out) {
     if (typeof node === 'object') { for (const v of Object.values(node)) walkAudioUrls(v, out); }
 }
 
-// ─── Step 1: try prexzyvilla directly, accepting EITHER response shape ──────
+// ─── Fallback: prexzyvilla, accepting EITHER response shape ─────────────────
 async function tryPrexzyvillaDirect(text) {
     try {
         const url = `https://prexzyapis.com/tts/tts-en?text=${encodeURIComponent(text)}`;
@@ -50,14 +90,12 @@ async function tryPrexzyvillaDirect(text) {
 
         const contentType = String(res.headers['content-type'] || '');
 
-        // Shape A: raw audio bytes
         if (contentType.includes('audio') || contentType.includes('octet-stream') || contentType.includes('mpeg')) {
             const buf = Buffer.from(res.data);
             if (buf && buf.length > 1024) return { buffer: buf, mimetype: 'audio/mpeg' };
             return null;
         }
 
-        // Shape B: JSON with a nested audio URL somewhere
         if (contentType.includes('json')) {
             let parsed;
             try { parsed = JSON.parse(Buffer.from(res.data).toString('utf8')); } catch { return null; }
@@ -75,7 +113,7 @@ async function tryPrexzyvillaDirect(text) {
     }
 }
 
-// ─── Step 3: Google Translate TTS — dependable, no key needed ───────────────
+// ─── Last resort: Google Translate TTS — no key needed ──────────────────────
 async function tryGoogleTranslateTts(text) {
     try {
         const url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' +
@@ -96,8 +134,8 @@ async function tryGoogleTranslateTts(text) {
 
 module.exports = {
     name: 'tts',
-    aliases: ['say', 'voice'],
-    description: 'Convert text to speech (English)',
+    aliases: ['say', 'voice', 'speak'],
+    description: 'Convert text to speech — 234 voices across ~60 languages',
     category: 'media',
     reactions: { start: '⏳' },
 
@@ -106,20 +144,56 @@ module.exports = {
             await bot.sendMessage(m.chat, { react: { text: '', key: m.key } }).catch(() => {});
             return m.reply(
                 `*Text to Speech*\n\n` +
-                `Usage: .tts <text>\n` +
-                `Example: .tts hello world`
+                `Usage:\n` +
+                `${bot.prefix}tts <text> — uses the default voice (${DEFAULT_VOICE})\n` +
+                `${bot.prefix}tts <voicename> <text> — pick a specific voice\n` +
+                `${bot.prefix}tts voices [language code] — list available voices\n\n` +
+                `Example: ${bot.prefix}tts mrbeast hello world`
             );
         }
-        
-        const text = args.join(' ').trim().slice(0, 600);
-        
+
+        // .tts voices [lang] — list what's available instead of speaking it
+        if (args[0].toLowerCase() === 'voices') {
+            const { byLang } = await getVoiceList();
+            const langFilter = (args[1] || '').toLowerCase();
+
+            if (langFilter) {
+                const match = [...byLang.keys()].find(l => l.toLowerCase() === langFilter);
+                if (!match) return m.reply(`No voices found for language "${args[1]}". Try e.g. en-US, en-GB, fr-FR, es-ES, ja-JP.`);
+                return m.reply(`*Voices for ${match}:*\n${byLang.get(match).join(', ')}`);
+            }
+
+            const languages = [...byLang.keys()].sort();
+            return m.reply(
+                `*234 voices available across ${languages.length} languages.*\n\n` +
+                `Popular English voices: henry, mrbeast, snoop, matthew, jane, guy, amy, brian\n\n` +
+                `See voices for a specific language:\n${bot.prefix}tts voices <language code>\n` +
+                `Example: ${bot.prefix}tts voices ja-JP\n\n` +
+                `Languages: ${languages.slice(0, 40).join(', ')}${languages.length > 40 ? ', ...' : ''}`
+            );
+        }
+
+        // First word is a valid voice name → use it and treat the rest as the text
+        const { names } = await getVoiceList();
+        let voicename = DEFAULT_VOICE;
+        let text;
+        if (args.length > 1 && names.has(args[0].toLowerCase())) {
+            voicename = args[0].toLowerCase();
+            text = args.slice(1).join(' ').trim();
+        } else {
+            text = args.join(' ').trim();
+        }
+
+        text = text.slice(0, 600);
+
         if (!text) {
             await bot.sendMessage(m.chat, { react: { text: '', key: m.key } }).catch(() => {});
             return m.reply('Please provide some text.');
         }
 
         try {
-            let result = await tryPrexzyvillaDirect(text);
+            let result = await tryAbTextVoice(text, voicename);
+            if (!result) result = await tryPrexzyvillaDirect(text);
             if (!result) result = await generateVoice(text, 'Leda').catch(() => null);
             if (!result) result = await tryGoogleTranslateTts(text);
 
@@ -139,10 +213,10 @@ module.exports = {
                 await bot.sendMessage(m.chat, { react: { text: '', key: m.key } }).catch(() => {});
                 return m.reply('Generated audio but failed to send it. Try again.');
             }
-            
+
             // Unreact on success
             await bot.sendMessage(m.chat, { react: { text: '', key: m.key } }).catch(() => {});
-            
+
         } catch (err) {
             console.error('[tts] error:', err.message);
             await bot.sendMessage(m.chat, { react: { text: '', key: m.key } }).catch(() => {});

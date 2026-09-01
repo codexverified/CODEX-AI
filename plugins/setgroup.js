@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['setname', 'setdesc', 'setdescription', 'groupname', 'groupdesc'],
+    category: 'group',
     description: 'Change the group name or description',
     usage:       '.setname New Name | .setdesc New description',
     permission:  'admin',

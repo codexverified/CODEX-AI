@@ -121,6 +121,7 @@ function hasAudioStream(videoPath) {
 // ─── Main plugin ─────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['bgm', 'addmusic', 'videomusic', 'musicvideo', 'addbgm'],
+    category: 'group',
     description: 'Add background music to a video. Reply to a video with audio (or vice versa).',
     usage: [
         '.bgm              → reply to video + send audio (or vice versa)',

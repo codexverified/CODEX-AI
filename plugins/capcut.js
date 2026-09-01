@@ -6,6 +6,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['capcut', 'capcutdl'],
+    category: 'downloader',
     description: 'Download CapCut videos without watermark',
     permission:  'public',
     group:       true,
@@ -39,7 +40,7 @@ module.exports = {
             if (!videoUrl) throw new Error('no video found');
             await sock.sendMessage(sender, {
                 video:   { url: videoUrl },
-                caption: `✂️ *CapCut Download*\n_Powered by Silva MD_`,
+                caption: `✂️ *CapCut Download*\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch {

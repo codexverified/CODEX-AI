@@ -8,6 +8,7 @@ function savePairs(d) { fs.mkdirSync(path.dirname(pairsFile), { recursive: true 
  
 module.exports = {
     commands:    ['pair', 'marry', 'divorce'],
+    category: 'group',
     description: 'Pair/marry two users in a group',
     permission:  'public',
     group:       true,

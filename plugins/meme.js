@@ -7,7 +7,7 @@ const axios = require('axios');
  
 async function getImgflipMeme() {
     const res = await axios.get('https://api.imgflip.com/get_memes', {
-        headers: { 'User-Agent': 'SilvaMD-Bot/2.0' },
+        headers: { 'User-Agent': 'CODEX AI/2.0' },
         timeout: 8000
     });
     const memes = res.data?.data?.memes;
@@ -19,7 +19,7 @@ async function getRedditMeme(sub) {
     const res = await axios.get(
         `https://www.reddit.com/r/${encodeURIComponent(sub)}/random/.json`,
         {
-            headers: { 'User-Agent': 'SilvaMD-Bot/2.0' },
+            headers: { 'User-Agent': 'CODEX AI/2.0' },
             timeout: 10000
         }
     );
@@ -37,6 +37,7 @@ async function getRedditMeme(sub) {
  
 module.exports = {
     commands:    ['meme', 'memes'],
+    category: 'media',
     description: 'Get a random meme image',
     usage:       '.meme [subreddit]',
     permission:  'public',

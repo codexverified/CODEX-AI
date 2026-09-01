@@ -45,6 +45,7 @@ function startReminder(sock, id, reminder) {
  
 module.exports = {
     commands: ['rremind', 'recurringremind', 'repeatremind', 'stopremind', 'myreminders', 'clearreminders'],
+    category: 'economy',
     description: 'Set recurring reminders (daily, weekly, hourly, etc.)',
     usage: '.rremind daily Take vitamins | .rremind weekly Team meeting | .myreminders',
     permission: 'public',

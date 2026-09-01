@@ -10,6 +10,7 @@ async function setBlock(sock, jid, action) {
  
 module.exports = {
     commands:    ['block', 'unblock', 'blocknum', 'unblocknum'],
+    category: 'owner',
     description: 'Block or unblock a WhatsApp number at the account level',
     usage:       '.block @user | .blocknum 2547XXXXXXXX | .unblock @user',
     permission:  'owner',

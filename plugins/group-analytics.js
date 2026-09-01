@@ -31,6 +31,7 @@ function makeBar(val, max, len = 10) {
  
 module.exports = {
     commands: ['analytics', 'groupstats', 'activity', 'topusers', 'peakhours'],
+    category: 'group',
     description: 'View group chat analytics — top members, peak hours, activity stats',
     usage: '.analytics',
     permission: 'public',

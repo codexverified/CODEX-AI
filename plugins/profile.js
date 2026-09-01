@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['profile', 'myprofile', 'whatsapp'],
+    category: 'group',
     description: 'View a user WhatsApp profile info',
     permission:  'public',
     group:       true,
@@ -27,7 +28,7 @@ module.exports = {
 💬 *Status:* ${statusText}
 🌐 *JID:* ${target}
  
-_Powered by Silva MD_`;
+_Powered by CODEX AI_`;
  
             if (pp) {
                 await sock.sendMessage(chatId, { image: { url: pp }, caption: text, contextInfo }, { quoted: message });

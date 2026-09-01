@@ -33,6 +33,7 @@ if (!global.bannedUsers || global.bannedUsers.size === 0) {
  
 module.exports = {
     commands:    ['ban', 'unban', 'banlist'],
+    category: 'admin',
     description: 'Permanently ban / unban users from using bot commands (persisted across restarts)',
     usage:       '.ban @user | .unban @user | .banlist',
     permission:  'admin',

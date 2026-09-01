@@ -143,6 +143,7 @@ async function tryFdownloader(url) {
  
 module.exports = {
     commands:    ['facebook', 'fb', 'fbdl'],
+    category: 'downloader',
     description: 'Download a Facebook video',
     permission:  'public',
     group:       true,
@@ -214,7 +215,7 @@ module.exports = {
                     ...contextInfo,
                     externalAdReply: {
                         title:                 'Facebook Downloader',
-                        body:                  'Powered by ' + (getStr('botName') || 'Silva MD'),
+                        body:                  'Powered by ' + (getStr('botName') || 'CODEX AI'),
                         thumbnailUrl:          'https://files.catbox.moe/5uli5p.jpeg',
                         sourceUrl:             url,
                         mediaType:             1,

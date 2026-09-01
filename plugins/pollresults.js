@@ -8,8 +8,8 @@ const { fmt } = require('../lib/theme');
 // value = { jid, question, meId, pollCreationMessage, pollUpdates: [] }
 if (!global.pollRegistry) global.pollRegistry = new Map();
  
-// ─── Poll update hook called from silva.js messages.update ───────────────────
-// silva.js calls: if (global.pollUpdateHook) global.pollUpdateHook(key, update, sock)
+// ─── Poll update hook called from codex.js messages.update ───────────────────
+// codex.js calls: if (global.pollUpdateHook) global.pollUpdateHook(key, update, sock)
 global.pollUpdateHook = async (key, update, sock) => {
     const { pollUpdates } = update;
     if (!pollUpdates?.length) return;
@@ -49,6 +49,7 @@ global.pollUpdateHook = async (key, update, sock) => {
 // ─── Plugin ───────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['pollresult', 'pollresults', 'pollstats', 'votes'],
+    category: 'group',
     description: 'Show live results of a poll (reply to the poll message)',
     usage:       'Reply to a poll + .pollresult',
     permission:  'public',

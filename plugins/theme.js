@@ -4,6 +4,7 @@ const { listThemes, setActiveTheme, getActiveTheme } = require('../lib/theme');
  
 module.exports = {
     commands:    ['theme', 'themes', 'settheme'],
+    category: 'owner',
     description: 'List available themes or switch the bot theme at runtime',
     usage:       '.theme list  |  .theme set <name>  |  .theme info',
     permission:  'owner',
@@ -19,7 +20,7 @@ module.exports = {
         // ── .theme / .themes / .theme list ───────────────────────────────────
         if (!sub || sub === 'list' || sub === 'themes') {
             const all     = listThemes();
-            const current = (getActiveTheme()?.global?.botName) || 'Silva MD';
+            const current = (getActiveTheme()?.global?.botName) || 'CODEX AI';
             const lines   = all.map((t, i) => `  ${i + 1}. *${t}*`).join('\n');
             return sock.sendMessage(jid, {
                 text: [

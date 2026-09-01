@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands:    ['hidetag', 'htag', 'stag', 'silenttag'],
+    category: 'group',
     description: 'Silently mention all group members — they get notified but are not visibly tagged',
     usage:       '.hidetag <message>',
     permission:  'admin',
@@ -42,7 +43,7 @@ module.exports = {
             }, { quoted: message });
         }
  
-        const mentions = participants.map(p => p.id);
+        const mentions = participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean);
         const text     = args.join(' ');
  
         // mentions array tags everyone silently — names don't appear in the message text

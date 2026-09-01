@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands:    ['fact', 'facts', 'funfact'],
+    category: 'group',
     description: 'Get a random interesting fact',
     permission:  'public',
     group:       true,

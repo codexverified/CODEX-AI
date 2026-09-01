@@ -7,6 +7,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['paste', 'pastebin', 'hastebin'],
+    category: 'group',
     description: 'Paste text online and get a shareable link',
     permission:  'public',
     group:       true,
@@ -48,7 +49,7 @@ module.exports = {
             const form = new URLSearchParams({
                 content:  text,
                 syntax:   'text',
-                title:    'Silva MD Paste',
+                title:    'CODEX AI Paste',
                 expiry_days: '30',
             });
             const res = await axios.post('https://dpaste.org/api/', form.toString(), {

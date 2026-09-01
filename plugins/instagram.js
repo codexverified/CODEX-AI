@@ -541,6 +541,7 @@ module.exports = [
     // ── Download command ────────────────────────────────────────────────────
     {
         commands:    ['instagram', 'igdl', 'ig', 'insta'],
+    category: 'downloader',
         description: 'Download Instagram posts, reels, and stories',
         usage:       '<instagram_url>',
         permission:  'public',
@@ -559,7 +560,7 @@ module.exports = [
                 ));
             }
  
-            const botName = getStr('botName') || 'Silva MD';
+            const botName = getStr('botName') || 'CODEX AI';
  
             const loading = await sock.sendMessage(jid, {
                 text: fmt(`⏳ _Fetching Instagram content…_`),
@@ -676,6 +677,7 @@ module.exports = [
     // ── Owner: set Instagram session cookie ─────────────────────────────────
     {
         commands:    ['setigsession', 'igsession'],
+    category: 'owner',
         description: 'Set Instagram session cookie for downloads (owner only)',
         usage:       '<sessionid_cookie_value>',
         permission:  'owner',
@@ -730,6 +732,7 @@ module.exports = [
     // ── Owner: clear Instagram session ──────────────────────────────────────
     {
         commands:    ['clearigsession', 'rmigsession'],
+    category: 'owner',
         description: 'Remove saved Instagram session cookie (owner only)',
         usage:       '',
         permission:  'owner',

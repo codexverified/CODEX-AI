@@ -13,6 +13,7 @@ module.exports = {
         'ggleimage', 'unsplash', 'wallpapers', 'wattpad',
         'yts', 'spotifysearch'
     ],
+    category: 'search',
     description: 'Extended search commands',
     permission:  'public',
     group:       true,

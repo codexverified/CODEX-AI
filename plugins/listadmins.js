@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['admins', 'listadmins', 'adminlist'],
+    category: 'group',
     description: 'List all group admins',
     permission:  'public',
     group:       true,
@@ -20,7 +21,7 @@ module.exports = {
             }).join('\n');
             const mentions = admins.map(m => m.id);
             await sock.sendMessage(groupId, {
-                text: `🛡️ *${meta.subject} — Admins*\n\n${list}\n\n📊 Total admins: ${admins.length}\n_Powered by Silva MD_`,
+                text: `🛡️ *${meta.subject} — Admins*\n\n${list}\n\n📊 Total admins: ${admins.length}\n_Powered by CODEX AI_`,
                 mentions,
                 contextInfo
             }, { quoted: message });

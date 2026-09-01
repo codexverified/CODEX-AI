@@ -3,7 +3,7 @@
 const fs   = require('fs');
 const path = require('path');
  
-// ── In-memory stores (populated by silva.js event hooks) ─────────────────────
+// ── In-memory stores (populated by codex.js event hooks) ─────────────────────
 // global.groupMsgMap   = Map<groupJid, Map<memberNum, count>>
 // global.groupJoinLog  = Map<groupJid, [{action,num,name,ts}]>  (last 50 per group)
  
@@ -26,7 +26,7 @@ function pushJoinLog(gid, entry) {
     log.unshift(entry);
     if (log.length > 50) log.length = 50;
 }
-global.pushGroupJoinLog = pushJoinLog;   // exported for silva.js
+global.pushGroupJoinLog = pushJoinLog;   // exported for codex.js
  
 function fmtAge(creationUnix) {
     if (!creationUnix) return 'Unknown';
@@ -61,6 +61,7 @@ module.exports = {
                   'adminlist', 'gadmins', 'groupstats', 'gstats',
                   'joinlog', 'gjoinlog', 'groupage', 'gage',
                   'exportgroup', 'gexport'],
+    category: 'group',
     description: 'Detailed group info, admin list, activity stats, join/leave log, age and export',
     usage:       '.ginfo | .adminlist | .groupstats | .joinlog | .groupage | .exportgroup',
     permission:  'public',
@@ -114,7 +115,7 @@ module.exports = {
  
             return sock.sendMessage(jid, {
                 text,
-                mentions: admins.map(p => p.id),
+                mentions: admins.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean),
                 contextInfo
             }, { quoted: message });
         }
@@ -255,7 +256,7 @@ module.exports = {
                 memberList,
                 ``,
                 `Exported at: ${new Date().toLocaleString()}`,
-                `Export by  : Silva MD Bot`,
+                `Export by  : CODEX AI`,
             ].join('\n');
  
             const tmpPath = `/tmp/groupexport_${Date.now()}.txt`;

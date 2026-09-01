@@ -6,7 +6,7 @@ const config  = require('../config');
 const { getStr } = require('../lib/theme');
 const moment  = require('moment-timezone');
  
-const WEBSITE = 'https://silvatech.co.ke';
+const WEBSITE = 'https://codexai.co.ke';
 const TZ      = 'Africa/Nairobi';
  
 // ── Category definitions ──────────────────────────────────────────────────────
@@ -14,7 +14,7 @@ const TZ      = 'Africa/Nairobi';
 const CATEGORIES = [
     { id: 1,  icon: '⬇️',  name: 'Downloaders',        cmds: ['yt','ytmp3','ytmp4','tiktok','instagram','facebook','spotify','soundcloud','capcut','apk','catbox','tourl','pinterest','reddit','twitter','threads','gdrive'] },
     { id: 2,  icon: '🎵',  name: 'Music & Audio',       cmds: ['play','shazam','lyrics','toaudio','bgm','addbgm','setbgm','clearbgm','transcribe','tts'] },
-    { id: 3,  icon: '🤖',  name: 'AI & Intelligence',   cmds: ['ai','gpt4','gpt4o','gemini','bard','venice','openai','letmegpt','ask','silva','assistant','imagine','translate','define','calc','shorten','gitclone','anime','manga','describe','caption','carbon'] },
+    { id: 3,  icon: '🤖',  name: 'AI & Intelligence',   cmds: ['ai','gpt4','gpt4o','gemini','bard','venice','openai','letmegpt','ask','codex','assistant','imagine','translate','define','calc','shorten','gitclone','anime','manga','describe','caption','carbon'] },
     { id: 4,  icon: '🔍',  name: 'Search & Info',       cmds: ['wiki','country','ip','currency','time','weather','numberfact','stalk','whois','dns','speedtest','ipinfo','screenshot','fetch','githubstalk'] },
     { id: 5,  icon: '🖼️', name: 'Media & Stickers',    cmds: ['sticker','stickersearch','togif','tojpeg','emojimix','textsticker','qrcode','react','ocr','ascii','color','getpp','togstatus','statussave','captionimage','quotly','viewonce'] },
     { id: 6,  icon: '👥',  name: 'Group Management',    cmds: ['kick','promote','demote','ban','unban','banlist','tagall','hidetag','poll','multipoll','pollresult','lock','unlock','link','revoke','setname','setdesc','broadcast','purge','dmall','warn','mute','unmute','pin','unpin','edit','groupinfo','grouprules','groupstatus','setbio'] },
@@ -104,7 +104,7 @@ function buildCompactMenu(plugins, pfx, botName, mode) {
         `│  \`${pfx}help <cmd>\` → Command help   │\n` +
         `╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯\n` +
         `\n> 🌐 _${WEBSITE}_\n` +
-        `> ⚡ _Made by SilvaTech © ${now.year()}_`;
+        `> ⚡ _Made by CodexAI © ${now.year()}_`;
  
     return `${header}${statusBlock}\n${catBlock}\n${footer}`;
 }
@@ -179,6 +179,7 @@ function buildCommandHelp(cmdName, plugins, pfx) {
 // ── Plugin ────────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['menu', 'help', 'list', 'cmds', 'commands'],
+    category: 'group',
     description: 'Show all commands in a categorized menu — use .menu <number> for a category deep-dive',
     usage:       '.menu | .menu <1-21> | .menu <category name> | .help <command>',
     permission:  'public',
@@ -188,7 +189,7 @@ module.exports = {
     run: async (sock, message, args, ctx) => {
         const { prefix, contextInfo, safeSend } = ctx;
         const plugins = loadPlugins();
-        const botName = getStr('botName') || config.BOT_NAME || 'Silva MD';
+        const botName = getStr('botName') || config.BOT_NAME || 'CODEX AI';
         const mode    = (config.MODE || 'public').toUpperCase();
         const pfx     = prefix || '.';
         const imgUrl  = getStr('pic1') || config.ALIVE_IMG || 'https://files.catbox.moe/5uli5p.jpeg';

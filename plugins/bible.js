@@ -10,6 +10,7 @@ const DAILY_VERSES = [
  
 module.exports = {
     commands:    ['bible', 'verse', 'scripture'],
+    category: 'economy',
     description: 'Look up a Bible verse or get a random daily verse',
     usage:       '.bible [reference]',
     permission:  'public',

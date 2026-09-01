@@ -10,6 +10,7 @@ const { dlBuffer, TYPE_MAP } = require('../lib/dlmedia');
  
 module.exports = {
     commands:    ['tourl', 'imgtourl', 'imgurl', 'geturl', 'upload'],
+    category: 'group',
     description: 'Upload a media file to Catbox and get a shareable URL',
     permission:  'public',
     group:       true,

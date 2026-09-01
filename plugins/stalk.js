@@ -40,6 +40,7 @@ function waitForPresence(sock, jid, timeoutMs = 6000) {
 // ─── Plugin ───────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['stalk', 'userinfo', 'lookup', 'wa'],
+    category: 'search',
     description: 'Full profile card: picture, status, last seen, devices, country',
     usage:       '.stalk @user  |  reply a message  |  .stalk 2547XXXXXXXX',
     permission:  'public',

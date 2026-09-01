@@ -21,6 +21,7 @@ const pending = new Map();
  
 module.exports = {
     commands:    ['riddle', 'answer'],
+    category: 'games',
     description: 'Get a riddle — type .answer to reveal the answer',
     permission:  'public',
     group:       true,

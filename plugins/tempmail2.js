@@ -7,6 +7,7 @@ const mailSessions = new Map();
  
 module.exports = {
     commands: ['tempinbox', 'readmail', 'delmail', 'tempmailhelp'],
+    category: 'group',
     description: 'Extended temporary mail commands',
     permission:  'public',
     group:       true,

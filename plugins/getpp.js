@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['spp', 'profile', 'getpp'],
+    category: 'group',
     description: 'Get a user\'s profile picture',
     permission:  'public',
     group:       true,

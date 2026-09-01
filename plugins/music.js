@@ -31,6 +31,7 @@ async function downloadMp3(videoUrl) {
  
 module.exports = {
     commands:    ['play', 'music', 'song', 'ytmp3', 'ytsong', 'ytaudio'],
+    category: 'downloader',
     description: 'Search and download a song from YouTube',
     permission:  'public',
     group:       true,

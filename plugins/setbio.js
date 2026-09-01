@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['setbio', 'setabout', 'about'],
+    category: 'owner',
     description: 'Set the bot WhatsApp About/Bio',
     permission:  'owner',
     group:       false,
@@ -10,7 +11,7 @@ module.exports = {
         const bio = args.join(' ');
         if (!bio) {
             return sock.sendMessage(sender, {
-                text: '📝 Usage: .setbio <text>\nExample: .setbio Silva MD Bot 🤖 | Always Online',
+                text: '📝 Usage: .setbio <text>\nExample: .setbio CODEX AI 🤖 | Always Online',
                 contextInfo
             }, { quoted: message });
         }

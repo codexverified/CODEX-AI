@@ -6,6 +6,7 @@ const axios = require('axios');
  
 module.exports = {
     commands: ['summarize', 'summary', 'tldr', 'shorten', 'brief'],
+    category: 'group',
     description: 'AI summarizes any long text, article, or quoted message',
     usage:       '.summarize <text> OR reply to a long message',
     permission:  'public',
@@ -57,7 +58,7 @@ module.exports = {
         try {
             const res = await axios.post('https://ch.at/api/chat',
                 { message: prompt },
-                { headers: { 'Content-Type': 'application/json', 'User-Agent': 'SilvaMD-Bot/2.0' }, timeout: 15000 }
+                { headers: { 'Content-Type': 'application/json', 'User-Agent': 'CODEX AI/2.0' }, timeout: 15000 }
             );
             const summary = res.data?.answer || res.data?.reply || res.data?.message || res.data?.response || res.data?.result;
             if (summary && String(summary).trim().length > 10) {

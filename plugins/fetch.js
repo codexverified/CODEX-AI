@@ -4,6 +4,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['fetch', 'get'],
+    category: 'group',
     description: 'Fetch a URL and return its content or file',
     permission:  'public',
     group:       true,

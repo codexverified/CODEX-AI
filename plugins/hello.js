@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['hello'],
+    category: 'group',
     description: 'Simple hello test command',
     permission:  'public',
     group:       true,

@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands: ['terminategc'],
+    category: 'admin',
     description: 'Kick all members from the group and leave — permanently terminates the group.',
     permission:  'owner',
     group:       true,
@@ -28,7 +29,8 @@ module.exports = {
  
         // Collect everyone except the bot itself
         const toKick = participants
-            .map(p => p.id)
+            .map(p => p.id || p.jid || p.phoneNumber)
+            .filter(Boolean)
             .filter(id => id !== botJid);
  
         if (toKick.length === 0) {

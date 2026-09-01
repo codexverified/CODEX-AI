@@ -7,6 +7,7 @@ const BASE = 'https://apis.davidcyriltech.my.id';
  
 module.exports = {
     commands:    ['ytmp4', 'ytvideo', 'ytv', 'yt', 'youtube'],
+    category: 'downloader',
     description: 'Download YouTube video (up to 10 min)',
     permission:  'public',
     group:       true,

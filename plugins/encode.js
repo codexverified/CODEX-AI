@@ -8,6 +8,7 @@ function rot13(str) { return str.replace(/[a-zA-Z]/g, c => String.fromCharCode(c
  
 module.exports = {
     commands:    ['encode', 'decode', 'binary', 'hex2text', 'rot13'],
+    category: 'tools',
     description: 'Encode/decode text: base64, hex, binary, rot13',
     permission:  'public',
     group:       true,

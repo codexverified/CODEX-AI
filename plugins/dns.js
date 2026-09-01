@@ -3,6 +3,7 @@ const dns = require('dns').promises;
  
 module.exports = {
     commands:    ['dns', 'dnslookup', 'nslookup'],
+    category: 'search',
     description: 'DNS lookup for a domain',
     permission:  'public',
     group:       true,
@@ -35,7 +36,7 @@ module.exports = {
 🌐 *NS:*        ${nsR}
 📋 *TXT:*       ${txtR}
  
-_Powered by Silva MD_`,
+_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

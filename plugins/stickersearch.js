@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['stickersearch', 'findsticker', 'giphy'],
+    category: 'search',
     description: 'Search and send animated stickers/GIFs',
     permission:  'public',
     group:       true,
@@ -27,7 +28,7 @@ module.exports = {
                 video:     Buffer.from(gifData),
                 gifPlayback: true,
                 mimetype:  'video/mp4',
-                caption:   `🎭 *${query}* — Silva MD`,
+                caption:   `🎭 *${query}* — CODEX AI`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

@@ -5,6 +5,7 @@ let autoReadEnabled = false;
  
 module.exports = {
     commands:    ['autoread', 'autoreadpm', 'readall'],
+    category: 'bot',
     description: 'Toggle auto-read for private messages',
     permission:  'owner',
     group:       false,

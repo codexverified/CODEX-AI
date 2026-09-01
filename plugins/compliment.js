@@ -25,6 +25,7 @@ const COMPLIMENTS = [
  
 module.exports = {
     commands:    ['compliment', 'comp', 'praise'],
+    category: 'fun',
     description: 'Send a random compliment',
     permission:  'public',
     group:       true,

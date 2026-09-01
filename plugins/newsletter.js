@@ -2,7 +2,7 @@ const config = require('../config');
 const followedThisSession = new Set();
  
 module.exports = {
-    commands: ['newsletter', 'followchannel', 'unfollowchannel', 'channelinfo', 'mutechannel', 'unmutechannel'],
+    commands: ['newsletter', 'followchannel', 'unfollowchannel', 'channelinfo', 'mutechannel', 'unmutechannel', 'channelsubs'],
     description: 'Newsletter/channel follow management',
     permission: 'owner',
     group: false,
@@ -62,6 +62,19 @@ module.exports = {
             }
         }
  
+        if (command === 'channelsubs') {
+            if (!jid || !jid.endsWith('@newsletter')) return reply(`Usage: ${prefix}channelsubs <newsletter_jid>`);
+            if (typeof sock.newsletterSubscribers !== 'function') {
+                return reply('newsletterSubscribers is not available in this Baileys build.');
+            }
+            try {
+                const subscribers = await sock.newsletterSubscribers(jid);
+                return reply(`Subscribers: ${Array.isArray(subscribers) ? subscribers.length : JSON.stringify(subscribers).slice(0, 1000)}`);
+            } catch (err) {
+                return reply(`Failed to fetch subscribers: ${err.message}`);
+            }
+        }
+
         if (command === 'followchannel') {
             if (!jid) return reply(`Usage: ${prefix}followchannel <newsletter_jid>\n\nJID format: 1234567890@newsletter`);
             if (!jid.endsWith('@newsletter')) return reply('JID must end with @newsletter');

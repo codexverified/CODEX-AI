@@ -1,7 +1,7 @@
 'use strict';
  
 // Runtime toggles — override config values without editing config.env
-// Read by silva.js status handler when present
+// Read by codex.js status handler when present
 if (global.autoStatusFlags === undefined) {
     global.autoStatusFlags = {
         seen:  null,   // null = use config default, true/false = runtime override
@@ -13,6 +13,7 @@ const FLAGS = global.autoStatusFlags;
  
 module.exports = {
     commands:    ['autoview', 'autolike', 'autoreact', 'autostatus', 'statusconfig'],
+    category: 'bot',
     description: 'Control automatic status viewing and liking at runtime',
     usage:       '.autoview on/off  |  .autolike on/off  |  .autostatus',
     permission:  'owner',

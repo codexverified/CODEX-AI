@@ -11,6 +11,7 @@ const FEEDS = {
  
 module.exports = {
     commands:    ['news', 'headlines'],
+    category: 'group',
     description: 'Get latest news headlines',
     permission:  'public',
     group:       true,
@@ -27,7 +28,7 @@ module.exports = {
             const lines = items.map((item, i) => `${i + 1}. *${item.title}*\n   🔗 ${item.link}`).join('\n\n');
             const cats  = Object.keys(FEEDS).join(' | ');
             await sock.sendMessage(chatId, {
-                text: `📰 *Latest News — ${category.toUpperCase()}*\n\n${lines}\n\n_Categories: ${cats}_\n_Powered by BBC • Silva MD_`,
+                text: `📰 *Latest News — ${category.toUpperCase()}*\n\n${lines}\n\n_Categories: ${cats}_\n_Powered by BBC • CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

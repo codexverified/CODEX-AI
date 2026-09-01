@@ -9,6 +9,7 @@ if (typeof global.antivvEnabled === 'undefined') {
  
 module.exports = {
     commands:    ['antivv', 'avv'],
+    category: 'admin',
     description: 'Toggle automatic view-once reveal on/off',
     permission:  'owner',
     group:       true,

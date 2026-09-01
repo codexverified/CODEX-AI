@@ -7,6 +7,7 @@ const sessions = new Map();
  
 module.exports = {
     commands:    ['hangman', 'hm'],
+    category: 'games',
     description: 'Play a hangman word guessing game',
     permission:  'public',
     group:       true,

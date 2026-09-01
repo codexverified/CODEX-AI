@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['crypto', 'coin', 'price'],
+    category: 'economy',
     description: 'Get live cryptocurrency prices',
     permission:  'public',
     group:       true,
@@ -23,7 +24,7 @@ module.exports = {
                 return `${emoji} *${coin.toUpperCase()}:* ${price}  (${change >= 0 ? '+' : ''}${change}% 24h)`;
             });
             await sock.sendMessage(chatId, {
-                text: `💰 *Crypto Prices*\n\n${lines.join('\n')}\n\n_Powered by CoinGecko • Silva MD_`,
+                text: `💰 *Crypto Prices*\n\n${lines.join('\n')}\n\n_Powered by CoinGecko • CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

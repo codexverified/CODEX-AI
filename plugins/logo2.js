@@ -77,6 +77,7 @@ module.exports = {
         'nigerianflag', 'papercut', 'pixelglitch', 'sandsummer', 'summerbeach',
         'texteffect', 'typographytext', 'underwater', 'writetext'
     ],
+    category: 'group',
     description: 'Logo maker and text effect generator',
     usage:       '.logomaker <text> | .galaxy <text> | .glitchtext <text>',
     permission:  'public',
@@ -105,7 +106,7 @@ module.exports = {
             return send(
                 `🎨 *${cmd.toUpperCase()} Style*\n\n` +
                 `❌ *Usage:* \`.${cmd} <your text>\`\n\n` +
-                `Example: \`.${cmd} Silva MD\`\n\n` +
+                `Example: \`.${cmd} CODEX AI\`\n\n` +
                 `_Use \`.logolist\` to see all styles_`
             );
         }

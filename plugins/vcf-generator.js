@@ -120,6 +120,7 @@ function resolveAndName(participantId, resolveLid) {
  
 module.exports = {
     commands: ['vcfgen', 'savecontacts', 'exportvcf', 'contactsave', 'vcfgroup', 'vcfnumber', 'vcfread', 'readvcf', 'vcfview'],
+    category: 'group',
     description: 'Generate VCF contact files with names from WhatsApp and Truecaller',
     usage: '.vcfgen | .vcfgen @user | .vcfnumber 2547XXXXXXXX | .vcfgroup | .vcfread (reply to vcf)',
     permission: 'public',

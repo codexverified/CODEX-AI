@@ -5,6 +5,7 @@ const sessions = new Map();
  
 module.exports = {
     commands:    ['trivia', 'quiz'],
+    category: 'games',
     description: 'Play a trivia quiz game',
     permission:  'public',
     group:       true,

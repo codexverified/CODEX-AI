@@ -21,6 +21,7 @@ const COLORS = {
  
 module.exports = {
     commands: ["togstatus", "swgc", "groupstatus"],
+    category: 'group',
     description: "Send text / image / video / audio as group status",
     permission: "public",
     group: true,
@@ -42,7 +43,7 @@ module.exports = {
                         isForwarded: true,
                         forwardedNewsletterMessageInfo: {
                             newsletterJid: "120363200367779016@newsletter",
-                            newsletterName: "SILVA GROUP STATUS\uD83D\uDC96",
+                            newsletterName: "CODEX GROUP STATUS\uD83D\uDC96",
                             serverMessageId: 143,
                         },
                     },

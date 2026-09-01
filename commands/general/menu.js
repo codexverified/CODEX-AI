@@ -14,6 +14,21 @@ module.exports = {
     description: 'Show all commands with CODEX UI',
 
     async execute(bot, m, args) {
+        // `.list plugins` shows installed plugins specifically instead of
+        // the full command menu — same data as .listplugins, just reachable
+        // through the phrasing requested alongside the "list" alias.
+        if ((args[0] || '').toLowerCase() === 'plugins') {
+            const { listPlugins } = require('../../lib/pluginManager');
+            const plugins = listPlugins(bot);
+            if (!plugins.length) {
+                return await m.reply(`📦 No plugins installed.\n\nUse ${bot.prefix}install <link> to add one.`);
+            }
+            const text = plugins
+                .map((cmd, i) => `${i + 1}. ${bot.prefix}${cmd.name}${cmd.source ? `\n   ${cmd.source}` : ''}`)
+                .join('\n');
+            return await m.reply(`📦 *Installed Plugins* (${plugins.length})\n\n${text}`);
+        }
+
         const c          = bot.config;
         const prefix     = bot.prefix || c.prefix || '.';
         const categories = bot.commandHandler.getAllCommands();

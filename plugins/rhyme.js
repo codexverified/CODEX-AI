@@ -18,6 +18,7 @@ const BUILTIN_RHYMES = {
  
 module.exports = {
     commands:    ['rhyme', 'rhymes'],
+    category: 'group',
     description: 'Find words that rhyme with a given word',
     usage:       '.rhyme <word>',
     permission:  'public',

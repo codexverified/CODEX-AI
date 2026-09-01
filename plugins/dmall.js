@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['dmall', 'dmmembers', 'msgall'],
+    category: 'group',
     description: 'Send a DM to every member of the current group (owner only)',
     permission:  'owner',
     group:       true,

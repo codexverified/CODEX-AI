@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['schedule', 'remind2', 'setmsg'],
+    category: 'owner',
     description: 'Schedule a message to be sent after a delay',
     permission:  'owner',
     group:       true,

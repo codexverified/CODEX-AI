@@ -3,6 +3,7 @@
 const config = require('../config');
 module.exports = {
     commands:    ['antidelete', 'antidel'],
+    category: 'admin',
     description: 'Toggle anti-delete — recovers deleted and edited messages and forwards them to you',
     permission:  'owner',
     group:       true,

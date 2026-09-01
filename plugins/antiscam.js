@@ -114,6 +114,7 @@ function detectScam(text) {
 // ─── Plugin ───────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['antiscam', 'scamcheck', 'checkscam'],
+    category: 'admin',
     description: 'Auto-detect and act on scam/fraud messages in groups',
     usage:       '.antiscam on | .antiscam off | .antiscam action <delete|warn|kick> | .scamcheck <text>',
     permission:  'admin',

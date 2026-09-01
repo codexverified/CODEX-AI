@@ -3,7 +3,7 @@ const { getQuoted } = require('../../lib/getQuoted');
 
 module.exports = {
     name: 'setgpp',
-    aliases: ['setgrouppp', 'setppgroup'],
+    aliases: ['setgrouppp', 'setppgroup', 'setpfp'],
     category: 'group',
     reactions: { start: '📸' },
     description: 'Set the group profile picture (reply to an image).',

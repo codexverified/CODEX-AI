@@ -41,6 +41,7 @@ module.exports = {
         'setantidelete', 'setantiedit', 'getsetting', 'setsetting',
         'resetsetting', 'resetallsettings', 'resetdb', 'jid'
     ],
+    category: 'owner',
     description: 'Extended owner/admin control commands',
     permission:  'owner',
     group:       true,

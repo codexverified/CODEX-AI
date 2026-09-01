@@ -6,6 +6,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['soundcloud', 'scdl', 'sc'],
+    category: 'downloader',
     description: 'Download SoundCloud audio',
     permission:  'public',
     group:       true,
@@ -53,7 +54,7 @@ module.exports = {
                     audio: { url: audioUrl }, mimetype: 'audio/mpeg', ptt: false, contextInfo
                 }, { quoted: message });
                 await sock.sendMessage(sender, {
-                    text: `🎵 *${title}*\n👤 ${author}\n_Powered by Silva MD_`, contextInfo
+                    text: `🎵 *${title}*\n👤 ${author}\n_Powered by CODEX AI_`, contextInfo
                 }, { quoted: message });
                 return;
             } catch {}

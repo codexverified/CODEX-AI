@@ -7,6 +7,7 @@ const BASE = 'https://apis.davidcyriltech.my.id';
  
 module.exports = {
     commands:    ['ytmp3', 'ytvid-audio', 'ytaudio2'],
+    category: 'downloader',
     description: 'Download YouTube audio as MP3 by URL',
     permission:  'public',
     group:       true,

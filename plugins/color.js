@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['color', 'colorinfo', 'hex'],
+    category: 'group',
     description: 'Get color information from a HEX code',
     permission:  'public',
     group:       true,
@@ -32,7 +33,7 @@ module.exports = {
 ▸ *HSL:*   hsl(${hsl.h}°, ${hsl.s}%, ${hsl.l}%)
 ▸ *Closest:* ${data.name.closest_named_hex}
  
-_Powered by Silva MD_`,
+_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

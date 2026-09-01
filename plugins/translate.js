@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['translate', 'tr'],
+    category: 'tools',
     description: 'Translate text to another language',
     usage:       '.translate <lang> <text>  e.g. .translate fr Hello world',
     permission:  'public',

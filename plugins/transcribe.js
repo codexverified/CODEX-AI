@@ -4,6 +4,7 @@ const { downloadMediaMessage } = require('../lib/baileys');
  
 module.exports = {
     commands: ['transcribe', 'voicetotext', 'vtt', 'speech'],
+    category: 'group',
     description: 'Transcribe voice messages to text (reply to a voice note)',
     usage: '.transcribe (reply to a voice message)',
     permission: 'public',

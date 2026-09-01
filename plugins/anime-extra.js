@@ -427,6 +427,7 @@ const handlers = {
  
 module.exports = {
     commands:   Object.keys(handlers),
+    category:   'fun',
     description: 'Extended anime commands — topanime, topmanga, seasonal, airing, upcoming, character, animequote, animegenre, animeinfo, mangainfo, studio',
     usage:      '.topanime | .topmanga | .seasonal 2024 spring | .airing | .upcoming | .character Goku | .animequote | .animegenre romance | .animeinfo Naruto | .mangainfo Berserk | .studio Mappa',
     permission: 'public',

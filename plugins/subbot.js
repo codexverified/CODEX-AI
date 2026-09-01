@@ -21,6 +21,7 @@ const STATUS_EMOJI = { connected: '🟢', connecting: '🟡', disconnected: '�
  
 module.exports = {
     commands:    ['subbot', 'subbots', 'mybotinfo', 'kicksubbot', 'restartsubbot'],
+    category: 'owner',
     description: 'Manage active sub-bot instances (lent bot sessions)',
     usage:       '.subbot list | .subbot stop <number> | .subbot restart <number> | .mybotinfo',
     permission:  'owner',

@@ -4,6 +4,7 @@
  
 module.exports = {
     commands:    ['blocklist', 'listblock'],
+    category: 'owner',
     description: 'Show the bot\'s blocked numbers list — owner only',
     permission:  'owner',
     group:       false,

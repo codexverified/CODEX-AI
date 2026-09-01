@@ -4,6 +4,7 @@ if (!global.pollRegistry) global.pollRegistry = new Map();
  
 module.exports = {
     commands:    ['poll', 'vote', 'multipoll'],
+    category: 'admin',
     description: 'Create a WhatsApp native poll — single or multi-select',
     usage:       '.poll Question | Option1 | Option2 | ...\n.multipoll Question | Option1 | Option2 | ...',
     permission:  'admin',

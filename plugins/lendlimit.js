@@ -51,7 +51,7 @@ function formatDuration(ms) {
     return parts.join(' ') || '<1h';
 }
  
-// ── Expiry checker (exported so silva.js can schedule it) ─────────────────────
+// ── Expiry checker (exported so codex.js can schedule it) ─────────────────────
 async function checkExpiredLends(sock) {
     const settings = loadSettings();
     if (!settings.defaultExpiryMs) return; // no expiry configured
@@ -96,6 +96,7 @@ global._lendExpiryCheck = checkExpiredLends;
  
 module.exports = {
     commands:    ['lendlimit', 'lendexpiry', 'lendstats', 'expirelends', 'lendconfig'],
+    category: 'owner',
     description: 'Configure lend limits, expiry times, and view lend health dashboard',
     usage:       '.lendlimit 5 | .lendexpiry 7d | .lendstats | .expirelends',
     permission:  'owner',

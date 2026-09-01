@@ -46,6 +46,7 @@ function escapeXml(str) {
  
 module.exports = {
     commands: ['textsticker', 'tsticker', 'stext', 'textstick'],
+    category: 'group',
     description: 'Create styled text stickers with various themes',
     usage: '.textsticker [style] <text> | Styles: neon, fire, ocean, pink, gold, matrix, retro',
     permission: 'public',
@@ -83,8 +84,8 @@ module.exports = {
         try {
             const svgBuffer = createTextImage(text, styleName);
             const sticker = new Sticker(svgBuffer, {
-                pack: ctx.pushName || 'Silva MD',
-                author: 'Silva Bot',
+                pack: ctx.pushName || 'CODEX AI',
+                author: 'Codex Bot',
                 type: StickerTypes.FULL,
                 quality: 80
             });

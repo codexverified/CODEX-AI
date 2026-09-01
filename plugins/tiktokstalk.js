@@ -19,6 +19,7 @@ function barOf(value, max, len = 12) {
  
 module.exports = {
     commands:    ['tiktokstalk', 'ttstalk', 'tksearch', 'ttuser', 'tikstalk'],
+    category: 'group',
     description: 'Stalk a TikTok profile — followers, videos, likes, bio and more',
     usage:       '.tiktokstalk <username>',
     permission:  'public',
@@ -132,7 +133,7 @@ module.exports = {
         }
  
         lines.push(`• *Profile:* https://www.tiktok.com/@${u.uniqueId || username}`);
-        lines.push(`_Powered by ${getStr('botName') || 'Silva MD'} · TikWM API_`);
+        lines.push(`_Powered by ${getStr('botName') || 'CODEX AI'} · TikWM API_`);
  
         const avatarUrl = u.avatarLarger || u.avatarThumb || u.avatar || null;
  

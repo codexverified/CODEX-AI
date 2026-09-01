@@ -3,6 +3,7 @@ const { downloadContentFromMessage } = require('../lib/baileys');
  
 module.exports = {
     commands:    ['tojpeg', 'toimg', 'stickertoimg', 'unwebp'],
+    category: 'media',
     description: 'Convert sticker to JPEG image',
     permission:  'public',
     group:       true,
@@ -24,7 +25,7 @@ module.exports = {
             await sock.sendMessage(sender, {
                 image:    buf,
                 mimetype: 'image/webp',
-                caption:  '🖼️ *Sticker converted to image*\n_Powered by Silva MD_',
+                caption:  '🖼️ *Sticker converted to image*\n_Powered by CODEX AI_',
                 contextInfo
             }, { quoted: message });
         } catch (e) {

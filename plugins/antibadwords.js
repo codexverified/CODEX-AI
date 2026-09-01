@@ -30,6 +30,7 @@ module.exports = [
     // ── Toggle command ────────────────────────────────────────────────────────
     {
         commands: ['antibad', 'antibadwords', 'antiswear', 'noswear'],
+    category: 'admin',
         description: 'Toggle anti-bad-words filter in a group — auto-deletes profanity',
         usage: '.antibad on/off',
         permission: 'admin',
@@ -73,6 +74,7 @@ module.exports = [
     // ── Add custom word ────────────────────────────────────────────────────────
     {
         commands: ['addword', 'addban', 'banword'],
+    category: 'group',
         description: 'Add a custom word to the bad-words filter for this group',
         usage: '.addword <word>',
         permission: 'admin',
@@ -95,6 +97,7 @@ module.exports = [
     // ── Remove custom word ─────────────────────────────────────────────────────
     {
         commands: ['removeword', 'unbanword', 'delword'],
+    category: 'admin',
         description: 'Remove a word from the bad-words filter',
         usage: '.removeword <word>',
         permission: 'admin',
@@ -118,6 +121,7 @@ module.exports = [
     // ── List banned words ──────────────────────────────────────────────────────
     {
         commands: ['badwordslist', 'badwords', 'bannedwords'],
+    category: 'group',
         description: 'Show all banned words in this group',
         permission: 'admin',
         group: true,
@@ -138,6 +142,7 @@ module.exports = [
     // ── Event handler — runs on EVERY message ─────────────────────────────────
     {
         commands: [],
+    category: 'group',
         description: 'Anti-bad-words event listener',
         permission: 'public',
         group: true,
@@ -175,7 +180,7 @@ module.exports = [
                         `⚠️ *Warning!* @${senderNum}\n\n` +
                         `Your message was deleted — it contained inappropriate language.\n` +
                         `Please keep the chat respectful! 🙏\n\n` +
-                        `_${config.BOT_NAME || 'Silva MD'} Anti-Bad Words_`,
+                        `_${config.BOT_NAME || 'CODEX AI'} Anti-Bad Words_`,
                     mentions: [sender],
                 }, { quoted: message });
             } catch { /* silent fail */ }

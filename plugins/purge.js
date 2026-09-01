@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['purge', 'clear', 'delmsg'],
+    category: 'admin',
     description: 'Delete multiple messages (reply to start message)',
     permission:  'admin',
     group:       true,

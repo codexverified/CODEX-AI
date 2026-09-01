@@ -17,6 +17,7 @@ function formatDuration(ms) {
  
 module.exports = {
     commands:    ['afk', 'back'],
+    category: 'owner',
     description: 'Owner AFK mode — bot auto-replies to everyone while you are away',
     permission:  'owner',
     group:       true,

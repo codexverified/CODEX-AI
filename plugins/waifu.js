@@ -67,6 +67,7 @@ module.exports = {
                              'uniform', 'selfies', 'raiden', 'rias', 'kamisato',
                              'wink', 'blush', 'smile', 'wave', 'happy'])],
     description: 'Anime girl/guy images — waifu, neko, maid, husbando, shinobu, megumin, raiden, rias, and more',
+    category:   'fun',
     usage:      '.waifu | .neko | .maid | .husbando | .shinobu | .megumin',
     permission: 'public',
     group:      true,

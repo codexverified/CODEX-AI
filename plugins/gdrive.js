@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['gdrive', 'googledrive', 'gdl'],
+    category: 'downloader',
     description: 'Get direct download link from Google Drive',
     permission:  'public',
     group:       true,
@@ -25,7 +26,7 @@ module.exports = {
             const fileName = (headers['content-disposition'] || '').match(/filename="?([^"]+)"?/)?.[1] || fileId;
             const size     = headers['content-length'] ? `${(parseInt(headers['content-length']) / 1024 / 1024).toFixed(2)} MB` : 'Unknown';
             await sock.sendMessage(sender, {
-                text: `📁 *Google Drive File*\n\n📄 *Name:* ${fileName}\n📦 *Size:* ${size}\n🔗 *Download:* ${confirm}\n\n_Powered by Silva MD_`,
+                text: `📁 *Google Drive File*\n\n📄 *Name:* ${fileName}\n📦 *Size:* ${size}\n🔗 *Download:* ${confirm}\n\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

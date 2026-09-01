@@ -5,6 +5,7 @@ const { dlBuffer }    = require('../lib/dlmedia');
  
 module.exports = {
     commands:    ['save', 'nitumie', 'statussave'],
+    category: 'media',
     description: 'Save a WhatsApp status (reply to a status with this command)',
     permission:  'public',
     group:       false,
@@ -32,7 +33,7 @@ module.exports = {
             const buffer = await dlBuffer(msgContent, mediaType);
  
             const caption = msgContent.caption
-                || `📥 *Status saved by ${getStr('botName') || 'Silva MD'}*`;
+                || `📥 *Status saved by ${getStr('botName') || 'CODEX AI'}*`;
  
             await sock.sendMessage(sender, {
                 [mediaType]: buffer,
@@ -41,7 +42,7 @@ module.exports = {
                     ...contextInfo,
                     externalAdReply: {
                         title:        'Status Saved ✅',
-                        body:         (getStr('botName') || 'Silva MD') + ' · Status Downloader',
+                        body:         (getStr('botName') || 'CODEX AI') + ' · Status Downloader',
                         thumbnailUrl: getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg',
                         mediaType:    1
                     }

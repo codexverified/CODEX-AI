@@ -6,6 +6,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['carbon', 'codeimg', 'code2img'],
+    category: 'media',
     description: 'Convert code to a beautiful image via Carbon',
     permission:  'public',
     group:       true,
@@ -35,7 +36,7 @@ module.exports = {
             if (res.data?.length > 5000) {
                 return sock.sendMessage(chatId, {
                     image:   Buffer.from(res.data),
-                    caption: `💻 *Code Image*\n_Powered by Silva MD_`,
+                    caption: `💻 *Code Image*\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             }
@@ -43,7 +44,7 @@ module.exports = {
  
         // Fallback: send the carbon.now.sh link
         await sock.sendMessage(chatId, {
-            text: `💻 *Code Image*\n\nOpen this link to view your code image:\n${carbonUrl}\n\n_Powered by Silva MD_`,
+            text: `💻 *Code Image*\n\nOpen this link to view your code image:\n${carbonUrl}\n\n_Powered by CODEX AI_`,
             contextInfo
         }, { quoted: message });
     }

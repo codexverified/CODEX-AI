@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['grouplink', 'invitelink', 'link', 'revoke', 'revokelink'],
+    category: 'group',
     description: 'Get or revoke the group invite link',
     usage:       '.link | .revoke',
     permission:  'admin',

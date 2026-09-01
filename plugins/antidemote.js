@@ -1,11 +1,12 @@
 'use strict';
  
-// Groups where anti-demote is enabled — read by silva.js event handler
+// Groups where anti-demote is enabled — read by codex.js event handler
 const enabledGroups = new Set();
 global.antiDemoteGroups = enabledGroups;
  
 module.exports = {
     commands:    ['antidemote'],
+    category: 'admin',
     description: 'Kick anyone who demotes a group admin (requires bot to be admin)',
     permission:  'admin',
     group:       true,

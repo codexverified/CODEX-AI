@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['ip', 'iplookup', 'ipinfo'],
+    category: 'tools',
     description: 'Look up information about any IP address',
     usage:       '.ip <address>',
     permission:  'public',

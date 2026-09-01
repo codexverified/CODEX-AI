@@ -6,7 +6,7 @@ const http = require('http');
 function fetchPage(url, timeout = 8000) {
     return new Promise((resolve, reject) => {
         const mod = url.startsWith('https') ? https : http;
-        const req = mod.get(url, { timeout, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SilvaMDBot/2.0)' } }, (res) => {
+        const req = mod.get(url, { timeout, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CODEX AI/2.0)' } }, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return fetchPage(res.headers.location, timeout).then(resolve).catch(reject);
             }
@@ -63,6 +63,7 @@ function extractUrl(text) {
  
 module.exports = {
     commands: ['summarize', 'linkpreview', 'summarizelink', 'readlink', 'tldr'],
+    category: 'group',
     description: 'Summarize and preview any shared link/article',
     usage: '.summarize <url> or reply to a message with a link',
     permission: 'public',

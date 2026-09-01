@@ -24,6 +24,7 @@ function slugify(s) { return s.toLowerCase().trim().replace(/\s+/g, '_').slice(0
 module.exports = {
     commands:    ['addnote', 'delnote', 'delallnotes', 'getnote', 'getnotes', 'notes', 'updatenote',
                   'adminnotes', 'admindelnote', 'adminclearnotes', 'adminupdatenote', 'allnotes'],
+    category: 'group',
     description: 'Personal notes — save, view, update and delete your notes',
     usage:       '.addnote <title> | <content>\n.getnote <title>\n.notes (list all)',
     permission:  'public',

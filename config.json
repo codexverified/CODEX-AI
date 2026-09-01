@@ -28,6 +28,7 @@
   "goodbye": false,
   "sessionName": "session",
   "sessionId": "",
+  "apiBase": "https://codex-ai-j8wh.onrender.com",
   "STICKER_PACKNAME": "CODEX AI",
   "STICKER_AUTHOR": "CODEX"
 }

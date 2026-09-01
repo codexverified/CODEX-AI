@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['ship', 'couple', 'love'],
+    category: 'fun',
     description: 'Calculate love compatibility between two people',
     permission:  'public',
     group:       true,

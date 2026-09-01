@@ -42,6 +42,7 @@ global.checkAutoReply = function (sender) {
  
 module.exports = {
     commands: ['autoreply', 'awaymsg', 'setaway', 'awayoff'],
+    category: 'general',
     description: 'Set scheduled auto-reply messages (e.g., away from 10pm-8am)',
     usage: '.autoreply 22:00 08:00 I am sleeping, will reply later',
     permission: 'public',

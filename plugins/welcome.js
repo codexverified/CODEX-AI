@@ -1,12 +1,13 @@
 'use strict';
  
 // Map of jid -> { welcome: bool, goodbye: bool, customWelcome: string, customGoodbye: string }
-// Read by silva.js group-participants.update handler
+// Read by codex.js group-participants.update handler
 const groupSettings = new Map();
 global.welcomeSettings = groupSettings;
  
 module.exports = {
     commands:    ['welcome', 'goodbye', 'setwelcome', 'setgoodbye', 'welcomeoff', 'goodbyeoff'],
+    category: 'admin',
     description: 'Auto-welcome new members and farewell members who leave',
     usage:       '.welcome on/off | .setwelcome Custom message (use {name} for member name)',
     permission:  'admin',

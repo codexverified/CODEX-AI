@@ -57,6 +57,7 @@ global.checkWelcomeQuizAnswer = function (jid, sender, text) {
  
 module.exports = {
     commands: ['welcomequiz', 'setquiz', 'quizoff', 'quizsettings'],
+    category: 'games',
     description: 'Welcome quiz — new members must answer a question to stay',
     usage: '.setquiz <question> | <answer> | .welcomequiz on/off',
     permission: 'admin',

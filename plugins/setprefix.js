@@ -26,6 +26,7 @@ function persistPrefix(value) {
  
 module.exports = {
     commands:    ['setprefix', 'prefix', 'changeprefix'],
+    category: 'owner',
     description: 'View or change the bot command prefix at runtime',
     usage:       '.setprefix .  |  .setprefix .,!,/  |  .setprefix any  |  .setprefix none',
     permission:  'owner',

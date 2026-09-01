@@ -5,12 +5,13 @@ const { getStr } = require('../lib/theme');
  
 module.exports = {
     commands:    ['call', 'support'],
+    category: 'group',
     description: 'Support panel',
     permission:  'public',
     group:       true,
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
-        const botName = getStr('botName') || 'Silva MD';
+        const botName = getStr('botName') || 'CODEX AI';
         const pic     = getStr('pic1') || 'https://files.catbox.moe/5uli5p.jpeg';
  
         const nairobiTime = new Date().toLocaleTimeString('en-KE', {
@@ -43,12 +44,12 @@ module.exports = {
         if (sub === 'social') {
             return sock.sendMessage(sender, {
                 text:
-`📱 *Silva Tech Social Media*
+`📱 *Codex Tech Social Media*
  
-• Facebook: https://web.facebook.com/silva.tech.inc
-• Instagram: https://instagram.com/silva.tech.inc
-• TikTok: https://www.tiktok.com/@silva.tech.inc
-• X (Twitter): https://x.com/silva_african`,
+• Facebook: https://web.facebook.com/codex.tech.inc
+• Instagram: https://instagram.com/codex.tech.inc
+• TikTok: https://www.tiktok.com/@codex.tech.inc
+• X (Twitter): https://x.com/codexai_official`,
                 contextInfo
             }, { quoted: message });
         }
@@ -57,7 +58,7 @@ module.exports = {
             image:   { url: pic },
             caption:
 `『 *${botName}* 』
-© 2025 *Silvatech Inc*
+© 2025 *CodexAI Inc*
  
 ⏰ *${nairobiTime}*
 📅 *${nairobiDate}*

@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['testhandler'],
+    category: 'owner',
     description: 'Internal diagnostics — owner only',
     permission:  'owner',
     group:       true,

@@ -26,7 +26,7 @@ function formatDuration(ms) {
     return [d && `${d}d`, h && `${h}h`].filter(Boolean).join(' ') || '<1h';
 }
  
-const SESSION_SERVER = 'https://session.silvatech.co.ke';
+const SESSION_SERVER = 'https://session.codexai.co.ke';
 const DATA_PATH      = path.join(__dirname, '../data/lends.json');
  
 // ─── Persistence ──────────────────────────────────────────────────────────────
@@ -49,7 +49,7 @@ async function fetchPairCode(number) {
     const res = await axios.get(`${SESSION_SERVER}/code`, {
         params:  { number: clean },
         timeout: 15000,
-        headers: { 'User-Agent': 'SilvaMD-Bot/2.0' }
+        headers: { 'User-Agent': 'CODEX AI/2.0' }
     });
     const code = res.data?.code || res.data?.pairCode || res.data?.pair_code;
     if (!code) throw new Error('No code returned');
@@ -59,6 +59,7 @@ async function fetchPairCode(number) {
 // ─── Plugin ───────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['lend', 'approvelend', 'rejectlend', 'lendlist', 'lendstatus', 'revokelend'],
+    category: 'group',
     description: 'Lend the bot to a user — requests owner approval then delivers a pair code',
     usage:       '.lend 2547XXXXXXXX | (owner) .approvelend 2547XXXXXXXX | .rejectlend 2547XXXXXXXX',
     permission:  'public',

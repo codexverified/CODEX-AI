@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands:    ['pin', 'unpin', 'pinmsg', 'unpinmsg'],
+    category: 'group',
     description: 'Pin or unpin any message in a group (reply to the message)',
     usage:       'Reply to a message + .pin | .unpin',
     permission:  'admin',

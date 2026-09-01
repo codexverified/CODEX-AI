@@ -3,6 +3,7 @@ const { downloadContentFromMessage } = require('../lib/baileys');
  
 module.exports = {
     commands:    ['togif', 'gif', 'mp4togif'],
+    category: 'media',
     description: 'Convert sticker or video to GIF',
     permission:  'public',
     group:       true,

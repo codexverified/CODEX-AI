@@ -4,6 +4,7 @@ const { fmt } = require('../lib/theme');
  
 module.exports = {
     commands:    ['groupinfo', 'ginfo', 'groupstats', 'gcinfo'],
+    category: 'group',
     description: 'Show detailed group information and statistics',
     usage:       '.groupinfo',
     permission:  'member',

@@ -5,6 +5,7 @@ const GH_REGEX = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
  
 module.exports = {
     commands:    ['gitclone'],
+    category: 'downloader',
     description: 'Download a GitHub repository as a ZIP file',
     permission:  'public',
     group:       true,
@@ -12,7 +13,7 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         if (!args[0]) {
             return sock.sendMessage(sender, {
-                text: `❌ Please provide a GitHub URL.\nExample: .gitclone https://github.com/SilvaTechB/silva-md-bot`,
+                text: `❌ Please provide a GitHub URL.\nExample: .gitclone https://github.com/CodexAI/CODEX AI`,
                 contextInfo
             }, { quoted: message });
         }
@@ -43,7 +44,7 @@ module.exports = {
                 document: { url },
                 fileName: filename,
                 mimetype: 'application/zip',
-                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via ${getStr('botName') || 'Silva MD'}_`,
+                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via ${getStr('botName') || 'CODEX AI'}_`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {

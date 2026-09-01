@@ -26,6 +26,7 @@ module.exports = {
         'setgroupevents', 'welcomemessage', 'goodbyemessage',
         'disapp', 'left', 'antibadwarn', 'antilinkwarn', 'menus', 'list'
     ],
+    category: 'admin',
     description: 'Extended group management commands',
     permission:  'admin',
     group:       true,
@@ -201,14 +202,14 @@ module.exports = {
         if (cmd === 'everyone') {
             if (!adminCheck()) return;
             const text = args.join(' ').trim() || '👋 Attention everyone!';
-            const mentions = participants.map(p => p.id);
+            const mentions = participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean);
             const names    = mentions.map(j => `@${j.split('@')[0]}`).join(' ');
             return sock.sendMessage(jid, { text: fmt(`📢 ${text}\n\n${names}`), mentions, contextInfo }, { quoted: message });
         }
  
         if (cmd === 'tagadmins') {
             if (!adminCheck()) return;
-            const admins  = participants.filter(p => p.admin).map(p => p.id);
+            const admins  = participants.filter(p => p.admin).map(p => p.id || p.jid || p.phoneNumber).filter(Boolean);
             if (!admins.length) return send('❌ No admins found.');
             const text = args.join(' ').trim() || '👑 Admins, your attention please!';
             const names = admins.map(j => `@${j.split('@')[0]}`).join(' ');
@@ -283,7 +284,7 @@ module.exports = {
             const text = participants.map((p, i) => `*${i + 1}.* @${p.id.split('@')[0]}`).join('\n');
             return sock.sendMessage(jid, {
                 text: fmt(`👥 *Group Members (${participants.length})*\n\n${text}`),
-                mentions: participants.map(p => p.id),
+                mentions: participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean),
                 contextInfo
             }, { quoted: message });
         }

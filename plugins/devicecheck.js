@@ -9,6 +9,7 @@ function phoneNum(jid) {
 // ─── Plugin ───────────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['device', 'devicecheck', 'checkdevice', 'wainfo'],
+    category: 'group',
     description: 'Check WhatsApp account type, linked devices, status and more',
     usage:       '.device @user  |  reply a message  |  .device 2547XXXXXXXX',
     permission:  'public',

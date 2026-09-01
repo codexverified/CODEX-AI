@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands: ['describe', 'caption', 'what', 'imgcaption', 'seethis', 'analyze'],
+    category: 'group',
     description: 'AI describes/analyzes an image — reply to any photo and ask what it is',
     usage: '.describe (reply to an image)',
     permission: 'public',

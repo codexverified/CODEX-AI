@@ -4,6 +4,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['anime', 'animesearch', 'manga'],
+    category: 'search',
     description: 'Search for anime or manga info from MyAnimeList',
     usage:       '.anime Naruto | .manga One Piece',
     permission:  'public',

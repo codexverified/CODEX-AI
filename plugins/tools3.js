@@ -46,6 +46,7 @@ module.exports = {
         'shortener', 'sspc', 'ssphone', 'sstab', 'ssur', 'ssweb',
         'web2zip', 'photoeditor', 'remini', 'met', 'onwa'
     ],
+    category: 'media',
     description: 'Extended tools and utilities',
     permission:  'public',
     group:       true,

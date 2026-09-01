@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['react', 'reaction', 'emoji'],
+    category: 'group',
     description: 'React to a message with an emoji',
     usage:       '.react ❤️  (reply to a message)',
     permission:  'public',

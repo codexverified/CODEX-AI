@@ -3,14 +3,15 @@
 const axios  = require('axios');
 const moment = require('moment-timezone');
  
-const REPO_URL    = 'https://github.com/SilvaTechB/silva-md-bot';
-const WEBSITE_URL = 'https://silvatech.co.ke';
+const REPO_URL    = 'https://github.com/CodexAI/CODEX AI';
+const WEBSITE_URL = 'https://codexai.co.ke';
 const WA_CHANNEL  = 'https://whatsapp.com/channel/0029VaksrRh6GcGnT0J05n0j';
 const SUPPORT_URL = 'https://chat.whatsapp.com/GzCZZxVnAHMINWdPQkGwJR';
  
 module.exports = {
     commands:    ['repo', 'repository', 'github'],
-    description: 'Show Silva MD repository info',
+    category: 'group',
+    description: 'Show CODEX AI repository info',
     permission:  'public',
     group:       true,
     private:     true,
@@ -22,14 +23,14 @@ module.exports = {
         let data = null;
         try {
             const res = await axios.get(
-                'https://api.github.com/repos/SilvaTechB/silva-md-bot',
+                'https://api.github.com/repos/CodexAI/CODEX AI',
                 { timeout: 10000 }
             );
             data = res.data;
         } catch { /* use fallback */ }
  
         const caption = data
-            ? `*✨ SILVA MD — REPOSITORY INFO*\n\n` +
+            ? `*✨ CODEX AI — REPOSITORY INFO*\n\n` +
               `📦 *Repo:* ${data.name}\n` +
               `📝 *About:* ${data.description || 'WhatsApp MD Bot'}\n\n` +
               `⭐ *Stars:* ${data.stargazers_count.toLocaleString()}\n` +
@@ -43,16 +44,16 @@ module.exports = {
               `🌐 *Website:* ${WEBSITE_URL}\n` +
               `📢 *Newsletter:* ${WA_CHANNEL}\n` +
               `💬 *Support:* ${SUPPORT_URL}\n\n` +
-              `⚡ _Powered by Silva Tech Inc_`
-            : `*✨ SILVA MD — REPOSITORY*\n\n` +
-              `📦 *Repo:* silva-md-bot\n` +
+              `⚡ _Powered by Codex Tech Inc_`
+            : `*✨ CODEX AI — REPOSITORY*\n\n` +
+              `📦 *Repo:* CODEX AI\n` +
               `💻 *Language:* JavaScript\n` +
               `📜 *License:* MIT\n\n` +
               `🔗 *GitHub:* ${REPO_URL}\n` +
               `🌐 *Website:* ${WEBSITE_URL}\n` +
               `📢 *Newsletter:* ${WA_CHANNEL}\n` +
               `💬 *Support:* ${SUPPORT_URL}\n\n` +
-              `⚡ _Powered by Silva Tech Inc_`;
+              `⚡ _Powered by Codex Tech Inc_`;
  
         const imgUrl = 'https://files.catbox.moe/5uli5p.jpeg';
  
@@ -62,7 +63,7 @@ module.exports = {
             contextInfo: {
                 ...contextInfo,
                 externalAdReply: {
-                    title:                 'Silva MD — Open Source Bot',
+                    title:                 'CODEX AI — Open Source Bot',
                     body:                  'Star us on GitHub!',
                     thumbnailUrl:          imgUrl,
                     sourceUrl:             REPO_URL,

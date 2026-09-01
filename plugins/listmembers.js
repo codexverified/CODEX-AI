@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['members', 'listmembers', 'memberlist'],
+    category: 'group',
     description: 'List all group members',
     permission:  'public',
     group:       true,
@@ -24,7 +25,7 @@ module.exports = {
 ${list}
  
 📊 Total: ${total} | 🛡️ Admins: ${admins} | 👤 Members: ${total - admins}
-_Powered by Silva MD_`,
+_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

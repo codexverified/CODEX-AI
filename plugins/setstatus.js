@@ -2,6 +2,7 @@
  
 module.exports = {
     commands:    ['poststatus', 'textstatus', 'mystatustext'],
+    category: 'owner',
     description: 'Post a text WhatsApp status from the bot',
     permission:  'owner',
     group:       false,
@@ -10,7 +11,7 @@ module.exports = {
         const text = args.join(' ');
         if (!text) {
             return sock.sendMessage(sender, {
-                text: '📢 Usage: .poststatus <text>\nExample: .poststatus Silva MD is online! 🔥',
+                text: '📢 Usage: .poststatus <text>\nExample: .poststatus CODEX AI is online! 🔥',
                 contextInfo
             }, { quoted: message });
         }

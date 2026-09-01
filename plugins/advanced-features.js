@@ -28,6 +28,7 @@ const slowmodeTrack = new Map(); // "groupJid:senderJid" → lastMsgTimestamp
 // ── onMessage hook: word filter + slowmode enforcement ────────────────────────
 const onMessagePlugin = {
     commands: ['__advanced_onmessage__'],
+    category: 'admin',
     description: 'Internal onMessage hook for word filter and slowmode',
     permission: 'public',
     run: async () => {},
@@ -74,6 +75,7 @@ module.exports = [
     // ── Native WhatsApp Poll ─────────────────────────────────────────────────
     {
         commands: ['poll', 'createpoll', 'vote'],
+    category: 'group',
         description: 'Create a native WhatsApp poll. Usage: .poll Question | Option1 | Option2 | ...',
         permission: 'public',
         group: true,
@@ -104,6 +106,7 @@ module.exports = [
     // ── Multi-select Poll ────────────────────────────────────────────────────
     {
         commands: ['multipoll', 'multivote'],
+    category: 'group',
         description: 'Poll where users can pick multiple options. Usage: .multipoll Question | Opt1 | Opt2 ...',
         permission: 'public',
         group: true,
@@ -130,6 +133,7 @@ module.exports = [
     // ── Reminder ─────────────────────────────────────────────────────────────
     {
         commands: ['remind', 'reminder', 'remindme'],
+    category: 'general',
         description: 'Set a timed reminder. Usage: .remind 10m Buy groceries',
         permission: 'public',
         run: async (sock, message, args, ctx) => {
@@ -171,6 +175,7 @@ module.exports = [
     // ── List reminders ───────────────────────────────────────────────────────
     {
         commands: ['reminders', 'myreminders', 'listreminders'],
+    category: 'general',
         description: 'List your active reminders',
         permission: 'public',
         run: async (sock, message, args, ctx) => {
@@ -189,6 +194,7 @@ module.exports = [
     // ── Word Filter ──────────────────────────────────────────────────────────
     {
         commands: ['addfilter', 'filterword', 'blockword'],
+    category: 'admin',
         description: 'Auto-delete messages containing a word. Usage: .addfilter <word>',
         permission: 'admin',
         group: true,
@@ -206,6 +212,7 @@ module.exports = [
  
     {
         commands: ['removefilter', 'unfilter', 'unblockword'],
+    category: 'admin',
         description: 'Remove a word filter',
         permission: 'admin',
         group: true,
@@ -223,6 +230,7 @@ module.exports = [
  
     {
         commands: ['listfilters', 'filterlist', 'wordfilters'],
+    category: 'group',
         description: 'List active word filters in this group',
         permission: 'public',
         group: true,
@@ -236,6 +244,7 @@ module.exports = [
  
     {
         commands: ['clearfilters', 'resetfilters'],
+    category: 'group',
         description: 'Remove all word filters from this group',
         permission: 'admin',
         group: true,
@@ -251,6 +260,7 @@ module.exports = [
     // ── Slowmode ─────────────────────────────────────────────────────────────
     {
         commands: ['slowmode', 'slow'],
+    category: 'admin',
         description: 'Set a cooldown between messages per user. Usage: .slowmode 30 (seconds) or .slowmode off',
         permission: 'admin',
         group: true,
@@ -274,6 +284,7 @@ module.exports = [
     // ── Disappearing Messages ─────────────────────────────────────────────────
     {
         commands: ['disappear', 'disappearing', 'ephemeral'],
+    category: 'group',
         description: 'Toggle disappearing messages in a chat',
         permission: 'admin',
         run: async (sock, message, args, ctx) => {
@@ -297,6 +308,7 @@ module.exports = [
     // ── Mention Admins ────────────────────────────────────────────────────────
     {
         commands: ['admins', 'tagadmins', 'mentionadmins', '@admins'],
+    category: 'group',
         description: 'Mention all group admins',
         permission: 'public',
         group: true,
@@ -307,7 +319,7 @@ module.exports = [
             const adminList = (meta.participants || []).filter(p => p.admin);
             if (!adminList.length) return reply('⚠️ No admins found in this group.');
             const reason = args.join(' ').trim() || 'Attention needed';
-            const mentions = adminList.map(p => p.id);
+            const mentions = adminList.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean);
             const text = `📢 *Admins Mentioned*\n\n📝 *Reason:* ${reason}\n\n${adminList.map(p => `• @${p.id.split('@')[0]}`).join('\n')}`;
             await safeSend({ text, mentions }, { quoted: message });
         }
@@ -316,6 +328,7 @@ module.exports = [
     // ── Group Link ────────────────────────────────────────────────────────────
     {
         commands: ['grouplink', 'invitelink', 'groupinvite'],
+    category: 'group',
         description: 'Get the group invite link (bot must be admin)',
         permission: 'admin',
         group: true,
@@ -333,6 +346,7 @@ module.exports = [
     // ── Revoke Group Link ─────────────────────────────────────────────────────
     {
         commands: ['revokelink', 'resetlink', 'newlink'],
+    category: 'group',
         description: 'Revoke and reset the group invite link',
         permission: 'admin',
         group: true,
@@ -350,6 +364,7 @@ module.exports = [
     // ── Bulk Promote ──────────────────────────────────────────────────────────
     {
         commands: ['promote', 'makeadmin'],
+    category: 'group',
         description: 'Promote mentioned users to admin (reply or mention)',
         permission: 'admin',
         group: true,
@@ -373,6 +388,7 @@ module.exports = [
     // ── Bulk Demote ───────────────────────────────────────────────────────────
     {
         commands: ['demote', 'removeadmin'],
+    category: 'group',
         description: 'Demote mentioned admins to regular member',
         permission: 'admin',
         group: true,
@@ -396,6 +412,7 @@ module.exports = [
     // ── Group Stats ───────────────────────────────────────────────────────────
     {
         commands: ['groupstats', 'gstats', 'groupinfo2'],
+    category: 'group',
         description: 'Detailed group statistics',
         permission: 'public',
         group: true,
@@ -423,6 +440,7 @@ module.exports = [
     // ── Ping / Latency ────────────────────────────────────────────────────────
     {
         commands: ['ping2', 'latency', 'ms'],
+    category: 'bot',
         description: 'Check bot response latency',
         permission: 'public',
         run: async (sock, message, args, ctx) => {
@@ -437,6 +455,7 @@ module.exports = [
     // ── React to message ──────────────────────────────────────────────────────
     {
         commands: ['react', 'reaction'],
+    category: 'general',
         description: 'React to a replied message with an emoji. Usage: .react 😍',
         permission: 'public',
         run: async (sock, message, args, ctx) => {
@@ -465,6 +484,7 @@ module.exports = [
     // ── Steal Sticker (convert media to sticker) ──────────────────────────────
     {
         commands: ['steal', 'stealsticker', 'takesticker'],
+    category: 'media',
         description: 'Convert any replied image/video/sticker to a bot-branded sticker',
         permission: 'public',
         run: async (sock, message, args, ctx) => {
@@ -512,6 +532,7 @@ module.exports = [
     // ── Broadcast to all group members' DMs (owner only) ──────────────────────
     {
         commands: ['broadcast2', 'bcastmembers'],
+    category: 'group',
         description: 'DM a message to all members of the current group (owner only)',
         permission: 'owner',
         group: true,
@@ -538,6 +559,7 @@ module.exports = [
     // ── Anonymous Message ─────────────────────────────────────────────────────
     {
         commands: ['anon', 'anonymous', 'anonmsg'],
+    category: 'group',
         description: 'Send an anonymous message to this group. Only bot knows who sent it.',
         permission: 'public',
         group: true,
@@ -554,6 +576,7 @@ module.exports = [
     // ── Chat Statistics ───────────────────────────────────────────────────────
     {
         commands: ['chatstats', 'toptalkers', 'whotalks'],
+    category: 'group',
         description: 'Show who talks most in this group',
         permission: 'public',
         group: true,

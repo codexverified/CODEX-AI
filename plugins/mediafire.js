@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['mediafire', 'mf', 'mfdl'],
+    category: 'downloader',
     description: 'Get MediaFire direct download link',
     permission:  'public',
     group:       true,
@@ -28,7 +29,7 @@ module.exports = {
                               data.match(/class="dl-btn-label[^"]*">([^<]+)<\/span>/);
             const fileName = nameMatch ? nameMatch[1].trim() : 'file';
             await sock.sendMessage(sender, {
-                text: `📁 *MediaFire Download*\n\n📄 *File:* ${fileName}\n🔗 *Link:* ${dlUrl}\n\n_Powered by Silva MD_`,
+                text: `📁 *MediaFire Download*\n\n📄 *File:* ${fileName}\n🔗 *Link:* ${dlUrl}\n\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

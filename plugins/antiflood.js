@@ -35,12 +35,13 @@ function trackMessage(jid, participant) {
     return record.count > gs.limit;
 }
  
-// Expose tracker for silva.js messages.upsert hook
+// Expose tracker for codex.js messages.upsert hook
 global.antifloodTrack = trackMessage;
 global.antifloodSettings = settings;
  
 module.exports = {
     commands:    ['antiflood', 'floodoff', 'floodon', 'floodlimit'],
+    category: 'admin',
     description: 'Auto-kick members who spam messages too fast',
     usage:       '.antiflood on | .antiflood off | .antiflood limit 5 10',
     permission:  'admin',

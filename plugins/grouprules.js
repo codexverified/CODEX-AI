@@ -13,6 +13,7 @@ function saveRules(data) {
  
 module.exports = {
     commands:    ['rules', 'setrules', 'delrules'],
+    category: 'group',
     description: 'Set/show/delete group rules',
     permission:  'admin',
     group:       true,

@@ -23,6 +23,7 @@ function barOf(value, max, len = 10) {
  
 module.exports = {
     commands:    ['githubstalk', 'ghstalk', 'github', 'gh'],
+    category: 'group',
     description: 'Stalk a GitHub profile — repos, stars, bio, activity and more',
     usage:       '.ghstalk <username>',
     permission:  'public',
@@ -38,7 +39,7 @@ module.exports = {
         await sock.sendPresenceUpdate('composing', jid);
  
         const headers = {
-            'User-Agent': 'SilvaMD-Bot/2.0',
+            'User-Agent': 'CODEX AI/2.0',
             'Accept':     'application/vnd.github+json',
         };
  
@@ -136,7 +137,7 @@ module.exports = {
         }
  
         lines.push(`• *Profile:* https://github.com/${user.login}`);
-        lines.push(`_Powered by ${getStr('botName') || 'Silva MD'} · GitHub API_`);
+        lines.push(`_Powered by ${getStr('botName') || 'CODEX AI'} · GitHub API_`);
  
         try {
             await sock.sendMessage(jid, {

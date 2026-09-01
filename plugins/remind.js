@@ -13,6 +13,7 @@ function parseDelay(str) {
  
 module.exports = {
     commands:    ['remind', 'remindme', 'reminder'],
+    category: 'group',
     description: 'Set a reminder — bot will ping you after the given time',
     usage:       '.remind 10m Buy groceries',
     permission:  'public',

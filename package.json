@@ -17,7 +17,7 @@
     "license": "MIT",
     "dependencies": {
         "@adiwajshing/keyed-db": "^0.2.4",
-        "@codexverified/baileys": "2.10.12",
+        "@codexverified/baileys": "2.11.12",
         "@distube/ytdl-core": "^4.16.12",
         "@faker-js/faker": "^10.3.0",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -69,6 +69,7 @@
         "sharp": "^0.35.3",
         "socket.io": "^4.7.5",
         "staticmaps": "^1.13.1",
+        "temp-mail-io": "^0.0.11",
         "terser": "^5.46.1",
         "tesseract.js": "^7.0.0",
         "util": "^0.12.5",

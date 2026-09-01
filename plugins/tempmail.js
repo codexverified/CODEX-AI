@@ -4,6 +4,7 @@ let TempMail;
  
  module.exports = {
     commands:    ['tempmail', 'tmpmail', 'fakemail', 'disposable'],
+    category: 'group',
     description: 'Generate a temporary disposable email address and check its inbox',
     usage:       '.tempmail | .tempmail inbox <address>',
     permission:  'public',

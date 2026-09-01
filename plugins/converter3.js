@@ -17,6 +17,7 @@ async function ytSearch(q, limit = 1) {
  
 module.exports = {
     commands: ['toimg', 'toptt', 'tovideo', 'sendaudio', 'sendvideo', 'snack', 'video'],
+    category: 'media',
     description: 'Additional converters and downloaders',
     permission:  'public',
     group:       true,

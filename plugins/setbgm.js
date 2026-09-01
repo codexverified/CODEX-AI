@@ -65,6 +65,7 @@ function buildMsgObj(originalMessage, quotedContent) {
 // ─── Plugin export ────────────────────────────────────────────────────────────
 module.exports = {
     commands:    ['setbgm', 'delbgm', 'listbgm', 'clearbgm', 'bgmlist', 'removebgm'],
+    category: 'owner',
     description: 'Word-triggered audio autoresponder. Set audios that play when trigger words are detected.',
     permission:  'owner',
     group:       true,

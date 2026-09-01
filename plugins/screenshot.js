@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands:    ['screenshot', 'ss', 'webshot'],
+    category: 'group',
     description: 'Take a screenshot of any website',
     permission:  'public',
     group:       true,
@@ -22,7 +23,7 @@ module.exports = {
             const { data } = await axios.get(ssUrl, { responseType: 'arraybuffer', timeout: 30000 });
             await sock.sendMessage(sender, {
                 image:   Buffer.from(data),
-                caption: `📸 *Screenshot:* ${url}\n_Powered by Silva MD_`,
+                caption: `📸 *Screenshot:* ${url}\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {

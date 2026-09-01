@@ -3,6 +3,7 @@ const axios = require('axios');
  
 module.exports = {
     commands: ['quotly', 'quote2img', 'q2s', 'quotesticker'],
+    category: 'media',
     description: 'Convert a quoted text message into a beautiful styled quote image/sticker',
     usage: '.quotly (reply to a message)',
     permission: 'public',

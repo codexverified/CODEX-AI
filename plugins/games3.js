@@ -20,6 +20,7 @@ module.exports = {
         'tttai', 'tttboard', 'tttend', 'tttjoin',
         'w', 'wcg', 'wcgai', 'wcgbegin', 'wcgend', 'wcgjoin', 'wcgscores'
     ],
+    category: 'games',
     description: 'Extended games — dice, word chain, tic-tac-toe multiplayer',
     permission:  'public',
     group:       true,
