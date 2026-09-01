@@ -295,7 +295,7 @@ class CODEXAI {
     if (failed > 0) console.log(chalk.red(`${failed} commands failed to load`));
     let pluginCount = 0;
     try {
-      pluginCount = Object.values(this.commandHandler.getAllCommands()).flat().filter(cmd => cmd.__plugin).length;
+      pluginCount = [...this.bot.commands.entries()].filter(([, cmd]) => cmd.__plugin).length;
     } catch {}
     console.log(chalk.green(`${loaded} commands loaded (${loaded - pluginCount} built-in, ${pluginCount} plugin — includes any installed via .install)`));
     this.successCmds = loaded;
@@ -709,10 +709,8 @@ ${newText || "(could not read new text)"}
     let totalCmds = this.successCmds;
     let pluginCmds = 0;
     try {
-      const categories = this.commandHandler.getAllCommands();
-      const allCmds = Object.values(categories).flat();
-      totalCmds = allCmds.length;
-      pluginCmds = allCmds.filter(cmd => cmd.__plugin).length;
+      totalCmds = this.commandHandler.getCommandCount();
+      pluginCmds = [...this.bot.commands.entries()].filter(([, cmd]) => cmd.__plugin).length;
     } catch {}
     const nativeCmds = totalCmds - pluginCmds;
 
