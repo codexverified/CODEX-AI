@@ -55,13 +55,23 @@ const QUESTIONS = [
 
 module.exports = {
     name: 'eye',
-    aliases: ['wouldyourather', 'wyr', 'rather'],
+    aliases: [],
     category: 'games',
-    desc: 'Would You Rather - Choose between 3 options',
+    description: 'Would You Rather - Choose between 3 options',
 
-    execute: async (context) => {
-        const { sock, msg, from, reply } = context;
-        
+    // Was: `execute: async (context) => { const { sock, msg, from, reply } = context; ... }`
+    // This bot always calls commands as execute(bot, m, args, cmdName) — four
+    // separate positional arguments, never a single merged object. With only
+    // one parameter declared, `context` silently became just the first
+    // argument (the bot context, which has no .msg/.from/.reply of its own),
+    // so `reply` destructured to undefined and calling it threw exactly
+    // "reply is not a function" on every attempt to use this command.
+    execute: async (bot, m) => {
+        const sock = bot.sock;
+        const msg = m;
+        const from = m?.chat;
+        const reply = (text, opts) => m.reply(text, opts);
+
         try {
             if (!msg || !from) {
                 return reply('Invalid context');
