@@ -293,11 +293,7 @@ class CODEXAI {
     console.log(chalk.blue('Loading environment variables..'));
     const { loaded, failed } = await this.reloader.loadCommands();
     if (failed > 0) console.log(chalk.red(`${failed} commands failed to load`));
-    let pluginCount = 0;
-    try {
-      pluginCount = [...this.bot.commands.entries()].filter(([, cmd]) => cmd.__plugin).length;
-    } catch {}
-    console.log(chalk.green(`${loaded} commands loaded (${loaded - pluginCount} built-in, ${pluginCount} plugin — includes any installed via .install)`));
+    console.log(chalk.green(`(${loaded}) cmds loaded`));
     this.successCmds = loaded;
     console.log('');
     await startConnection(this);
