@@ -49,7 +49,7 @@ const {
 // itself exiting. These two handlers are what let a 2000+ command bot with
 // occasional bugs in individual plugins stay up for months instead of
 // crashing out within days on the first unguarded edge case.
-process.on("uncaughtException", (err, origin) => {
+heprocess.on("uncaughtException", (err, origin) => {
   console.error(chalk.red(`[uncaughtException] ${origin || ""}`));
   console.error(err?.stack || err);
   // Deliberately NOT calling process.exit() here — logging and continuing
