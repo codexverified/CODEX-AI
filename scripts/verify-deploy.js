@@ -16,6 +16,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const chalk = require('chalk');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -43,35 +44,30 @@ const MIN_COMMANDS = 250;
 const MIN_PLUGINS = 150;
 
 console.log('');
-console.log('========================================');
-console.log('  CODEX AI — deployment file check');
-console.log('========================================');
-console.log(`  commands/  : ${commandsCount === -1 ? 'FOLDER MISSING' : commandsCount + ' .js files'}`);
-console.log(`  plugins/   : ${pluginsCount === -1 ? 'FOLDER MISSING' : pluginsCount + ' .js files'}`);
-console.log('========================================');
+console.log(chalk.blue('CODEX AI — deployment file check'));
+console.log(chalk.blue(`commands/ : ${commandsCount === -1 ? 'FOLDER MISSING' : commandsCount + ' .js files'}`));
+console.log(chalk.blue(`plugins/  : ${pluginsCount === -1 ? 'FOLDER MISSING' : pluginsCount + ' .js files'}`));
 
 let problem = false;
 
 if (commandsCount === -1 || commandsCount < MIN_COMMANDS) {
     problem = true;
-    console.log('  ⚠️  commands/ looks incomplete or missing.');
+    console.log(chalk.yellow('commands/ looks incomplete or missing.'));
 }
 if (pluginsCount === -1 || pluginsCount < MIN_PLUGINS) {
     problem = true;
-    console.log('  ⚠️  plugins/ looks incomplete or missing.');
-    console.log('      This bot ships with plugin files built in — if you');
-    console.log('      expected them, this deployment did not bring the');
-    console.log('      plugins/ folder\'s contents over from your repo.');
-    console.log('      Check on GitHub (or wherever you pushed) that');
-    console.log('      plugins/*.js files are actually committed there,');
-    console.log('      and that your deploy step does a full clone rather');
-    console.log('      than a partial/sparse one.');
+    console.log(chalk.yellow('plugins/ looks incomplete or missing.'));
+    console.log(chalk.yellow('This bot ships with plugin files built in — if you expected'));
+    console.log(chalk.yellow('them, this deployment did not bring the plugins/ folder\'s'));
+    console.log(chalk.yellow('contents over from your repo. Check on GitHub (or wherever you'));
+    console.log(chalk.yellow('pushed) that plugins/*.js files are actually committed there,'));
+    console.log(chalk.yellow('and that your deploy step does a full clone rather than a'));
+    console.log(chalk.yellow('partial/sparse one.'));
 }
 
 if (!problem) {
-    console.log('  ✅ Both folders look complete.');
+    console.log(chalk.green('Both folders look complete.'));
 }
-console.log('========================================');
 console.log('');
 
 // Deliberately NOT failing the install over this (exit code stays 0) —
