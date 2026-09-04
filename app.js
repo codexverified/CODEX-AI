@@ -49,16 +49,73 @@ const {
 // itself exiting. These two handlers are what let a 2000+ command bot with
 // occasional bugs in individual plugins stay up for months instead of
 // crashing out within days on the first unguarded edge case.
-heprocess.on("uncaughtException", (err, origin) => {
-  console.error(chalk.red(`[uncaughtException] ${origin || ""}`));
-  console.error(err?.stack || err);
-  // Deliberately NOT calling process.exit() here — logging and continuing
-  // is what keeps the WhatsApp socket (and its 100+ day uptime) alive.
+// A rolling window of recent fatal errors. If too many land in a short
+// span, the process is in a corrupted/looping state (not a one-off bad
+// plugin) and swallowing forever just produces the "online in Pterodactyl,
+// dead to WhatsApp" zombie this whole file was patched to avoid. In that
+// case exiting(1) and letting Pterodactyl's restart policy bring up a
+// clean process is safer than staying alive.
+const _fatalErrorTimestamps = [];
+const FATAL_ERROR_WINDOW_MS = 60 * 1000;
+const FATAL_ERROR_THRESHOLD = 15; // >15 uncaught errors within 60s = corrupted state
+
+function _logFatal(label, err) {
+  const stamp = nigerianDateTime();
+  const mem = process.memoryUsage();
+  console.error(chalk.red(`[${label}] ${stamp}`));
+  console.error(chalk.red(err?.stack || err));
+  console.error(
+    chalk.gray(
+      `  rss=${(mem.rss / 1048576).toFixed(1)}MB heapUsed=${(mem.heapUsed / 1048576).toFixed(1)}MB`,
+    ),
+  );
+}
+
+function _shouldExitOnFatal() {
+  const now = Date.now();
+  _fatalErrorTimestamps.push(now);
+  while (
+    _fatalErrorTimestamps.length &&
+    now - _fatalErrorTimestamps[0] > FATAL_ERROR_WINDOW_MS
+  ) {
+    _fatalErrorTimestamps.shift();
+  }
+  return _fatalErrorTimestamps.length > FATAL_ERROR_THRESHOLD;
+}
+
+// ── Session hardening: survive bad plugins instead of dying to them ────────
+// With ~2000 commands loaded, a single uncaught throw or unhandled promise
+// rejection anywhere — a bad regex, a null property access, a third-party
+// API timeout nobody awaited correctly — otherwise kills the ENTIRE Node
+// process. Baileys' own reconnect logic (in lib/connection.js) only helps
+// with *socket*-level disconnects; it can't save you from the process
+// itself exiting. These handlers log and continue for isolated errors, but
+// escalate to a clean process.exit(1) if errors are firing in a tight loop,
+// which is a sign the process itself is corrupted rather than one plugin
+// having a bad day. Exiting lets Pterodactyl's restart policy recover it
+// instead of leaving a process that's "online" but unusable.
+process.on("uncaughtException", (err, origin) => {
+  _logFatal(`uncaughtException] ${origin || ""}`, err);
+  if (_shouldExitOnFatal()) {
+    console.error(
+      chalk.red(
+        `[fatal] ${FATAL_ERROR_THRESHOLD}+ uncaught exceptions within ${FATAL_ERROR_WINDOW_MS / 1000}s — process state looks corrupted, exiting(1) for a clean restart.`,
+      ),
+    );
+    process.exit(1);
+  }
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error(chalk.red("[unhandledRejection]"));
-  console.error(reason?.stack || reason);
+  _logFatal("unhandledRejection", reason);
+  if (_shouldExitOnFatal()) {
+    console.error(
+      chalk.red(
+        `[fatal] ${FATAL_ERROR_THRESHOLD}+ unhandled rejections within ${FATAL_ERROR_WINDOW_MS / 1000}s — process state looks corrupted, exiting(1) for a clean restart.`,
+      ),
+    );
+    process.exit(1);
+  }
 });
 
 // ── Ensure dirs & DBs ─────────────────────────────────────────────────────────
@@ -204,6 +261,45 @@ const _MEDIA_CATEGORY = {
   stickerMessage: "sticker",
 };
 
+// ── Bounded media-download concurrency ──────────────────────────────────────
+// _cacheMessage() used to fire an unbounded, unqueued
+// downloadContentFromMessage() promise for every single recoverable media
+// message as it arrived. In an active media-heavy group that's an unbounded
+// number of concurrent downloads/decrypt streams competing for CPU, memory,
+// and (mainly) the single Node event loop — a burst of images/videos could
+// pile up dozens of simultaneous downloads, adding to the same event-loop
+// pressure that lets the websocket go stale. This caps how many run at once
+// and queues the rest (dropping oldest-queued if the queue itself grows
+// unreasonably, so a flood can't turn into unbounded memory growth either).
+const MEDIA_DOWNLOAD_MAX_CONCURRENCY = 4;
+const MEDIA_DOWNLOAD_MAX_QUEUE = 200;
+let _mediaDownloadActive = 0;
+const _mediaDownloadQueue = [];
+
+function _pumpMediaDownloadQueue() {
+  while (_mediaDownloadActive < MEDIA_DOWNLOAD_MAX_CONCURRENCY && _mediaDownloadQueue.length) {
+    const job = _mediaDownloadQueue.shift();
+    _mediaDownloadActive++;
+    job()
+      .catch(() => {})
+      .finally(() => {
+        _mediaDownloadActive--;
+        _pumpMediaDownloadQueue();
+      });
+  }
+}
+
+function _queueMediaDownload(job) {
+  if (_mediaDownloadQueue.length >= MEDIA_DOWNLOAD_MAX_QUEUE) {
+    // Drop the oldest queued job rather than let this grow unbounded under
+    // sustained media floods — losing one old recovery-download is far
+    // cheaper than accumulating unbounded pending work/memory.
+    _mediaDownloadQueue.shift();
+  }
+  _mediaDownloadQueue.push(job);
+  _pumpMediaDownloadQueue();
+}
+
 // Unwrap disappearing-message / view-once wrappers so the real media type
 // (imageMessage, videoMessage, etc.) is detected instead of the wrapper's
 // own type ("ephemeralMessage" / "viewOnceMessage...").  Without this,
@@ -342,21 +438,20 @@ class CODEXAI {
         // already gone, so re-downloading at that point isn't reliable.
         const cat = _MEDIA_CATEGORY[type];
         if (cat) {
-          downloadContentFromMessage(inner, cat)
-            .then(async (stream) => {
-              const chunks = [];
-              for await (const chunk of stream) chunks.push(chunk);
-              const buf = Buffer.concat(chunks);
-              if (buf.length) {
-                mediaStore.save(msg.key, buf, {
-                  type,
-                  mimetype: inner.mimetype,
-                  fileName: inner.fileName,
-                  ptt: !!inner.ptt,
-                });
-              }
-            })
-            .catch(() => {});
+          _queueMediaDownload(async () => {
+            const stream = await downloadContentFromMessage(inner, cat);
+            const chunks = [];
+            for await (const chunk of stream) chunks.push(chunk);
+            const buf = Buffer.concat(chunks);
+            if (buf.length) {
+              mediaStore.save(msg.key, buf, {
+                type,
+                mimetype: inner.mimetype,
+                fileName: inner.fileName,
+                ptt: !!inner.ptt,
+              });
+            }
+          });
         }
       }
 
