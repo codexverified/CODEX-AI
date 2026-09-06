@@ -177,32 +177,23 @@ async function getGroupParticipantJids(sock, groupJid) {
 
 /** Posts `content` to groupJid's status feed. Tries the high-level shortcut
  *  first, falls back to a manual groupStatusMessageV2 relay if unsupported.
+ *  `content` is passed through untouched in both paths — `backgroundColor`
+ *  and `font` are genuine Baileys text-message fields (it converts the hex
+ *  itself internally), so they must stay ON the message content object,
+ *  not get pulled out into a separate options bag. Pulling them out (or
+ *  force-adding `richPreview` to every text post, color or not) is exactly
+ *  what silently ate the color before: richPreview overrides how the
+ *  status renders, so it must only be set by the caller for real links.
  *  Returns the sent message (so callers can track its id for .gcstatus clear). */
 async function postGroupStatus(sock, groupJid, content) {
     try {
-        const { backgroundColor, previewTitle, previewDescription, previewImage, ...rest } = content;
-        const isTextPost = typeof rest.text === 'string' && rest.text.length > 0;
-        const hasMedia   = !!(rest.image || rest.video || rest.audio || rest.document);
-        const payload = { ...rest, groupStatus: true };
-        if (isTextPost && !hasMedia) {
-            payload.richPreview = true;
-            if (previewTitle)       payload.previewTitle       = previewTitle;
-            if (previewDescription) payload.previewDescription = previewDescription;
-            if (previewImage)       payload.previewImage       = previewImage;
-        }
-        if (backgroundColor && payload.text) payload.backgroundColor = backgroundColor;
-        return await sock.sendMessage(groupJid, payload);
+        return await sock.sendMessage(groupJid, { ...content, groupStatus: true });
     } catch (e) {
         console.error('[gcstatus] groupStatus:true path failed, falling back to relay:', e.message);
     }
 
-    const { backgroundColor } = content;
-    const payload = { ...content };
-    delete payload.backgroundColor;
-
-    const inner = await generateWAMessageContent(payload, {
+    const inner = await generateWAMessageContent(content, {
         upload: sock.waUploadToServer,
-        backgroundColor: backgroundColor || TEXT_BG_COLOR,
     });
 
     const secret = crypto.randomBytes(32);
@@ -451,7 +442,7 @@ No admin role needed.`
                 const buf  = await downloadMedia(imgMsg, type);
                 const result = await deliver(sock, targetInfo, async () => ({ image: buf, caption: parsedText || '' }));
                 return m.reply(result.broadcast
-                    ? `✅ Broadcast done.\nSuccess: ${result.success}\nFailed: ${result.failed}`
+                    ? `✅ Broadcast done.\nSuccess: ${result.success}\nFailed: ${result.failed: ${result.failed}`
                     : `✅ Posted to group status!\n📸 Type: Image${parsedText ? `\n💬 Caption: ${parsedText}` : ''}`);
             } catch (err) {
                 return m.reply(`❌ Failed to post image: ${err.message}`);
@@ -529,7 +520,7 @@ No admin role needed.`
                         ...(preview.imageBuffer ? { previewImage: preview.imageBuffer }        : {}),
                     };
                 }
-                return { text: messageText, backgroundColor: bgColor };
+                return { text: messageText, backgroundColor: bgColor, font: 0 };
             });
             return m.reply(result.broadcast
                 ? `✅ Broadcast done.\nSuccess: ${result.success}\nFailed: ${result.failed}`
@@ -539,4 +530,4 @@ No admin role needed.`
         }
     },
 };
-                
+    
