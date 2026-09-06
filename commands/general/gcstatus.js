@@ -356,11 +356,11 @@ async function deliver(sock, targetInfo, buildContent) {
     return { broadcast: true, success, failed };
 }
 
-// ── command ──────────────────────────────────────────────────────────────
+// ── command ───���──────────────────────────────────────────────────────────
 
 module.exports = {
     name: 'gcstatus',
-    aliases: ['groupstatus', 'gstatus', 'poststatus', 'gclinkstatus', 'glinkstatus', 'linkstatus'],
+    aliases: ['gcstatsus', 'groupstatus', 'gstatus', 'poststatus', 'gclinkstatus', 'glinkstatus', 'linkstatus'],
     category: 'general',
     reactions: { start: '👥' },
     description: "Post text, link, image, video, audio or document to a group's status feed. Works from DM too — via a group JID, \"all\", or an invite link. Supports colors and clearing tracked statuses.",
