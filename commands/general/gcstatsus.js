@@ -239,7 +239,7 @@ async function deleteTrackedStatuses(sock, groupJid) {
 
 module.exports = {
     name: 'gcstatus',
-    aliases: ['groupstatus', 'gstatus', 'poststatus'],
+    aliases: ['gcstatsus', 'groupstatus', 'gstatus', 'poststatus'],
     category: 'general',
     reactions: { start: '👥' },
     description: "Post text, link, image, video, audio or document to the group's status feed. Supports broadcasting to all groups and clearing tracked statuses.",
