@@ -4,6 +4,7 @@ module.exports = {
     name: 'listplugins',
     aliases: ['plugins', 'pluginlist'],
     category: 'general',
+    reactions: { start: '📝' },
     description: 'Show all installed plugins',
     usage: '.listplugins',
 
@@ -18,7 +19,8 @@ module.exports = {
                 const aliases = cmd.aliases || cmd.alias || [];
                 const aliasList = (Array.isArray(aliases) ? aliases : [aliases]).filter(Boolean);
                 const aliasStr = aliasList.length ? ` (${aliasList.map(a => bot.prefix + a).join(', ')})` : '';
-                return `${i + 1}. ${bot.prefix}${cmd.name}${aliasStr}`;
+                const sourceStr = cmd.source ? `\n   ${cmd.source}` : '';
+                return `${i + 1}. ${bot.prefix}${cmd.name}${aliasStr}${sourceStr}`;
             })
             .join('\n');
 

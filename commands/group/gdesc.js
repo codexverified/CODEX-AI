@@ -2,6 +2,7 @@ module.exports = {
     name: 'gdesc',
     aliases: ['setdescription'],
     category: 'group',
+    reactions: { start: '⚙️' },
     description: 'Set the group description.',
     usage: '.gdesc <text>',
     groupOnly: true,

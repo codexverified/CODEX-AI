@@ -1,10 +1,12 @@
 const { getTarget } = require('../../lib/getTarget');
 const { loadDB, saveDB, getUser, fmt, CURRENCY } = require('../../lib/economyEngine');
+const { requirePin } = require('../../lib/economyPin');
 
 module.exports = {
     name: 'pay',
     aliases: ['transfer', 'send'],
     category: 'economy',
+    reactions: { start: '💰' },
     description: 'Send coins to another user. Usage: .pay @user <amount>',
 
     async execute(bot, m, args) {
@@ -18,6 +20,9 @@ module.exports = {
         if (targetJid === m.sender.replace(/:[0-9]+@/, '@')) return await m.reply(`❌ You can't pay yourself!`);
         if (!amount || amount < 1) return await m.reply(`❌ Enter a valid amount.`);
         if (amount > user.wallet) return await m.reply(`❌ Insufficient funds. You have *${fmt(user.wallet)}* ${CURRENCY}.`);
+
+        const pinCheck = requirePin(user, args[2] || args[1]);
+        if (!pinCheck.ok) return await m.reply(pinCheck.message);
 
         const target = getUser(db, targetJid);
         user.wallet   -= amount;

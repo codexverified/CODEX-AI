@@ -22,6 +22,7 @@ module.exports = {
     name: 'travel',
     aliases: ['trip', 'goto'],
     category: 'economy',
+    reactions: { start: '⚙️' },
     description: 'Travel to a city and earn coins',
 
     async execute(bot, m, args) {

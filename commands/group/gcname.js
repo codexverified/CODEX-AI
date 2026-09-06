@@ -2,6 +2,7 @@ module.exports = {
     name: 'gcname',
     aliases: ['setgcname'],
     category: 'group',
+    reactions: { start: '👥' },
     description: 'Set the group name.',
     usage: '.gcname <new name>',
     groupOnly: true,

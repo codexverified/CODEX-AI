@@ -3,9 +3,10 @@ const { imageToWebp, videoToWebp, addExif } = require('../../library/exif');
 
 module.exports = {
     name: 'sticker',
-    aliases: ['s', 'take', 'steal'],
+    aliases: ['s'],
     category: 'general',
-    description: 'Convert image/video/GIF to sticker or steal a sticker pack info',
+    reactions: { start: '🖼️' },
+    description: 'Convert image/video/GIF to sticker',
 
     async execute(bot, m, args) {
         const packname = bot.config.STICKER_PACKNAME || 'CODEX AI';

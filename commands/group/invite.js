@@ -1,9 +1,10 @@
-const { prepareWAMessageMedia, generateMessageIDV2 } = require('@crysnovax/baileys');
+const { prepareWAMessageMedia, generateMessageIDV2 } = require('../../lib/baileys');
 
 module.exports = {
     name: 'invite',
     alias: ['grouplink', 'glink'],
     category: 'Group',
+    reactions: { start: '👥' },
     groupOnly: true,
     adminOnly: true,
 

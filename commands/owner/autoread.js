@@ -4,6 +4,7 @@ module.exports = {
     name: 'autoread',
     aliases: ['ar'],
     category: 'owner',
+    reactions: { start: '⚙️' },
     ownerOnly: true,
     description: 'Toggle auto-read (mark every incoming message as seen)',
 

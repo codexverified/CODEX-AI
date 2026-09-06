@@ -41,6 +41,7 @@ module.exports = {
     name: 'events',
     aliases: ['event'],
     category: 'admin',
+    reactions: { start: '⚙️' },
     description:
         'Group events configuration — welcome/goodbye, promote/demote announcements, ' +
         'and anti-promote/anti-demote/anti-invaid-promotion/anti-invaid-demotion.',
@@ -50,7 +51,7 @@ module.exports = {
     async execute(bot, m, args) {
         const jid = m.chat;
         const db  = readDB();
-        const cfg = db[jid] || {};
+        const cfg = db[jid] || { welcomeEnabled: false, goodbyeEnabled: false };
         const P   = bot.prefix;
 
         const save = (fields) => {

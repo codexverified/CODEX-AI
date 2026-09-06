@@ -1,166 +1,104 @@
 const { getContentType, downloadContentFromMessage } = require('../../lib/baileys');
-
-// ── QUOTED MODE ───────────────────────────────────────────────────────────────
-// Set via: .setvar QUOTED_MODE=1  or  .setvar QUOTED_MODE=2  or  .setvar QUOTED_MODE=3
-//
-// Mode 1 — DIRECT
-//   You reply to message B → bot returns message B itself (the exact message you replied to)
-//
-// Mode 2 — DEEP (default)
-//   You reply to message B → bot returns the ORIGINAL message that B was replying to (A)
-//   If B was not a reply, falls back to returning B itself
-//
-// Mode 3 — BOTH
-//   You reply to message B → bot returns BOTH:
-//   first the original message A (what B was replying to), then B itself
-//   If B was not a reply, just returns B
+const store = require('../../lib/messageStore');
 
 module.exports = {
     name: 'quoted',
     aliases: ['q', 'getquoted', 'quote'],
     category: 'general',
-    description: 'Forward quoted messages. Mode: setvar QUOTED_MODE=1/2/3',
+    reactions: { start: '⚙️' },
+    description: 'Extract a replied text or media message',
 
-    async execute(bot, m, args) {
-        const mode = parseInt(bot.config.QUOTED_MODE) || 2;
+    async execute(sock, m, { args, reply }) {
+        const ctx = m.contextInfo || m.msg?.contextInfo || m.message?.extendedTextMessage?.contextInfo || {};
+        const quoted = m.quoted?.message || m.quoted?.msg || ctx.quotedMessage;
+        if (!quoted) return reply('Reply to a message first');
 
-        const ctx       = m.msg?.contextInfo || m.message?.extendedTextMessage?.contextInfo;
-        const quotedMsg = ctx?.quotedMessage; // message B (the one you replied to)
+        // If the command itself is a tagged reply, recover the message that
+        // reply was quoting. The quoted message could itself be plain text
+        // OR media (image/video/audio/document/sticker) that was sent as a
+        // reply, and it may be wrapped in a disappearing-message/view-once
+        // envelope — look through all of those, not just extendedTextMessage.
+        const repliedMessage = m.quoted?.key ? store.getMessage(m.quoted.key) : null;
+        let taggedReply = getContextInfo(repliedMessage?.message || repliedMessage) ||
+            getContextInfo(quoted) || getContextInfo(m.quoted?.msg) || getContextInfo(m.quoted?.message);
 
-        if (!quotedMsg) {
-            return await m.reply(
-`QUOTED MESSAGE VIEWER
-
-Reply to any message with ${bot.prefix}quoted to retrieve it.
-
-Current mode: ${mode}
-
-Modes (set with ${bot.prefix}setvar QUOTED_MODE=<1/2/3>):
-  1 - DIRECT  : Returns the exact message you replied to
-  2 - DEEP    : Returns the original inside that reply (nested)
-  3 - BOTH    : Returns both the nested original AND the reply itself`
-            );
+        // Fall back to the cached full message when WhatsApp trims nested contextInfo.
+        if (!taggedReply && ctx.stanzaId) {
+            const stored = store.getMessage({ remoteJid: m.chat, id: ctx.stanzaId });
+            if (stored?.message) taggedReply = getContextInfo(stored.message);
         }
-
-        try {
-            const quotedType  = getContentType(quotedMsg);
-            const quotedInner = quotedMsg[quotedType];
-            const deepCtx     = quotedInner?.contextInfo;
-
-            const senderB     = ctx?.participant || ctx?.remoteJid || 'Unknown';
-
-            if (mode === 1) {
-                // ── Mode 1: just return message B ─────────────────────────────
-                return await _forward(bot, m, quotedMsg, senderB);
-            }
-
-            if (mode === 2) {
-                // ── Mode 2: return A (what B was replying to) ─────────────────
-                if (deepCtx?.quotedMessage) {
-                    const senderA = deepCtx.participant || deepCtx.remoteJid || senderB;
-                    return await _forward(bot, m, deepCtx.quotedMessage, senderA);
-                }
-                // B was not a reply — fall back to B itself
-                return await _forward(bot, m, quotedMsg, senderB);
-            }
-
-            if (mode === 3) {
-                // ── Mode 3: return A first, then B ────────────────────────────
-                if (deepCtx?.quotedMessage) {
-                    const senderA = deepCtx.participant || deepCtx.remoteJid || senderB;
-                    await bot.sendMessage(m.chat, { text: `── Original (A) ──` });
-                    await _forward(bot, m, deepCtx.quotedMessage, senderA);
-                    await bot.sendMessage(m.chat, { text: `── Reply (B) ──` });
-                    return await _forward(bot, m, quotedMsg, senderB);
-                }
-                // B was not a reply — just return B
-                return await _forward(bot, m, quotedMsg, senderB);
-            }
-
-            // Unknown mode fallback
-            await m.reply(`Unknown mode ${mode}. Use ${bot.prefix}setvar QUOTED_MODE=1, 2, or 3`);
-
-        } catch (err) {
-            console.error('quoted error:', err);
-            await m.reply('Failed: ' + err.message);
-        }
+        const original = taggedReply?.quotedMessage || quoted;
+        const originalCtx = taggedReply || ctx;
+        const quotedSender = originalCtx.participant || originalCtx.participantAlt || ctx.participant || m.quoted?.sender;
+        const key = {
+            remoteJid: originalCtx.remoteJid || m.chat,
+            id: originalCtx.stanzaId || m.quoted?.key?.id || `quoted-${Date.now()}`,
+            participant: originalCtx.participant || m.quoted?.key?.participant,
+            fromMe: false,
+        };
+        store.saveMessage({ key, message: original, pushName: originalCtx.pushName || '' });
+        return forward(sock, m.chat, original, quotedSender, m);
     }
 };
 
-async function _forward(bot, m, msgObj, senderJid) {
-    const senderNum = (senderJid || 'Unknown').split('@')[0];
-
-    // Unwrap view-once
-    let realObj = msgObj;
-    for (const vt of ['viewOnceMessage','viewOnceMessageV2','viewOnceMessageV2Extension']) {
-        if (msgObj[vt]) { realObj = msgObj[vt]?.message || msgObj[vt]; break; }
+// Pull contextInfo out of a message object regardless of which message
+// type is carrying it (text reply, or a media message sent as a reply),
+// unwrapping ephemeral/view-once envelopes first if needed.
+function getContextInfo(message, seen = new Set()) {
+    if (!message || typeof message !== 'object' || seen.has(message)) return null;
+    seen.add(message);
+    const msg = unwrap(message);
+    if (!msg || typeof msg !== 'object') return null;
+    if (msg.contextInfo?.quotedMessage) return msg.contextInfo;
+    if (message.contextInfo?.quotedMessage) return message.contextInfo;
+    const CONTEXT_KEYS = [
+        'extendedTextMessage', 'imageMessage', 'videoMessage', 'audioMessage',
+        'documentMessage', 'stickerMessage', 'contactMessage', 'locationMessage',
+        'documentWithCaptionMessage',
+    ];
+    for (const key of CONTEXT_KEYS) {
+        const ctx = msg[key]?.contextInfo;
+        if (ctx?.quotedMessage) return ctx;
     }
-
-    const type  = getContentType(realObj);
-    const inner = realObj?.[type];
-
-    if (!type || !inner) {
-        return await bot.sendMessage(m.chat, {
-            text: `From @${senderNum}\n\n(Could not read message content)`,
-            mentions: [senderJid]
-        });
+    for (const value of Object.values(msg)) {
+        const nested = getContextInfo(value, seen);
+        if (nested) return nested;
     }
-
-    // Plain text
-    if (type === 'conversation' || type === 'extendedTextMessage') {
-        const text = (typeof inner === 'string') ? inner : (inner?.text || inner?.conversation || '(empty)');
-        return await bot.sendMessage(m.chat, {
-            text: `From @${senderNum}:\n\n${text}`,
-            mentions: [senderJid]
-        });
-    }
-
-    const mimetype = inner?.mimetype || '';
-    const caption  = inner?.caption  || '';
-    const label    = `From @${senderNum}${caption ? `\n${caption}` : ''}`;
-
-    const isImage   = type === 'imageMessage';
-    const isVideo   = type === 'videoMessage';
-    const isAudio   = type === 'audioMessage';
-    const isDoc     = type === 'documentMessage';
-    const isSticker = type === 'stickerMessage';
-
-    if (isImage || isVideo || isAudio || isDoc || isSticker) {
-        const cat    = isImage ? 'image' : isVideo ? 'video' : isAudio ? 'audio' : isSticker ? 'sticker' : 'document';
-        const stream = await downloadContentFromMessage(inner, cat);
-        const chunks = [];
-        for await (const chunk of stream) chunks.push(chunk);
-        const buffer = Buffer.concat(chunks);
-
-        if (!buffer.length) {
-            return await bot.sendMessage(m.chat, {
-                text: `From @${senderNum}\n(Media expired — cannot retrieve)`,
-                mentions: [senderJid]
-            });
-        }
-
-        if (isImage)   return await bot.sendMessage(m.chat, { image: buffer, caption: label, mentions: [senderJid] });
-        if (isVideo)   return await bot.sendMessage(m.chat, { video: buffer, caption: label, mentions: [senderJid] });
-        if (isSticker) return await bot.sendMessage(m.chat, { sticker: buffer });
-        if (isAudio) {
-            await bot.sendMessage(m.chat, { text: label, mentions: [senderJid] });
-            return await bot.sendMessage(m.chat, {
-                audio:    buffer,
-                mimetype: mimetype || 'audio/ogg; codecs=opus',
-                ptt:      inner?.ptt !== undefined ? inner.ptt : true
-            });
-        }
-        if (isDoc) return await bot.sendMessage(m.chat, {
-            document: buffer,
-            mimetype: mimetype || 'application/octet-stream',
-            fileName: inner?.fileName || 'file',
-            caption:  label,
-            mentions: [senderJid]
-        });
-    }
-
-    await bot.sendMessage(m.chat, {
-        text: `From @${senderNum}\nType: ${type}\n(Cannot retrieve this media type)`,
-        mentions: [senderJid]
-    });
+    return null;
 }
+
+async function forward(sock, chat, message, sender, m) {
+    const unwrapped = unwrap(message);
+    const type = getContentType(unwrapped);
+    const body = unwrapped?.[type];
+    const normalizedType = type === 'documentWithCaptionMessage' ? 'documentMessage' : type;
+    const mention = sender ? [sender] : [];
+    const from = sender ? `From @${sender.split('@')[0]}\n` : '';
+    if (!type || body == null) return sock.sendMessage(chat, { text: `${from}Unable to read the quoted message.`, mentions: mention });
+    if (normalizedType === 'conversation' || normalizedType === 'extendedTextMessage') {
+        const text = typeof body === 'string' ? body : body.text || '';
+        return sock.sendMessage(chat, { text: `${from}${text}`, mentions: mention });
+    }
+    const mediaTypes = { imageMessage: 'image', videoMessage: 'video', audioMessage: 'audio', documentMessage: 'document', stickerMessage: 'sticker' };
+    const kind = mediaTypes[type];
+    if (!kind) return sock.sendMessage(chat, { text: `${from}Unsupported message type: ${type}`, mentions: mention });
+    const stream = await downloadContentFromMessage(body, kind);
+    const chunks = [];
+    for await (const chunk of stream) chunks.push(chunk);
+    const buffer = Buffer.concat(chunks);
+    if (!buffer.length) return sock.sendMessage(chat, { text: `${from}The media is no longer available.`, mentions: mention });
+    const caption = body.caption ? `${from}${body.caption}` : from.trim();
+    if (kind === 'image') return sock.sendMessage(chat, { image: buffer, caption, mentions: mention });
+    if (kind === 'video') return sock.sendMessage(chat, { video: buffer, caption, mentions: mention });
+    if (kind === 'audio') return sock.sendMessage(chat, { audio: buffer, mimetype: body.mimetype || 'audio/ogg; codecs=opus', ptt: !!body.ptt });
+    if (kind === 'sticker') return sock.sendMessage(chat, { sticker: buffer });
+    return sock.sendMessage(chat, { document: buffer, fileName: body.fileName || 'quoted-file', mimetype: body.mimetype || 'application/octet-stream', caption, mentions: mention });
+}
+
+function unwrap(message) {
+    for (const key of ['ephemeralMessage', 'viewOnceMessage', 'viewOnceMessageV2', 'documentWithCaptionMessage']) {
+        if (message?.[key]?.message) return unwrap(message[key].message);
+    }
+    return message?.message || message;
+}
+

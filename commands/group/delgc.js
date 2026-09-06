@@ -3,6 +3,7 @@ module.exports = {
     name: 'delgc',
     aliases: ['deletegc', 'dgc', 'kickall'],
     category: 'group',
+    reactions: { start: '👥' },
     description: 'Kick every member and leave the group. Irreversible.',
     usage: '.delgc, then .delgc confirm within 30s',
     groupOnly: true,
@@ -28,7 +29,8 @@ module.exports = {
             const meta = await bot.sock.groupMetadata(m.chat);
             const toRemove = meta.participants
                 .filter(p => p.id !== bot.sock.user.id)
-                .map(p => p.id);
+                .map(p => p.id || p.jid || p.phoneNumber)
+                .filter(Boolean);
 
             if (toRemove.length) {
                 await bot.sock.groupParticipantsUpdate(m.chat, toRemove, 'remove');

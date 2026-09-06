@@ -4,6 +4,7 @@ module.exports = {
     name: 'listvar',
     aliases: ['vars', 'allvar'],
     category: 'bot',
+    reactions: { start: '📝' },
     description: 'List all variables in the database',
 
     async execute(bot, m, args) {

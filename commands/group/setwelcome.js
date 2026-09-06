@@ -9,7 +9,7 @@ const saveDB = (d) => { fs.ensureDirSync(path.dirname(DB)); fs.writeFileSync(DB,
 function getWelcomeCfg(db, jid) {
     const entry = db[jid] || {};
     return {
-        welcomeEnabled: entry.welcomeEnabled,   // undefined = not set (uses global default)
+        welcomeEnabled: entry.welcomeEnabled ?? false, // disabled until explicitly enabled
         welcome:        entry.welcome || null,
     };
 }
@@ -18,6 +18,7 @@ module.exports = {
     name: 'setwelcome',
     aliases: ['welcome'],
     category: 'bot',
+    reactions: { start: '📝' },
     description: 'Set up the group welcome message',
     groupOnly: true,
 

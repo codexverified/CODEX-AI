@@ -12,6 +12,7 @@ module.exports = {
     name: 'autoreply',
     aliases: ['ar', 'autoresponse'],
     category: 'bot',
+    reactions: { start: '💬' },
     description: 'Configure auto-reply rules triggered by keywords or tag',
 
     async execute(bot, m, args) {

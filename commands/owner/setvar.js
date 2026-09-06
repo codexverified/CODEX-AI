@@ -11,7 +11,7 @@ module.exports = {
     category: 'owner',
     desc:      'Set a bot config variable (BOT_NAME, PREFIX, MODE, etc.)',
     ownerOnly: true,
-    reactions: { start: '⚙️', success: '👾' },
+    reactions: { start: '🔐' },
 
     execute: async (bot, m, args) => {
         if (!args[0]) return await m.reply(
@@ -51,6 +51,7 @@ module.exports = {
                 BOT_FONT:     'BOT_FONT',
                 BOT_CHARACTER:'BOT_CHARACTER',
                 AI_BADGE:     'AI_BADGE',
+            STATUS_EMOJI:  'statusReact.emoji',
             };
             if (keyMap[key]) {
                 const parts = keyMap[key].split('.');

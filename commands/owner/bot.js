@@ -8,6 +8,7 @@ module.exports = {
     name: 'bot',
     aliases: ['botswitch', 'gcbot'],
     category: 'owner',
+    reactions: { start: '⚙️' },
     description: 'Turn the bot completely on/off for this group. When off, nothing works here — no commands, no moderation, nothing — except .bot on.',
     ownerOnly: true,
     groupOnly: true,
@@ -20,19 +21,19 @@ module.exports = {
         const s = db[groupId];
 
         if (!sub || sub === 'status') {
-            return m.reply(`🤖 Bot is currently *${s.enabled !== false ? 'ON' : 'OFF'}* for this group.\n\n${bot.prefix}bot on\n${bot.prefix}bot off`);
+            return m.reply(`bot set to ${s.enabled !== false ? 'on' : 'off'}`);
         }
 
         if (sub === 'on') {
             s.enabled = true;
             saveDB(db);
-            return m.reply('✅ Bot enabled for this group — everything is back to normal.');
+            return m.reply('bot set to on');
         }
 
         if (sub === 'off') {
             s.enabled = false;
             saveDB(db);
-            return m.reply(`🛑 Bot disabled for this group. Nothing will work here — no commands, no moderation, nothing — until ${bot.prefix}bot on is used.`);
+            return m.reply('bot set to off');
         }
 
         return m.reply(`Usage:\n${bot.prefix}bot on\n${bot.prefix}bot off\n${bot.prefix}bot status`);

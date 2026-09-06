@@ -2,6 +2,7 @@ module.exports = {
     name: 'approve',
     aliases: ['acceptall', 'approveall'],
     category: 'group',
+    reactions: { start: '📸' },
     description: 'Approve all pending group join requests.',
     groupOnly: true,
     adminOnly: true,

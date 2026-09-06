@@ -173,6 +173,19 @@ node index.js
 
 ---
 
+## 🔐 Optional Environment Variables
+
+These commands are disabled by default and only activate once the matching variable is set:
+
+| Variable | Used by | Purpose |
+|---|---|---|
+| `GITHUB_TOKEN` | `.createrepo`, `.delrepo`, `.listrepo`, `.update` | A GitHub personal access token with `repo` scope |
+| `GITHUB_USERNAME` | `.createrepo`, `.delrepo` | Your GitHub username, for repo lookups |
+
+Set these in your host's environment (or `config.env`) — never commit them to source control.
+
+---
+
 <div align="center">
   <img src="https://i.imgur.com/dBaSKWF.gif" height="18" width="100%">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=00ff66&height=90&section=footer" style="margin-top:-20px;" />

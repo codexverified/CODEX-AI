@@ -4,6 +4,7 @@ module.exports = {
     name: 'delnote',
     aliases: ['deletenote', 'removenote'],
     category: 'general',
+    reactions: { start: '📝' },
     description: 'Delete a saved note',
     adminOnly: true,
 

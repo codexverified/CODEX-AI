@@ -4,6 +4,7 @@ module.exports = {
     name: 'animesearch',
     aliases: ['anisearch', 'findanime'],
     category: 'anime',
+    reactions: { start: '🔎' },
     description: 'Search for anime information using AniList.',
 
     async execute(bot, m, args) {

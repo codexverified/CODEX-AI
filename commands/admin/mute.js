@@ -3,6 +3,7 @@ const { parseTime, humanize, schedule, cancelAll } = require('../../lib/mute-cor
 module.exports = {
     name: 'mute', aliases: ['lock', 'lockgroup', 'groupclose'],
     category: 'admin', adminOnly: true, groupOnly: true,
+    reactions: { start: '🛡️' },
     description: 'Mute the group. .mute / .mute 10m / .mute after 10m',
 
     async execute(bot, m, args) {
@@ -25,7 +26,7 @@ module.exports = {
         catch (e) { return m.reply(`❌ Failed: ${e.message}\n(Bot must be admin)`); }
 
         const all = [];
-        try { const meta = await bot.sock.groupMetadata(jid); all.push(...meta.participants.map(p => p.id)); } catch {}
+        try { const meta = await bot.sock.groupMetadata(jid); all.push(...meta.participants.map(p => p.id || p.jid || p.phoneNumber).filter(Boolean)); } catch {}
 
         // ── Timed: .mute 10m ───────────────────────────────────────────────
         if (ms) {

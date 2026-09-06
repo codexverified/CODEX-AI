@@ -3,6 +3,7 @@ const mumaker = require('mumaker');
 module.exports = {
     name: 'purplet',
     category: 'textmaker',
+    reactions: { start: '⚙️' },
     description: 'Create a purple text effect',
     usage: '.purplet <text>',
 

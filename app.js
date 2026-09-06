@@ -1,8 +1,8 @@
 const chalk = require("chalk");
 const fs = require("fs-extra");
 const { getContentType, downloadContentFromMessage } = require("./lib/baileys");
-const { applyPrefix } = require("./lib/characterEngine");
 const { applyFont } = require("./lib/fontEngine");
+const mediaStore = require("./lib/mediaStore");
 
 // Nigerian time helper (Africa/Lagos = UTC+1)
 function nigerianTime() {
@@ -40,6 +40,84 @@ const {
   writeMsgCache,
 } = require("./lib/connection");
 
+// ── Session hardening: survive bad plugins instead of dying to them ────────
+// With ~2000 commands loaded, a single uncaught throw or unhandled promise
+// rejection anywhere — a bad regex, a null property access, a third-party
+// API timeout nobody awaited correctly — otherwise kills the ENTIRE Node
+// process. Baileys' own reconnect logic (in lib/connection.js) only helps
+// with *socket*-level disconnects; it can't save you from the process
+// itself exiting. These two handlers are what let a 2000+ command bot with
+// occasional bugs in individual plugins stay up for months instead of
+// crashing out within days on the first unguarded edge case.
+// A rolling window of recent fatal errors. If too many land in a short
+// span, the process is in a corrupted/looping state (not a one-off bad
+// plugin) and swallowing forever just produces the "online in Pterodactyl,
+// dead to WhatsApp" zombie this whole file was patched to avoid. In that
+// case exiting(1) and letting Pterodactyl's restart policy bring up a
+// clean process is safer than staying alive.
+const _fatalErrorTimestamps = [];
+const FATAL_ERROR_WINDOW_MS = 60 * 1000;
+const FATAL_ERROR_THRESHOLD = 15; // >15 uncaught errors within 60s = corrupted state
+
+function _logFatal(label, err) {
+  const stamp = nigerianDateTime();
+  const mem = process.memoryUsage();
+  console.error(chalk.red(`[${label}] ${stamp}`));
+  console.error(chalk.red(err?.stack || err));
+  console.error(
+    chalk.gray(
+      `  rss=${(mem.rss / 1048576).toFixed(1)}MB heapUsed=${(mem.heapUsed / 1048576).toFixed(1)}MB`,
+    ),
+  );
+}
+
+function _shouldExitOnFatal() {
+  const now = Date.now();
+  _fatalErrorTimestamps.push(now);
+  while (
+    _fatalErrorTimestamps.length &&
+    now - _fatalErrorTimestamps[0] > FATAL_ERROR_WINDOW_MS
+  ) {
+    _fatalErrorTimestamps.shift();
+  }
+  return _fatalErrorTimestamps.length > FATAL_ERROR_THRESHOLD;
+}
+
+// ── Session hardening: survive bad plugins instead of dying to them ────────
+// With ~2000 commands loaded, a single uncaught throw or unhandled promise
+// rejection anywhere — a bad regex, a null property access, a third-party
+// API timeout nobody awaited correctly — otherwise kills the ENTIRE Node
+// process. Baileys' own reconnect logic (in lib/connection.js) only helps
+// with *socket*-level disconnects; it can't save you from the process
+// itself exiting. These handlers log and continue for isolated errors, but
+// escalate to a clean process.exit(1) if errors are firing in a tight loop,
+// which is a sign the process itself is corrupted rather than one plugin
+// having a bad day. Exiting lets Pterodactyl's restart policy recover it
+// instead of leaving a process that's "online" but unusable.
+process.on("uncaughtException", (err, origin) => {
+  _logFatal(`uncaughtException] ${origin || ""}`, err);
+  if (_shouldExitOnFatal()) {
+    console.error(
+      chalk.red(
+        `[fatal] ${FATAL_ERROR_THRESHOLD}+ uncaught exceptions within ${FATAL_ERROR_WINDOW_MS / 1000}s — process state looks corrupted, exiting(1) for a clean restart.`,
+      ),
+    );
+    process.exit(1);
+  }
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  _logFatal("unhandledRejection", reason);
+  if (_shouldExitOnFatal()) {
+    console.error(
+      chalk.red(
+        `[fatal] ${FATAL_ERROR_THRESHOLD}+ unhandled rejections within ${FATAL_ERROR_WINDOW_MS / 1000}s — process state looks corrupted, exiting(1) for a clean restart.`,
+      ),
+    );
+    process.exit(1);
+  }
+});
+
 // ── Ensure dirs & DBs ─────────────────────────────────────────────────────────
 ["./database", "./session", "./commands", "./plugins", "./lib"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
@@ -65,8 +143,6 @@ const {
   "./database/goodbye.json",
   "./database/autoreply.json",
   "./database/autoreact.json",
-  "./database/autovv.json",
-  "./database/vv-reactions.json",
   "./database/mention_config.json",
   "./database/antiedit.json",
   "./database/chatbotgroup.json",
@@ -80,6 +156,11 @@ const {
     const defaults = {
       "./database/antiedit.json": JSON.stringify(
         { chats: {}, _globalPriv: false, _mode: "dm" },
+        null,
+        2,
+      ),
+      "./database/antidelete.json": JSON.stringify(
+        { enabled: false, mode: "dm" },
         null,
         2,
       ),
@@ -171,6 +252,73 @@ const _RECOVERABLE_MEDIA_TYPES = [
   "documentMessage",
   "stickerMessage",
 ];
+// Baileys category name used by downloadContentFromMessage for each type.
+const _MEDIA_CATEGORY = {
+  imageMessage: "image",
+  videoMessage: "video",
+  audioMessage: "audio",
+  documentMessage: "document",
+  stickerMessage: "sticker",
+};
+
+// ── Bounded media-download concurrency ──────────────────────────────────────
+// _cacheMessage() used to fire an unbounded, unqueued
+// downloadContentFromMessage() promise for every single recoverable media
+// message as it arrived. In an active media-heavy group that's an unbounded
+// number of concurrent downloads/decrypt streams competing for CPU, memory,
+// and (mainly) the single Node event loop — a burst of images/videos could
+// pile up dozens of simultaneous downloads, adding to the same event-loop
+// pressure that lets the websocket go stale. This caps how many run at once
+// and queues the rest (dropping oldest-queued if the queue itself grows
+// unreasonably, so a flood can't turn into unbounded memory growth either).
+const MEDIA_DOWNLOAD_MAX_CONCURRENCY = 4;
+const MEDIA_DOWNLOAD_MAX_QUEUE = 200;
+let _mediaDownloadActive = 0;
+const _mediaDownloadQueue = [];
+
+function _pumpMediaDownloadQueue() {
+  while (_mediaDownloadActive < MEDIA_DOWNLOAD_MAX_CONCURRENCY && _mediaDownloadQueue.length) {
+    const job = _mediaDownloadQueue.shift();
+    _mediaDownloadActive++;
+    job()
+      .catch(() => {})
+      .finally(() => {
+        _mediaDownloadActive--;
+        _pumpMediaDownloadQueue();
+      });
+  }
+}
+
+function _queueMediaDownload(job) {
+  if (_mediaDownloadQueue.length >= MEDIA_DOWNLOAD_MAX_QUEUE) {
+    // Drop the oldest queued job rather than let this grow unbounded under
+    // sustained media floods — losing one old recovery-download is far
+    // cheaper than accumulating unbounded pending work/memory.
+    _mediaDownloadQueue.shift();
+  }
+  _mediaDownloadQueue.push(job);
+  _pumpMediaDownloadQueue();
+}
+
+// Unwrap disappearing-message / view-once wrappers so the real media type
+// (imageMessage, videoMessage, etc.) is detected instead of the wrapper's
+// own type ("ephemeralMessage" / "viewOnceMessage...").  Without this,
+// media sent in a chat with disappearing messages on (the default in a lot
+// of DMs) was never recognised as recoverable at all.
+function _unwrapMessage(message) {
+  if (!message || typeof message !== "object") return message;
+  const wrapperKeys = [
+    "ephemeralMessage",
+    "viewOnceMessage",
+    "viewOnceMessageV2",
+    "viewOnceMessageV2Extension",
+    "documentWithCaptionMessage",
+  ];
+  for (const key of wrapperKeys) {
+    if (message[key]?.message) return _unwrapMessage(message[key].message);
+  }
+  return message;
+}
 
 class CODEXAI {
   constructor() {
@@ -188,9 +336,28 @@ class CODEXAI {
         this.config[k] = v !== "" && !isNaN(num) ? num : v;
       }
     } catch {}
-    // prefix as getter so setvar PREFIX takes effect immediately without restart
+    // prefix as getter so setvar PREFIX takes effect immediately without restart.
+    // .setvar PREFIX=null stores the literal 3-character STRING "null" (setvar
+    // is a text-based command, not real JSON) — that string is truthy, so the
+    // old `this.config.prefix || "."` fallback let it straight through
+    // unmodified. Every place that then did `${bot.prefix}menu` rendered the
+    // literal text "nullmenu", and every `text.startsWith(bot.prefix)` gate
+    // was checking for messages starting with the 4 characters "null" instead
+    // of recognizing no-prefix mode — which is exactly why commands typed
+    // bare (no prefix, as intended) got swallowed by other message-handling
+    // paths before ever reaching the dispatcher. Normalizing every "no
+    // prefix configured" spelling (null, "null", "none", "", undefined) to
+    // an empty string here fixes both: `${''}menu` displays as plain "menu",
+    // and `text.startsWith('')` is always true, correctly treating every
+    // message as prefix-satisfied so the real command lookup decides validity.
     Object.defineProperty(this, "prefix", {
-      get: () => this.config.prefix || ".",
+      get: () => {
+        const raw = this.config.prefix;
+        if (raw === null || raw === undefined) return ".";
+        const str = String(raw).trim();
+        if (str === "" || str.toLowerCase() === "null" || str.toLowerCase() === "none") return "";
+        return str;
+      },
       set: (v) => {
         this.config.prefix = v;
       },
@@ -207,6 +374,7 @@ class CODEXAI {
     this.failedCmds = 0;
     this._heartbeatInterval = null;
     this._connectionHeartbeat = null;
+    this._reconnectAttempts = 0;
   }
 
   _startLocalHeartbeat() {
@@ -221,7 +389,8 @@ class CODEXAI {
     console.log(chalk.blue('Loading environment variables..'));
     const { loaded, failed } = await this.reloader.loadCommands();
     if (failed > 0) console.log(chalk.red(`${failed} commands failed to load`));
-    console.log(chalk.green(`${loaded} commands loaded`));
+    console.log(chalk.green(`(${loaded}) cmds loaded`));
+    this.successCmds = loaded;
     console.log('');
     await startConnection(this);
   }
@@ -229,9 +398,19 @@ class CODEXAI {
   // ── Message cache ─────────────────────────────────────────────────────────
   _cacheMessage(msg) {
     try {
+      const messageStore = require('./lib/messageStore');
+      messageStore.saveMessage(msg);
+      const typeForStore = getContentType(msg.message || {});
+      const innerForStore = msg.message?.[typeForStore];
+      if (innerForStore && ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(typeForStore)) {
+        messageStore.saveMedia(msg.key, { type: typeForStore, message: _serializeForCache(innerForStore) });
+      }
       const cache = readMsgCache();
-      const type = getContentType(msg.message);
-      const inner = msg.message[type];
+      // Unwrap disappearing/view-once messages first so media hiding
+      // inside one of those wrappers is still detected and cached.
+      const realMessage = _unwrapMessage(msg.message);
+      const type = getContentType(realMessage);
+      const inner = realMessage[type];
       let text = "";
       if (typeof inner === "string") text = inner;
       else text = inner?.text || inner?.caption || inner?.conversation || "";
@@ -251,6 +430,29 @@ class CODEXAI {
         typeof inner === "object"
       ) {
         media = { type, msg: _serializeForCache(inner) };
+
+        // Also grab the real bytes right now, while the media is still
+        // guaranteed to be reachable, and save them to disk via
+        // mediaStore. This is what actually lets anti-delete recover
+        // media later — by delete time WhatsApp's CDN link is often
+        // already gone, so re-downloading at that point isn't reliable.
+        const cat = _MEDIA_CATEGORY[type];
+        if (cat) {
+          _queueMediaDownload(async () => {
+            const stream = await downloadContentFromMessage(inner, cat);
+            const chunks = [];
+            for await (const chunk of stream) chunks.push(chunk);
+            const buf = Buffer.concat(chunks);
+            if (buf.length) {
+              mediaStore.save(msg.key, buf, {
+                type,
+                mimetype: inner.mimetype,
+                fileName: inner.fileName,
+                ptt: !!inner.ptt,
+              });
+            }
+          });
+        }
       }
 
       cache[msg.key.id] = {
@@ -268,6 +470,37 @@ class CODEXAI {
     } catch {}
   }
 
+  // Send a recovered media buffer to `dest`, mirroring the message type.
+  // Shared by both the on-disk mediaStore path and the legacy live
+  // re-download fallback so the sending logic only lives in one place.
+  async _sendRecoveredMedia(dest, cat, buf, meta, formatted, mentions) {
+    if (cat === "image") {
+      await this.sendMessage(dest, { image: buf, caption: formatted, mentions }).catch(() => {});
+    } else if (cat === "video") {
+      await this.sendMessage(dest, { video: buf, caption: formatted, mentions }).catch(() => {});
+    } else if (cat === "document") {
+      await this.sendMessage(dest, {
+        document: buf,
+        mimetype: meta.mimetype || "application/octet-stream",
+        fileName: meta.fileName || "recovered_file",
+      }).catch(() => {});
+      await this.sendMessage(dest, { text: formatted, mentions }).catch(() => {});
+    } else if (cat === "audio") {
+      await this.sendMessage(dest, {
+        audio: buf,
+        mimetype: meta.mimetype || "audio/ogg; codecs=opus",
+        ptt: !!meta.ptt,
+      }).catch(() => {});
+      await this.sendMessage(dest, { text: formatted, mentions }).catch(() => {});
+    } else if (cat === "sticker") {
+      await this.sendMessage(dest, { sticker: buf }).catch(() => {});
+      await this.sendMessage(dest, { text: formatted, mentions }).catch(() => {});
+    } else {
+      return false;
+    }
+    return true;
+  }
+
   // ── Anti-Delete (CRYSNOVA-mapped logic) ─────────────────────────────────────
   async _handleAntiDelete(revokedKey, fallbackChat) {
     try {
@@ -276,7 +509,6 @@ class CODEXAI {
       if (!chat || !msgId) return;
 
       const isGroup = chat.endsWith("@g.us");
-      const isPrivate = !isGroup;
       const isStatus = chat === "status@broadcast";
       if (isStatus) return;
 
@@ -285,11 +517,11 @@ class CODEXAI {
         db = JSON.parse(fs.readFileSync("./database/antidelete.json", "utf8"));
       } catch {}
 
-      const enabledForChat = !!db[chat];
-      const enabledGlobally = isPrivate && !!db._globalPriv;
-      if (!enabledForChat && !enabledGlobally) return;
+      // Single global switch — applies to every chat the bot is in,
+      // private and group alike. No more per-chat/global-private split.
+      if (!db.enabled) return;
 
-      const mode = db._mode || "dm";
+      const mode = db.mode || "dm";
       const ownerDM =
         (typeof this.config.owner === "object"
           ? this.config.owner?.number
@@ -321,8 +553,7 @@ class CODEXAI {
         else if (cached.type === "documentMessage") msgContent = "[Document]";
       }
 
-      let formatted = `*ⓘ DELETED!*
-`;
+      let formatted = `╭─❍ *ANTI-DELETE ALERT*\n`;
 
       if (isGroup) {
         let groupName = "Unknown Group";
@@ -337,7 +568,7 @@ class CODEXAI {
         formatted += `_❏◦Deleted by_ •⌲ @${deleterNum}
 `;
       } else {
-        formatted += `_❏◦Chat_ •⌲ ${pushName}
+        formatted += `_❏��Chat_ •⌲ ${pushName}
 `;
         formatted += `_𓋎◦Sender_ •⌲ @${senderNum}
 `;
@@ -357,17 +588,32 @@ ${msgContent}
 
       const dest = mode === "chat" ? chat : ownerDM;
 
-      // ── Try to recover & resend the actual media (SUKUNA-style capture) ──
+      // ── Try to recover & resend the actual media ──────────────────────
+      // 1st choice: the on-disk mediaStore — bytes captured the moment the
+      // media was first received, so it doesn't matter whether WhatsApp's
+      // CDN link still works by the time the message gets deleted.
+      const stored = mediaStore.get(revokedKey);
+      if (stored?.buffer?.length) {
+        try {
+          const cat = _MEDIA_CATEGORY[stored.type];
+          if (cat) {
+            const sent = await this._sendRecoveredMedia(dest, cat, stored.buffer, stored, formatted, mentions);
+            if (sent) {
+              mediaStore.remove(revokedKey); // no need to keep it once delivered
+              return; // media path already covered the notice too
+            }
+          }
+        } catch (e) {
+          console.error("[AntiDelete media recovery - store]", e.message);
+        }
+      }
+
+      // 2nd choice: legacy live re-download via the cached mediaKey. Kept
+      // as a fallback for messages the on-disk store didn't get to in
+      // time (e.g. a restart right after the media arrived).
       if (cached?.media?.msg) {
         try {
-          const catMap = {
-            imageMessage: "image",
-            videoMessage: "video",
-            audioMessage: "audio",
-            documentMessage: "document",
-            stickerMessage: "sticker",
-          };
-          const cat = catMap[cached.media.type];
+          const cat = _MEDIA_CATEGORY[cached.media.type];
           if (cat) {
             const mediaMsg = _deserializeFromCache(cached.media.msg);
             const stream = await downloadContentFromMessage(mediaMsg, cat);
@@ -376,50 +622,12 @@ ${msgContent}
             const buf = Buffer.concat(chunks);
 
             if (buf.length > 0) {
-              if (cat === "image") {
-                await this.sendMessage(dest, {
-                  image: buf,
-                  caption: formatted,
-                  mentions,
-                }).catch(() => {});
-              } else if (cat === "video") {
-                await this.sendMessage(dest, {
-                  video: buf,
-                  caption: formatted,
-                  mentions,
-                }).catch(() => {});
-              } else if (cat === "document") {
-                await this.sendMessage(dest, {
-                  document: buf,
-                  mimetype: mediaMsg.mimetype || "application/octet-stream",
-                  fileName: mediaMsg.fileName || "recovered_file",
-                }).catch(() => {});
-                await this.sendMessage(dest, {
-                  text: formatted,
-                  mentions,
-                }).catch(() => {});
-              } else if (cat === "audio") {
-                await this.sendMessage(dest, {
-                  audio: buf,
-                  mimetype: mediaMsg.mimetype || "audio/ogg; codecs=opus",
-                  ptt: !!mediaMsg.ptt,
-                }).catch(() => {});
-                await this.sendMessage(dest, {
-                  text: formatted,
-                  mentions,
-                }).catch(() => {});
-              } else if (cat === "sticker") {
-                await this.sendMessage(dest, { sticker: buf }).catch(() => {});
-                await this.sendMessage(dest, {
-                  text: formatted,
-                  mentions,
-                }).catch(() => {});
-              }
-              return; // media path already covered the notice too
+              const sent = await this._sendRecoveredMedia(dest, cat, buf, mediaMsg, formatted, mentions);
+              if (sent) return; // media path already covered the notice too
             }
           }
         } catch (e) {
-          console.error("[AntiDelete media recovery]", e.message);
+          console.error("[AntiDelete media recovery - live]", e.message);
         }
       }
 
@@ -489,8 +697,7 @@ ${msgContent}
         }
       } catch {}
 
-      let formatted = `*✎ EDITED MESSAGE*
-`;
+      let formatted = `╭─❍ *ANTI-EDIT ALERT*\n`;
 
       if (isGroup) {
         let groupName = "Unknown Group";
@@ -581,14 +788,31 @@ ${newText || "(could not read new text)"}
       })
       .toLowerCase();
 
+    // Same source .menu uses (total registered command names, aliases
+    // included, across every category) — not the raw file-load count,
+    // so this number always matches what .menu shows instead of a stale
+    // or differently-scoped figure. This naturally includes any plugin
+    // installed via .install: loadCommands() re-scans the plugins/
+    // folder from disk on every boot (fs.readdirSync, no cached list),
+    // so an installed plugin file sitting on disk before a restart is
+    // picked up like any other plugin file — this count and the console
+    // "X commands loaded" line both reflect that automatically.
+    let totalCmds = this.successCmds;
+    let pluginCmds = 0;
+    try {
+      totalCmds = this.commandHandler.getCommandCount();
+      pluginCmds = [...this.bot.commands.entries()].filter(([, cmd]) => cmd.__plugin).length;
+    } catch {}
+    const nativeCmds = totalCmds - pluginCmds;
+
     const startupText = `—͟͟͞͞𖣘 *${botName.toUpperCase()}* IS ONLINE!
 
 —͟͟͞͞𖣘 *PREFIX:* ${prefix}
 —͟͟͞͞𖣘 *MODE:* ${(c.mode || "private").toUpperCase()}
-—͟͟͞͞𖣘 *CMDS:* ${this.successCmds} loaded
+—͟͟͞͞𖣘 *CMDS:* ${totalCmds} loaded (${nativeCmds} built-in, ${pluginCmds} plugin)
 —͟͟͞͞𖣘 *TIME:* ${time}
 
-—͟͟͞͞𖣘 *ANTIDELETE* ${Object.keys(antiDelDb).filter((k) => !k.startsWith("_")).length > 0 ? "✓" : "✗"}
+—͟͟͞͞𖣘 *ANTIDELETE* ${Object.keys(antiDelDb).filter((k) => !k.startsWith("_")).length > 0 ? "���" : "✗"}
 —͟͟͞͞𖣘 *ANTIEDIT* ${Object.keys(antiEditDb.chats || {}).length > 0 ? "✓" : "✗"}
 —͟͟͞͞𖣘 *AUTOREACT* ${autoReactDb.enabled ? "✓" : "✗"}
 —͟͟͞͞𖣘 *AUTOREPLY* ${autoRepDb.enabled ? "✓" : "✗"}
@@ -661,13 +885,18 @@ ${GROUP_LINK}
 
   // ── Group join/leave ──────────────────────────────────────────────────────
   async handleGroupUpdate({ id, participants, action }) {
-    // Read from groupEvents.json (CRYSNOVA pattern: one file, all group event config)
+  try {
+    const toggles = JSON.parse(fs.readFileSync('./database/botToggle.json', 'utf8'));
+    if (toggles[id]?.enabled === false) return;
+  } catch {}
+  // Read from groupEvents.json (CODEX pattern: one file, all group event config)
     let eventsDb = {};
     try { eventsDb = JSON.parse(fs.readFileSync('./database/groupEvents.json', 'utf8')); } catch {}
     const cfg = eventsDb[id] || {};
 
     if (action === 'add') {
-      const enabled = cfg.welcomeEnabled ?? (this.config.welcome !== false);
+      // Welcome is disabled unless explicitly enabled for this group.
+      const enabled = cfg.welcomeEnabled === true;
       if (!enabled) return;
 
       let meta = null;
@@ -716,8 +945,8 @@ ${GROUP_LINK}
       }
 
     } else if (action === 'remove') {
-      // Goodbye uses goodbyeEnabled ONLY — never touches welcomeEnabled
-      const enabled = cfg.goodbyeEnabled ?? (this.config.goodbye !== false);
+      // Goodbye is disabled unless explicitly enabled for this group.
+      const enabled = cfg.goodbyeEnabled === true;
       if (!enabled) return;
 
       let meta = null;
@@ -763,7 +992,7 @@ ${GROUP_LINK}
     }
   }
 
-  // ── Send message ──────────────────────────────────────────────────────────
+  // ── Send message ──────���───────────────────────────────────────────────────
   // Single pipeline: font + character/emoji applied here for ALL commands.
   async sendMessage(jid, content, options = {}) {
     try {
@@ -774,11 +1003,6 @@ ${GROUP_LINK}
       if (typeof content.caption === "string" && fontNum > 0)
         content.caption = applyFont(content.caption, fontNum);
       // Apply language translation to text (async — uses GPT API if key is set)
-      // Apply character/emoji prefix to text and caption
-      if (typeof content.text === "string")
-        content.text = applyPrefix(content.text, this.config);
-      if (typeof content.caption === "string")
-        content.caption = applyPrefix(content.caption, this.config);
 
       const sent = await this.sock.sendMessage(jid, content, options);
       if (this.config.autoRead && sent?.key)

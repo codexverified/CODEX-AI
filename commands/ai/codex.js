@@ -15,6 +15,7 @@ module.exports = {
     description: 'Ask CODEX AI anything',
     usage: '.codex <your question>',
     category: 'ai',
+    reactions: { start: '🧠' },
 
     async execute(bot, m, args) {
         const input = args.join(' ').trim();

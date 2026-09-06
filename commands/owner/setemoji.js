@@ -9,12 +9,13 @@ module.exports = {
     name: 'setemoji',
     aliases: ['emojimap', 'bindemoji'],
     category: 'owner',
+    reactions: { start: '📝' },
     ownerOnly: true,
     description: 'Bind an emoji to a command. Send that emoji to trigger the command.',
 
     execute: async (bot, m, args) => {
         const db  = load();
-        const sub = args[0];
+        const sub  = String(args[0] || '').trim();
 
         // .setemoji list
         if (!sub || sub === 'list') {

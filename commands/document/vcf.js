@@ -6,6 +6,7 @@ module.exports = {
     name: 'vcf',
     aliases: ['contact', 'savecontact'],
     category: 'documents',
+    reactions: { start: '⚙️' },
     description: 'Generate a contact card (.vcf file).',
 
     async execute(bot, m, args) {

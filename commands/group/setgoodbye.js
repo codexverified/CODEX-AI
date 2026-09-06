@@ -10,7 +10,7 @@ const saveDB = (d) => { fs.ensureDirSync(path.dirname(DB)); fs.writeFileSync(DB,
 function getGoodbyeCfg(db, jid) {
     const entry = db[jid] || {};
     return {
-        goodbyeEnabled: entry.goodbyeEnabled,  // undefined = not set (uses global default)
+        goodbyeEnabled: entry.goodbyeEnabled ?? false, // disabled until explicitly enabled
         goodbye:        entry.goodbye || null,
     };
 }
@@ -19,6 +19,7 @@ module.exports = {
     name: 'setgoodbye',
     aliases: ['goodbye', 'farewell'],
     category: 'group',
+    reactions: { start: '📝' },
     description: 'Set up the group goodbye message',
     groupOnly: true,
 

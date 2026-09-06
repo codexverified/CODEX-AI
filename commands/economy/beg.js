@@ -14,6 +14,7 @@ const RESPONSES = [
 module.exports = {
     name: 'beg',
     category: 'economy',
+    reactions: { start: '⚙️' },
     description: 'Beg for coins (5 min cooldown)',
 
     async execute(bot, m, args) {
