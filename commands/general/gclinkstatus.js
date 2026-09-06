@@ -111,7 +111,7 @@ Reply to 📄 document + ${bot.prefix}gclinkstatus [caption]
 Only need to target the current group, "all", or a JID — or want to clear
 tracked statuses? Use ${bot.prefix}gcstatus instead.
 
-Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan (or a raw hex code)`
+Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan, teal, lime, pink, indigo, navy, gold, brown, silver (or a raw hex code)`
             );
         }
 

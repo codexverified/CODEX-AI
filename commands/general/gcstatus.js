@@ -122,7 +122,7 @@ Reply to 💬 any message + ${bot.prefix}gcstatus
 
 Only have an invite link, not the JID? Use ${bot.prefix}gclinkstatus instead.
 
-Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan (or a raw hex code)
+Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan, teal, lime, pink, indigo, navy, gold, brown, silver (or a raw hex code)
 Color and target can be combined, in either order: "Hello|blue|all".
 
 No admin role needed.`
