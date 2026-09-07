@@ -32,7 +32,7 @@ Usage:
 ${bot.prefix}antispam on/off
 ${bot.prefix}antispam delete
 ${bot.prefix}antispam kick
-${bot.prefix}antispam warn 3
+${bot.prefix}antispam warn [1-3]
 ${bot.prefix}antispam limit 5 10`);
 
         if (sub === 'on')     { s.enabled = true;  save(); return await m.reply('Anti-Spam enabled.'); }
@@ -41,7 +41,7 @@ ${bot.prefix}antispam limit 5 10`);
         if (sub === 'kick')   { s.action = 'kick';   save(); return await m.reply('Action set to KICK. Spammers will be removed immediately.'); }
         if (sub === 'warn') {
             const n = parseInt(args[1]);
-            if (!n || n < 1 || n > 10) return await m.reply(`Usage: ${bot.prefix}antispam warn [1-10]`);
+            if (!n || n < 1 || n > 3) return await m.reply(`Usage: ${bot.prefix}antispam warn [1-3]\nMax warnings allowed is 3.`);
             s.action = 'warn'; s.maxWarns = n; save();
             return await m.reply(`Action set to WARN. Max ${n} warnings before kick.`);
         }
