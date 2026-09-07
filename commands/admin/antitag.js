@@ -30,7 +30,7 @@ Usage:
 ${bot.prefix}antitag on/off
 ${bot.prefix}antitag delete
 ${bot.prefix}antitag kick
-${bot.prefix}antitag warn [1-10]`);
+${bot.prefix}antitag warn [1-3]`);
 
         if (sub === 'on')     { s.enabled = true;  save(); return await m.reply('Anti-Tag enabled.'); }
         if (sub === 'off')    { s.enabled = false; save(); return await m.reply('Anti-Tag disabled.'); }
@@ -38,7 +38,7 @@ ${bot.prefix}antitag warn [1-10]`);
         if (sub === 'kick')   { s.action = 'kick';   save(); return await m.reply('Action set to KICK.'); }
         if (sub === 'warn') {
             const n = parseInt(args[1]);
-            if (!n || n < 1 || n > 10) return await m.reply(`Usage: ${bot.prefix}antitag warn [1-10]`);
+            if (!n || n < 1 || n > 3) return await m.reply(`Usage: ${bot.prefix}antitag warn [1-3]\nMax warnings allowed is 3.`);
             s.action = 'warn'; s.maxWarns = n; save();
             return await m.reply(`Action set to WARN. Max ${n} warnings before kick.`);
         }
