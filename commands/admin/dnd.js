@@ -32,7 +32,7 @@ Custom message: ${s.customMsg || '(default)'}
 
 Usage:
 ${bot.prefix}dnd on/off
-${bot.prefix}dnd delete / kick / warn [1-10]
+${bot.prefix}dnd delete / kick / warn [1-3]
 ${bot.prefix}dnd msg <text>
 ${bot.prefix}dnd 5h              — on now, auto-off in 5h
 ${bot.prefix}dnd after 2h        — on in 2h
@@ -44,7 +44,7 @@ ${bot.prefix}sch -dnd 12am to 6pm daily`);
         if (sub === 'kick')   { s.action = 'kick';   save(); return await m.reply('Action set to KICK. Tagging owner/bot gets you kicked immediately.'); }
         if (sub === 'warn') {
             const n = parseInt(args[1]);
-            if (!n || n < 1 || n > 10) return await m.reply(`Usage: ${bot.prefix}dnd warn [1-10]`);
+            if (!n || n < 1 || n > 3) return await m.reply(`Usage: ${bot.prefix}dnd warn [1-3]\nMax warnings allowed is 3.`);
             s.action = 'warn'; s.maxWarns = n; save();
             return await m.reply(`Action set to WARN. Max ${n} warnings before kick.`);
         }
@@ -85,4 +85,4 @@ ${bot.prefix}sch -dnd 12am to 6pm daily`);
         return await m.reply(`Unknown option. Use ${bot.prefix}dnd status`);
     }
 };
-                               
+
