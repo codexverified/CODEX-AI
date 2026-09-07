@@ -24,10 +24,10 @@ module.exports = {
     groupOnly: true,
     adminOnly: true,
 
-    execute: async (sock, m, { args, reply }) => {
+    execute: async (sock, m, { args, reply, prefix }) => {
         const db = loadDB();
         const groupId = m.chat;
-        if (!db[groupId]) db[groupId] = { enabled: false, action: 'warn' };
+        if (!db[groupId]) db[groupId] = { enabled: false, action: 'warn', maxWarns: 3 };
 
         const sub  = (args[0] || '').toLowerCase();
         const rest = args.slice(1).join(' ').trim();
@@ -37,14 +37,17 @@ module.exports = {
             const status = db[groupId].enabled ? 'ON' : 'OFF';
             const action = db[groupId].action || 'warn';
             return reply(
-                `╭─❍ *ANTI-FORWARDING* 𓉤\n` +
+                `╭─❍ *ANTI-FORWARDING*\n` +
                 `│ Status   : *${status}*\n` +
                 `│ Action   : *${action.toUpperCase()}*\n` +
-                `│ Warnings : 3\n` +
+                `│ Warnings : ${db[groupId].maxWarns || 3}\n` +
                 `│\n` +
                 `│ Commands:\n` +
                 `│ .antiforwarding on\n` +
                 `│ .antiforwarding off\n` +
+                `│ .antiforwarding delete\n` +
+                `│ .antiforwarding kick\n` +
+                `│ .antiforwarding warn [1-3]\n` +
                 `│ .antiforwarding action delete|warn|kick\n` +
                 `╰────────────────`
             );
@@ -62,6 +65,28 @@ module.exports = {
             db[groupId].enabled = false;
             saveDB(db);
             return reply('`—͟͟͞͞𖣘 Anti-Forwarding DISABLED`');
+        }
+
+        // .antiforwarding delete / kick — direct shorthand, same style as antilink
+        if (sub === 'delete') {
+            db[groupId].action = 'delete';
+            saveDB(db);
+            return reply('`—͟͟͞͞𖣘 Action set to: DELETE`');
+        }
+        if (sub === 'kick') {
+            db[groupId].action = 'kick';
+            saveDB(db);
+            return reply('`—͟͟͞͞𖣘 Action set to: KICK`');
+        }
+
+        // .antiforwarding warn [1-3]
+        if (sub === 'warn') {
+            const n = parseInt(args[1]);
+            if (!n || n < 1 || n > 3) return reply(`\`✘ Usage: ${prefix || '.'}antiforwarding warn [1-3]\nMax warnings allowed is 3.\``);
+            db[groupId].action = 'warn';
+            db[groupId].maxWarns = n;
+            saveDB(db);
+            return reply(`\`—͟͟͞͞𖣘 Action set to WARN. Max ${n} warnings before kick.\``);
         }
 
         // .antiforwarding action delete|warn|kick
