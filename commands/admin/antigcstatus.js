@@ -37,7 +37,7 @@ module.exports = {
     async execute(bot, m, args) {
         const db = loadDB();
         const groupId = m.chat;
-        if (!db[groupId]) db[groupId] = { enabled: false, action: 'warn' };
+        if (!db[groupId]) db[groupId] = { enabled: false, action: 'warn', maxWarns: 3 };
 
         const sub  = (args[0] || '').toLowerCase();
         const rest = args.slice(1).join(' ').trim();
@@ -50,10 +50,13 @@ module.exports = {
                 `📊 *Anti-Group-Status Settings*\n\n` +
                 `Status : *${status}*\n` +
                 `Action : *${action.toUpperCase()}*\n` +
-                `Warnings: 3\n\n` +
+                `Warnings: ${db[groupId].maxWarns || 3}\n\n` +
                 `*Usage:*\n` +
                 `• \`${bot.prefix}antigcstatus on\`\n` +
                 `• \`${bot.prefix}antigcstatus off\`\n` +
+                `• \`${bot.prefix}antigcstatus delete\`\n` +
+                `• \`${bot.prefix}antigcstatus kick\`\n` +
+                `• \`${bot.prefix}antigcstatus warn [1-3]\`\n` +
                 `• \`${bot.prefix}antigcstatus action delete|warn|kick\`\n` +
                 `• \`${bot.prefix}antigcstatus status\``
             );
@@ -73,6 +76,28 @@ module.exports = {
             return m.reply('❌ *Anti-Group-Status Disabled*\n\nMembers can now post to group status freely.');
         }
 
+        // .antigcstatus delete / kick — direct shorthand, same style as antilink
+        if (sub === 'delete') {
+            db[groupId].action = 'delete';
+            saveDB(db);
+            return m.reply('✅ Action set to: *DELETE*');
+        }
+        if (sub === 'kick') {
+            db[groupId].action = 'kick';
+            saveDB(db);
+            return m.reply('✅ Action set to: *KICK*');
+        }
+
+        // .antigcstatus warn [1-3]
+        if (sub === 'warn') {
+            const n = parseInt(args[1]);
+            if (!n || n < 1 || n > 3) return m.reply(`✘ Usage: ${bot.prefix}antigcstatus warn [1-3]\nMax warnings allowed is 3.`);
+            db[groupId].action = 'warn';
+            db[groupId].maxWarns = n;
+            saveDB(db);
+            return m.reply(`✅ Action set to WARN. Max ${n} warnings before kick.`);
+        }
+
         // .antigcstatus action delete|warn|kick
         if (sub === 'action') {
             const newAction = rest.toLowerCase();
@@ -87,3 +112,4 @@ module.exports = {
         return m.reply('✘ Invalid sub-command. Use: on, off, action delete|warn|kick, status');
     },
 };
+                   
