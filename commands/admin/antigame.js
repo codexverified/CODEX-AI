@@ -30,7 +30,7 @@ Usage:
 ${bot.prefix}antigame on/off
 ${bot.prefix}antigame delete
 ${bot.prefix}antigame kick
-${bot.prefix}antigame warn [1-10]`);
+${bot.prefix}antigame warn [1-3]`);
 
         if (sub === 'on')     { s.enabled = true;  save(); return await m.reply('Anti-Game enabled.'); }
         if (sub === 'off')    { s.enabled = false; save(); return await m.reply('Anti-Game disabled.'); }
@@ -38,7 +38,7 @@ ${bot.prefix}antigame warn [1-10]`);
         if (sub === 'kick')   { s.action = 'kick';   save(); return await m.reply('Action set to KICK.'); }
         if (sub === 'warn') {
             const n = parseInt(args[1]);
-            if (!n || n < 1 || n > 10) return await m.reply(`Usage: ${bot.prefix}antigame warn [1-10]`);
+            if (!n || n < 1 || n > 3) return await m.reply(`Usage: ${bot.prefix}antigame warn [1-3]\nMax warnings allowed is 3.`);
             s.action = 'warn'; s.maxWarns = n; save();
             return await m.reply(`Action set to WARN. Max ${n} warnings before kick.`);
         }
