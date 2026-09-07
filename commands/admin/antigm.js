@@ -32,7 +32,7 @@ module.exports = {
 *Commands:*
 ${bot.prefix}antigm on / off
 ${bot.prefix}antigm action warn / kick / delete
-${bot.prefix}antigm maxwarns <number>
+${bot.prefix}antigm maxwarns [1-3]
 
 _Detects when members mention this group in their WhatsApp status and takes the configured action._`
             );
@@ -55,9 +55,19 @@ _Detects when members mention this group in their WhatsApp status and takes the 
             return m.reply(`✅ Action set to *${a1.toUpperCase()}*.`);
         }
 
+        // .antigm warn [1-3] — same shorthand style as antilink/antispam/etc:
+        // sets action to warn AND the warn cap in one go.
+        if (a0 === 'warn') {
+            const n = parseInt(a1);
+            if (!n || n < 1 || n > 3) return m.reply(`Usage: ${bot.prefix}antigm warn [1-3]\nMax warnings allowed is 3.`);
+            db[jid] = { ...cfg, action: 'warn', maxWarns: n };
+            saveDB(db);
+            return m.reply(`✅ Action set to WARN. Max ${n} warnings before kick.`);
+        }
+
         if (a0 === 'maxwarns') {
             const n = parseInt(a1);
-            if (!n || n < 1) return m.reply(`Usage: ${bot.prefix}antigm maxwarns <number>`);
+            if (!n || n < 1 || n > 3) return m.reply(`Usage: ${bot.prefix}antigm maxwarns [1-3]\nMax warnings allowed is 3.`);
             db[jid] = { ...cfg, maxWarns: n };
             saveDB(db);
             return m.reply(`✅ Max warns set to *${n}*.`);
