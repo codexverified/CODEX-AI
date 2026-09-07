@@ -24,10 +24,10 @@ module.exports = {
     groupOnly: true,
     adminOnly: true,
 
-    execute: async (sock, m, { args, reply }) => {
+    execute: async (sock, m, { args, reply, prefix }) => {
         const db = loadDB();
         const groupId = m.chat;
-        if (!db[groupId]) db[groupId] = { enabled: false, action: 'kick' };
+        if (!db[groupId]) db[groupId] = { enabled: false, action: 'kick', maxWarns: 3 };
 
         const sub  = (args[0] || '').toLowerCase();
         const rest = args.slice(1).join(' ').trim();
@@ -40,11 +40,14 @@ module.exports = {
                 `╭─❍ *ANTI-BOT* 𓉤\n` +
                 `│ Status   : *${status}*\n` +
                 `│ Action   : *${action.toUpperCase()}*\n` +
-                `│ Warnings : 3\n` +
+                `│ Warnings : ${db[groupId].maxWarns || 3}\n` +
                 `│\n` +
                 `│ Commands:\n` +
                 `│ .antibot on\n` +
                 `│ .antibot off\n` +
+                `│ .antibot delete\n` +
+                `│ .antibot kick\n` +
+                `│ .antibot warn [1-3]\n` +
                 `│ .antibot action delete|warn|kick\n` +
                 `╰────────────────`
             );
@@ -64,6 +67,28 @@ module.exports = {
             return reply('`—͟͟͞͞𖣘 Anti-Bot DISABLED`');
         }
 
+        // .antibot delete / kick — direct shorthand, same style as antilink
+        if (sub === 'delete') {
+            db[groupId].action = 'delete';
+            saveDB(db);
+            return reply('`—͟͟͞͞𖣘 Action set to: DELETE`');
+        }
+        if (sub === 'kick') {
+            db[groupId].action = 'kick';
+            saveDB(db);
+            return reply('`—͟͟͞͞𖣘 Action set to: KICK`');
+        }
+
+        // .antibot warn [1-3]
+        if (sub === 'warn') {
+            const n = parseInt(args[1]);
+            if (!n || n < 1 || n > 3) return reply(`\`✘ Usage: ${prefix || '.'}antibot warn [1-3]\nMax warnings allowed is 3.\``);
+            db[groupId].action = 'warn';
+            db[groupId].maxWarns = n;
+            saveDB(db);
+            return reply(`\`—͟͟͞͞𖣘 Action set to WARN. Max ${n} warnings before kick.\``);
+        }
+
         // .antibot action delete|warn|kick
         if (sub === 'action') {
             const newAction = rest.toLowerCase();
@@ -78,3 +103,4 @@ module.exports = {
         return reply('`✘ Invalid sub-command`');
     }
 };
+                
