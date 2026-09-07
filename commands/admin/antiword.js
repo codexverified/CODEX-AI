@@ -24,10 +24,10 @@ module.exports = {
     groupOnly: true,
     adminOnly: true,
 
-    execute: async (sock, m, { args, reply }) => {
+    execute: async (sock, m, { args, reply, prefix }) => {
         const db = loadDB();
         const groupId = m.chat;
-        if (!db[groupId]) db[groupId] = { enabled: false, words: [], action: 'warn' };
+        if (!db[groupId]) db[groupId] = { enabled: false, words: [], action: 'warn', maxWarns: 3 };
 
         const sub  = (args[0] || '').toLowerCase();
         const rest = args.slice(1).join(' ').trim();
@@ -38,15 +38,18 @@ module.exports = {
             const action = db[groupId].action || 'warn';
             const words = db[groupId].words || [];
             return reply(
-                `╭─❍ *ANTI-WORD* 𓉤\n` +
+                `╭─❍ *ANTI-WORD*\n` +
                 `│ Status   : *${status}*\n` +
                 `│ Action   : *${action.toUpperCase()}*\n` +
-                `│ Warnings : 3\n` +
+                `│ Warnings : ${db[groupId].maxWarns || 3}\n` +
                 `│ Words    : ${words.length}\n` +
                 `│\n` +
                 `│ Commands:\n` +
                 `│ .antiword on\n` +
                 `│ .antiword off\n` +
+                `│ .antiword delete\n` +
+                `│ .antiword kick\n` +
+                `│ .antiword warn [1-3]\n` +
                 `│ .antiword action delete|warn|kick\n` +
                 `│ .antiword add <word>\n` +
                 `│ .antiword remove <word>\n` +
@@ -68,6 +71,28 @@ module.exports = {
             db[groupId].enabled = false;
             saveDB(db);
             return reply('`—͟͟͞͞𖣘 Anti-Word DISABLED`');
+        }
+
+        // .antiword delete / kick — direct shorthand, same style as antilink
+        if (sub === 'delete') {
+            db[groupId].action = 'delete';
+            saveDB(db);
+            return reply('`—͟͟͞͞𖣘 Action set to: DELETE`');
+        }
+        if (sub === 'kick') {
+            db[groupId].action = 'kick';
+            saveDB(db);
+            return reply('`—͟͟͞͞𖣘 Action set to: KICK`');
+        }
+
+        // .antiword warn [1-3]
+        if (sub === 'warn') {
+            const n = parseInt(args[1]);
+            if (!n || n < 1 || n > 3) return reply(`\`✘ Usage: ${prefix || '.'}antiword warn [1-3]\nMax warnings allowed is 3.\``);
+            db[groupId].action = 'warn';
+            db[groupId].maxWarns = n;
+            saveDB(db);
+            return reply(`\`—͟͟͞͞𖣘 Action set to WARN. Max ${n} warnings before kick.\``);
         }
 
         // .antiword action delete|warn|kick
@@ -118,3 +143,4 @@ module.exports = {
         return reply('`✘ Invalid sub-command`');
     }
 };
+                               
