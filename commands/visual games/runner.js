@@ -223,6 +223,13 @@ canvas#field {
     var nextBeepAt;
     var muted = false;
     var actx = null;
+    var countingDown = false;
+    var countdownTimer = null;
+    var countdownValue = '';
+    var backgroundGain = null;
+    var backgroundEngine = null;
+    var backgroundPulse = null;
+    var backgroundRunning = false;
 
     function readNum(key) {
         try {
@@ -297,6 +304,62 @@ canvas#field {
         setTimeout(function () {
             blip(110, 0.3, 'square', 0.06);
         }, 110);
+    }
+
+    function sfxCountdown(value) {
+        if (value === 'GO') {
+            blip(520, 0.16, 'square', 0.05);
+        } else {
+            blip(330, 0.1, 'square', 0.03);
+        }
+    }
+
+    function startBackground() {
+        if (muted || backgroundRunning) return;
+
+        var a = audio();
+        if (!a) return;
+
+        backgroundGain = a.createGain();
+        backgroundEngine = a.createOscillator();
+        backgroundPulse = a.createOscillator();
+
+        backgroundEngine.type = 'sawtooth';
+        backgroundEngine.frequency.value = 64;
+        backgroundPulse.type = 'triangle';
+        backgroundPulse.frequency.value = 2.6;
+
+        backgroundGain.gain.setValueAtTime(0.0001, a.currentTime);
+        backgroundGain.gain.exponentialRampToValueAtTime(0.016, a.currentTime + 0.4);
+        backgroundEngine.connect(backgroundGain);
+        backgroundPulse.connect(backgroundGain);
+        backgroundGain.connect(a.destination);
+        backgroundEngine.start();
+        backgroundPulse.start();
+        backgroundRunning = true;
+    }
+
+    function stopBackground() {
+        if (!backgroundRunning) return;
+
+        var engine = backgroundEngine;
+        var pulse = backgroundPulse;
+        var a = actx;
+
+        if (a && backgroundGain) {
+            backgroundGain.gain.cancelScheduledValues(a.currentTime);
+            backgroundGain.gain.setValueAtTime(Math.max(backgroundGain.gain.value, 0.0001), a.currentTime);
+            backgroundGain.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.14);
+        }
+
+        backgroundEngine = null;
+        backgroundPulse = null;
+        backgroundRunning = false;
+
+        setTimeout(function () {
+            try { if (engine) engine.stop(); } catch (e) {}
+            try { if (pulse) pulse.stop(); } catch (e) {}
+        }, 170);
     }
 
     function paintSound() {
@@ -949,7 +1012,7 @@ canvas#field {
         ctx.fillStyle = '#d9f7ff';
         ctx.font = 'bold 15px monospace';
         ctx.fillText(
-            'TAP TO START',
+            countingDown ? countdownValue : 'TAP TO START',
             W / 2,
             H * 0.45
         );
@@ -989,6 +1052,7 @@ canvas#field {
     function endGame() {
         running = false;
         ended = true;
+        stopBackground();
 
         sfxCrash();
 
@@ -1023,10 +1087,44 @@ canvas#field {
         draw();
     }
 
-    function begin() {
+    function beginGame() {
         reset();
         running = true;
         audio();
+        startBackground();
+    }
+
+    function begin() {
+        if (running || countingDown) return;
+
+        reset();
+        countingDown = true;
+        countdownValue = '3';
+
+        var values = ['3', '2', '1', 'GO'];
+        var index = 0;
+
+        function next() {
+            if (!countingDown) return;
+
+            countdownValue = values[index++];
+            sfxCountdown(countdownValue);
+            draw();
+
+            if (index < values.length) {
+                countdownTimer = setTimeout(next, 1000);
+                return;
+            }
+
+            countdownTimer = setTimeout(function () {
+                countdownTimer = null;
+                countingDown = false;
+                countdownValue = '';
+                beginGame();
+            }, 450);
+        }
+
+        next();
     }
 
     function jump() {
@@ -1085,6 +1183,9 @@ canvas#field {
 
         if (!muted) {
             sfxPoint();
+            if (running) startBackground();
+        } else {
+            stopBackground();
         }
     });
 
@@ -1205,6 +1306,9 @@ canvas#field {
     });
 
     window.addEventListener('pagehide', function () {
+        if (countdownTimer) clearTimeout(countdownTimer);
+        countingDown = false;
+        stopBackground();
         if (rafId) {
             cancelAnimationFrame(rafId);
         }

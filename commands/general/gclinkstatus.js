@@ -4,12 +4,12 @@
  *
  * ✅ No admin required — works as a regular group member
  * ✅ Works from DM — as long as the bot is already a member of that group
- * ✅ Same text/link/image/video/audio/document + color support as .gcstatus
+ * ✅ Same text/link/image/video/audio/document + dual-color support as .gcstatus
  *
  * Usage:
  *   .gclinkstatus Hello everyone!                              (reply to a message containing the link)
  *   .gclinkstatus https://chat.whatsapp.com/XXXXXXXX Hello!    (paste the link directly)
- *   .gclinkstatus Hello everyone!|blue
+ *   .gclinkstatus Hello everyone!|bg:blue|fg:white
  *   Reply to a photo    + .gclinkstatus [caption]   (link in the same replied-to message, or in your command text)
  *   Reply to a video    + .gclinkstatus [caption]
  *   Reply to an audio   + .gclinkstatus
@@ -21,7 +21,7 @@
  * Colors:
  *   blue, green, yellow, orange, red, purple, gray, black, white, cyan,
  *   teal, lime, pink, indigo, navy, gold, brown, silver
- *   — or any raw hex code like #FF00AA.
+ *   — or any raw hex code like #FF00AA, using bg: and fg: prefixes.
  */
 
 const {
@@ -102,7 +102,7 @@ module.exports = {
 
 Usage:
 ${bot.prefix}gclinkstatus https://chat.whatsapp.com/XXXXXXXX Hello world!
-${bot.prefix}gclinkstatus Hello everyone!|blue   (reply to a message containing the link)
+${bot.prefix}gclinkstatus Hello everyone!|bg:blue|fg:white   (reply to a message containing the link)
 Reply to 📷 photo    + ${bot.prefix}gclinkstatus [caption]
 Reply to 🎥 video    + ${bot.prefix}gclinkstatus [caption]
 Reply to 🎵 audio    + ${bot.prefix}gclinkstatus
@@ -111,7 +111,7 @@ Reply to 📄 document + ${bot.prefix}gclinkstatus [caption]
 Only need to target the current group, "all", or a JID — or want to clear
 tracked statuses? Use ${bot.prefix}gcstatus instead.
 
-Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan, teal, lime, pink, indigo, navy, gold, brown, silver (or a raw hex code)`
+Colors: use bg: and fg: with named colors or raw hex codes, e.g. bg:blue|fg:white`
             );
         }
 
@@ -120,8 +120,8 @@ Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan, teal
 
         // The caption/color comes from the link-stripped text, since the
         // original text may have swallowed link characters if parsed as-is.
-        const { text: parsedText, color } = parsePipeArgs(targetInfo.strippedRaw);
-        const bgColor = color || TEXT_BG_COLOR;
+        const { text: parsedText, backgroundColor, textColor } = parsePipeArgs(targetInfo.strippedRaw);
+        const bgColor = backgroundColor || TEXT_BG_COLOR;
 
         // ── IMAGE (or sticker treated as image) ───────────────────────────
         if (imgMsg) {
@@ -199,7 +199,7 @@ Colors: blue, green, yellow, orange, red, purple, gray, black, white, cyan, teal
                         ...(preview.imageBuffer ? { previewImage: preview.imageBuffer }        : {}),
                     };
                 }
-                return { text: messageText, backgroundColor: bgColor, font: 0 };
+                return { text: messageText, backgroundColor: bgColor, textColor, font: 0 };
             });
             return m.reply(`✅ Posted to group status!\n${isUrl ? '🔗 Type: Link' : '💬 Type: Text'}\n📝 "${messageText.slice(0, 60)}${messageText.length > 60 ? '…' : ''}"`);
         } catch (err) {
