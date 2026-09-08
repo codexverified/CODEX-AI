@@ -1,8 +1,9 @@
 const fs = require('fs-extra');
 const { getTarget } = require('../../lib/getTarget');
+const { getQuoted } = require('../../lib/getQuoted');
 
-const WARN_PATH = './database/warnings.json';
-const MAX_WARNS = 5;
+const WARN_PATH  = './database/warnings.json';
+const MAX_WARNS  = 3; // hard cap — matches every anti-system's warn[1-3] limit
 
 function loadDB() {
     try { return JSON.parse(fs.readFileSync(WARN_PATH, 'utf8')); } catch { return {}; }
@@ -36,6 +37,17 @@ module.exports = {
             return await m.reply('❌ You cannot warn yourself.');
         }
 
+        // BUG (found): nothing stopped an admin (accidentally or otherwise)
+        // from warning/kicking the bot itself or the owner — a mistaken
+        // .warn on either of them would count down toward an actual kick.
+        // Neither should ever be a valid warn target.
+        if (bot.permission.isBotSelf(target)) {
+            return await m.reply('❌ I can\'t warn myself.');
+        }
+        if (bot.permission.isOwner(target)) {
+            return await m.reply('❌ The owner can\'t be warned.');
+        }
+
         // Reason: everything in args that is not the mention
         const reason = args.filter(a => !a.startsWith('@')).join(' ').trim() || 'Reason not specified';
 
@@ -55,6 +67,17 @@ module.exports = {
         db[key].count++;
         db[key].history.push({ reason, issuer: m.sender, issuerName, time });
         const count = db[key].count;
+
+        // Delete the message being warned for. If this .warn was sent as a
+        // reply to the offending message, that quoted message is what gets
+        // deleted (e.g. admin replies "fuck you" with .warn spam) — the
+        // flagged message disappears the same way an anti-system deletion
+        // would. If .warn was just a tag with no reply, there's no specific
+        // message to delete, so this is skipped.
+        const quoted = getQuoted(bot, m);
+        if (quoted?.key) {
+            try { await bot.sock.sendMessage(m.chat, { delete: quoted.key }); } catch {}
+        }
 
         if (count >= MAX_WARNS) {
             // Kick on max warns
