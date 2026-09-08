@@ -95,7 +95,7 @@ module.exports = {
                             || quoted?.documentMessage?.caption || '';
         void quotedCaption; // not used for target resolution in this command
 
-        const { text: parsedText, backgroundColor, textColor, target } = parsePipeArgs(rawFull);
+        const { text: parsedText, backgroundColor, textColor, font, target } = parsePipeArgs(rawFull);
 
         const imgMsg   = quoted?.imageMessage || quoted?.stickerMessage;
         const hasMedia = !!(imgMsg || quoted?.videoMessage || quoted?.audioMessage || quoted?.documentMessage);
@@ -228,7 +228,7 @@ No admin role needed.`
                         ...(preview.imageBuffer ? { previewImage: preview.imageBuffer }        : {}),
                     };
                 }
-                return { text: messageText, backgroundColor: bgColor, textColor, font: 0 };
+                return { text: messageText, backgroundColor: bgColor, textColor, font };
             });
             return m.reply(result.broadcast
                 ? `✅ Broadcast done.\nSuccess: ${result.success}\nFailed: ${result.failed}`

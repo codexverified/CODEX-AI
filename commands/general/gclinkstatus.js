@@ -120,7 +120,7 @@ Colors: use bg: and fg: with named colors or raw hex codes, e.g. bg:blue|fg:whit
 
         // The caption/color comes from the link-stripped text, since the
         // original text may have swallowed link characters if parsed as-is.
-        const { text: parsedText, backgroundColor, textColor } = parsePipeArgs(targetInfo.strippedRaw);
+        const { text: parsedText, backgroundColor, textColor, font } = parsePipeArgs(targetInfo.strippedRaw);
         const bgColor = backgroundColor || TEXT_BG_COLOR;
 
         // ── IMAGE (or sticker treated as image) ───────────────────────────
@@ -199,7 +199,7 @@ Colors: use bg: and fg: with named colors or raw hex codes, e.g. bg:blue|fg:whit
                         ...(preview.imageBuffer ? { previewImage: preview.imageBuffer }        : {}),
                     };
                 }
-                return { text: messageText, backgroundColor: bgColor, textColor, font: 0 };
+                return { text: messageText, backgroundColor: bgColor, textColor, font };
             });
             return m.reply(`✅ Posted to group status!\n${isUrl ? '🔗 Type: Link' : '💬 Type: Text'}\n📝 "${messageText.slice(0, 60)}${messageText.length > 60 ? '…' : ''}"`);
         } catch (err) {
