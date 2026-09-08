@@ -5,16 +5,16 @@
  * ✅ No admin required — works as a regular group member
  * ✅ Uses the official groupStatusMessageV2 API (Baileys), with a manual
  *    relay fallback if the high-level `groupStatus:true` shortcut fails
- * ✅ Separate background and text colors ("|bg:blue|fg:white")
+ * ✅ Background colors for text status ("|bg:blue")
  * ✅ Broadcast to every group the bot is in, or target one specific group
  * ✅ Tracks every status it posts so they can all be pulled down at once
  *
  * Usage:
  *   .gcstatus Hello world!                      → text status (in the current group)
  *   .gcstatus Hello world!|blue                  → text status with a named color
- *   .gcstatus Hello world!|bg:#00FF88|fg:white    → text with background and text colors
+ *   .gcstatus Hello world!|bg:#00FF88           → text with a raw background color
  *   .gcstatus Hello world!|all                    → broadcast text to every group
- *   .gcstatus Hello world!|bg:blue|fg:white|all   → broadcast, dual-colored
+ *   .gcstatus Hello world!|bg:blue|all           → broadcast with background color
  *   .gcstatus Hello world!|12036...@g.us          → post to one specific group (works from DM)
  *   .gcstatus Hello world!|blue|12036...@g.us     → ...with a color too, any order works
  *   .gcstatus https://example.com                 → link status (with preview)
@@ -26,7 +26,7 @@
  *   Reply to an audio   + .gcstatus                → voice-note group status
  *   Reply to a document + .gcstatus [caption]      → document group status
  *
- *   Every content type above also accepts "|bg:color", "|fg:color", "|all" and
+ *   Every content type above also accepts "|bg:color", "|all" and
  *   "|<groupJid>" pipe modifiers, in any order.
  *
  * Only have an invite link, not the JID? Use .gclinkstatus instead — it's a
@@ -95,7 +95,7 @@ module.exports = {
                             || quoted?.documentMessage?.caption || '';
         void quotedCaption; // not used for target resolution in this command
 
-        const { text: parsedText, backgroundColor, textColor, font, target } = parsePipeArgs(rawFull);
+        const { text: parsedText, backgroundColor, target } = parsePipeArgs(rawFull);
 
         const imgMsg   = quoted?.imageMessage || quoted?.stickerMessage;
         const hasMedia = !!(imgMsg || quoted?.videoMessage || quoted?.audioMessage || quoted?.documentMessage);
@@ -108,7 +108,7 @@ module.exports = {
 
 Usage:
 ${bot.prefix}gcstatus Hello world!               — text status
-${bot.prefix}gcstatus Hello world!|bg:blue|fg:white — colored text status
+${bot.prefix}gcstatus Hello world!|bg:blue — colored background status
 ${bot.prefix}gcstatus https://link.com            — link/preview status
 ${bot.prefix}gcstatus Hello world!|all            — broadcast to every group
 ${bot.prefix}gcstatus Hello world!|12036...@g.us  — post to one specific group
@@ -122,7 +122,7 @@ Reply to 💬 any message + ${bot.prefix}gcstatus
 
 Only have an invite link, not the JID? Use ${bot.prefix}gclinkstatus instead.
 
-Colors: use bg: and fg: with named colors or raw hex codes, e.g. bg:blue|fg:white
+Colors: use bg: with named colors or raw hex codes, e.g. bg:blue
 Color and target can be combined, in either order: "Hello|blue|all".
 
 No admin role needed.`
@@ -228,7 +228,7 @@ No admin role needed.`
                         ...(preview.imageBuffer ? { previewImage: preview.imageBuffer }        : {}),
                     };
                 }
-                return { text: messageText, backgroundColor: bgColor, textColor, font };
+                return { text: messageText, backgroundColor: bgColor };
             });
             return m.reply(result.broadcast
                 ? `✅ Broadcast done.\nSuccess: ${result.success}\nFailed: ${result.failed}`
