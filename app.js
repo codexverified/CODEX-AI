@@ -852,7 +852,7 @@ ${newText || "(could not read new text)"}
 —͟͟͞͞𖣘 *CMDS:* ${totalCmds} loaded (${nativeCmds} built-in, ${pluginCmds} plugin)
 —͟͟͞͞𖣘 *TIME:* ${time}
 
-—͟͟͞͞𖣘 *ANTIDELETE* ${Object.keys(antiDelDb).filter((k) => !k.startsWith("_")).length > 0 ? "���" : "✗"}
+—͟͟͞͞𖣘 *ANTIDELETE* ${Object.keys(antiDelDb).filter((k) => !k.startsWith("_")).length > 0 ? "✓" : "✗"}
 —͟͟͞͞𖣘 *ANTIEDIT* ${Object.keys(antiEditDb.chats || {}).length > 0 ? "✓" : "✗"}
 —͟͟͞͞𖣘 *AUTOREACT* ${autoReactDb.enabled ? "✓" : "✗"}
 —͟͟͞͞𖣘 *AUTOREPLY* ${autoRepDb.enabled ? "✓" : "✗"}
