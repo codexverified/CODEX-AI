@@ -1,10 +1,16 @@
 const fs   = require('fs-extra');
 const path = require('path');
+// Anchored to the project root (not process.cwd()) so persistent data
+// lands in the same place regardless of the directory the process was
+// launched from. CODEX_PROJECT_ROOT is a test-only override; production
+// never sets it.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+
 const { parseTime, humanize, schedule, cancel } = require('../../lib/mute-core');
 
 // Same path/shape that lib/antiSystems.js's "Block-Sticker" enforcement
 // already reads: { [groupId]: [base64Hash, base64Hash, ...] }
-const DB_PATH = path.join(process.cwd(), 'database/blockedstickers.json');
+const DB_PATH = path.join(PROJECT_ROOT, 'database/blockedstickers.json');
 const readDB  = () => { try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); } catch { return {}; } };
 const saveDB  = (d) => { fs.ensureDirSync(path.dirname(DB_PATH)); fs.writeFileSync(DB_PATH, JSON.stringify(d, null, 2)); };
 

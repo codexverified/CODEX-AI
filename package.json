@@ -6,7 +6,10 @@
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js",
-        "postinstall": "node scripts/verify-deploy.js"
+        "postinstall": "node scripts/verify-deploy.js",
+        "verify-deploy": "node scripts/verify-deploy.js",
+        "verify-deploy:strict": "STRICT_DEPLOY_CHECK=1 node scripts/verify-deploy.js",
+        "test": "node tests/connection.test.js"
     },
     "keywords": [
         "whatsapp",
@@ -18,7 +21,7 @@
     "license": "MIT",
     "dependencies": {
         "@adiwajshing/keyed-db": "^0.2.4",
-        "@codexverified/baileys": "2.13.13",
+        "@codexverified/baileys": "2.12.12",
         "@distube/ytdl-core": "^4.16.12",
         "@faker-js/faker": "^10.3.0",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -31,7 +34,6 @@
         "canvas": "npm:@napi-rs/canvas@^1.0.2",
         "chalk": "^4.1.2",
         "cheerio": "^1.2.0",
-        "child_process": "^1.0.2",
         "crypto-js": "latest",
         "docx": "^9.6.1",
         "dotenv": "^17.3.1",
@@ -58,7 +60,6 @@
         "node-gtts": "^2.0.2",
         "node-webpmux": "^3.1.0",
         "openai": "^6.22.0",
-        "path": "^0.12.7",
         "pdf-lib": "^1.17.1",
         "pdfkit": "^0.17.2",
         "pino": "^8.17.2",
@@ -72,7 +73,6 @@
         "temp-mail-io": "^0.0.11",
         "terser": "^5.46.1",
         "tesseract.js": "^7.0.0",
-        "util": "^0.12.5",
         "uuid": "^13.0.0",
         "wa-sticker-formatter": "^4.4.4",
         "youtubei.js": "^16.0.1",

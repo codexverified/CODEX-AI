@@ -2,6 +2,12 @@
 
 const fs = require('fs');
 const path = require('path');
+// Anchored to the project root (not process.cwd()) so persistent data
+// lands in the same place regardless of the directory the process was
+// launched from. CODEX_PROJECT_ROOT is a test-only override; production
+// never sets it.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+
 const { exec } = require('child_process');
 const sharp = require('sharp');
 const { downloadContentFromMessage } = require('@codexverified/baileys');
@@ -81,7 +87,7 @@ module.exports = {
                 metadata = { pages: 1, delay: [100] };
             }
             
-            const tempDir = path.join(process.cwd(), 'temp');
+            const tempDir = path.join(PROJECT_ROOT, 'temp');
 
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir, { recursive: true });

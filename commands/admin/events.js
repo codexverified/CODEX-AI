@@ -1,5 +1,11 @@
 const fs   = require('fs-extra');
 const path = require('path');
+// Anchored to the project root (not process.cwd()) so persistent data
+// lands in the same place regardless of the directory the process was
+// launched from. CODEX_PROJECT_ROOT is a test-only override; production
+// never sets it.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+
 
 // Same file setwelcome.js / setgoodbye.js already use — "one file, all group
 // event config". This command only ever merges new fields into it, never
@@ -7,7 +13,7 @@ const path = require('path');
 // `.events on/off` intentionally includes them (per spec: those two already
 // have their own dedicated commands, but `.events on` still switches them on
 // too, since it's meant to be the single "turn everything basic on" switch).
-const DB     = path.join(process.cwd(), 'database/groupEvents.json');
+const DB     = path.join(PROJECT_ROOT, 'database/groupEvents.json');
 const readDB = () => { try { return JSON.parse(fs.readFileSync(DB, 'utf8')); } catch { return {}; } };
 const saveDB = (d) => { fs.ensureDirSync(path.dirname(DB)); fs.writeFileSync(DB, JSON.stringify(d, null, 2)); };
 

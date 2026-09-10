@@ -6,7 +6,11 @@ const util = require("util");
 
 const execPromise = util.promisify(exec);
 
-const ROOT = process.cwd();
+// Anchored to the project root (not process.cwd()) — this is used as the
+// exec() cwd for git/pnpm commands below and as a directory-traversal
+// boundary (see the startsWith(ROOT) check), so it must be the real
+// install directory regardless of the process's launch-time cwd.
+const ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, "..", "..");
 const VERSION_FILE = path.join(ROOT, ".version");
 const VARS_FILE = path.join(ROOT, "database/variables.json");
 

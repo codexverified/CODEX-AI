@@ -18,6 +18,12 @@ const fs = require('fs');
 // ── Isolated CWD so this never touches the real ./database or ./session ────
 const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-conn-test-'));
 process.chdir(testRoot);
+// lib/connection.js resolves persistent paths (session/, etc.) from the
+// project's own install directory now, not process.cwd() — see the
+// process.cwd()-independence fix. CODEX_PROJECT_ROOT is the test-only
+// escape hatch for that, so this suite can still redirect session storage
+// into the throwaway testRoot instead of writing into the real repo.
+process.env.CODEX_PROJECT_ROOT = testRoot;
 fs.mkdirSync(path.join(testRoot, 'database'), { recursive: true });
 fs.mkdirSync(path.join(testRoot, 'session'), { recursive: true });
 fs.writeFileSync(path.join(testRoot, 'config.json'), JSON.stringify({ owner: { number: '10000000000' } }));
@@ -195,22 +201,29 @@ async function waitUntil(fn, timeoutMs = 2000, stepMs = 10) {
     assert.strictEqual(bot.sock, sock1);
     sock1.ev._emit('connection.update', { connection: 'open' });
     assert.ok(sock1.ev._listenerCount('messages.upsert') > 0, 'first socket should have listeners registered');
-    assert.ok(bot._connectionHeartbeat, 'heartbeat interval should be set after open');
+    // NOTE: _connectionHeartbeat/_heartbeatInterval are legacy fields that
+    // _clearConnectionTimers() still defensively clears but that current
+    // code never sets (the periodic "connected" console log they used to
+    // drive was intentionally removed — see the comment above the
+    // "connection open" log line in lib/connection.js). Asserting they get
+    // set here was testing removed functionality, not a real regression;
+    // the watchdog interval below is the timer that actually matters.
     assert.ok(bot._connectionWatchdog, 'watchdog interval should be set after open');
+    assert.ok(bot._connGeneration >= 1, 'a connection generation token should be assigned');
 
-    const oldHeartbeat = bot._connectionHeartbeat;
     const oldWatchdog = bot._connectionWatchdog;
+    const oldGeneration = bot._connGeneration;
 
     await connection.startConnection(bot);
     assert.strictEqual(bot.sock, sock2, 'bot.sock should now point at the new socket');
     assert.strictEqual(sock1.ev._listenerCount('messages.upsert'), 0, 'old socket listeners must be removed');
     assert.ok(sock1.isEnded(), 'old socket must be ended');
+    assert.ok(bot._connGeneration > oldGeneration, 'reconnecting must bump the generation token');
     // The old timers must have been cleared, not just orphaned — Node
     // marks a cleared interval's _destroyed/_idleTimeout in a way we can
     // check indirectly: the bot's references must no longer point at them
     // once a fresh open cycle re-arms new ones.
     sock2.ev._emit('connection.update', { connection: 'open' });
-    assert.notStrictEqual(bot._connectionHeartbeat, oldHeartbeat, 'a fresh heartbeat interval should replace the old one');
     assert.notStrictEqual(bot._connectionWatchdog, oldWatchdog, 'a fresh watchdog interval should replace the old one');
   });
 
@@ -254,6 +267,48 @@ async function waitUntil(fn, timeoutMs = 2000, stepMs = 10) {
       lastDisconnect: { error: { output: { statusCode: 401 } } },
     });
     assert.ok(!fs.existsSync(sessionFile), 'session dir must be cleared immediately on a real 401 logout');
+  });
+
+  await test('watchdog does not treat a resolved sendPresenceUpdate() as proof of health', async () => {
+    // Regression test for the exact bug this repair targeted: a socket
+    // whose query() (the real request/response round trip) hangs/fails
+    // must be detected as unhealthy even though sendPresenceUpdate() (a
+    // fire-and-forget local write) keeps resolving successfully. Before
+    // the fix, _probeSocketHealth() called sendPresenceUpdate() FIRST and
+    // returned on its success, so this exact socket would have been
+    // reported healthy forever.
+    const bot = makeBot();
+    let presenceCalls = 0;
+    // Defensive: an earlier test in this file queues a socket it never
+    // consumes (the 401-logout test pushes sock3 but never starts it).
+    // Clear any leftover before pushing the one this test actually cares
+    // about, so makeWASocket() can't hand back a stale socket instead.
+    socketQueue.length = 0;
+    const sock = makeFakeSocket({
+      queryImpl: async () => {
+        throw new Error('simulated: no response from WhatsApp servers');
+      },
+    });
+    sock.sendPresenceUpdate = async () => {
+      // Still resolves — this is the misleading local-write success that
+      // must NOT be enough on its own once query() exists on the socket.
+      presenceCalls++;
+    };
+    socketQueue.push(sock);
+    await connection.startConnection(bot);
+    sock.ev._emit('connection.update', { connection: 'open' });
+
+    const nextSock = makeFakeSocket();
+    socketQueue.push(nextSock);
+    bot._lastLiveEventAt = Date.now() - (10 * 60 * 1000); // stale enough
+    // Drive the watchdog directly and deterministically instead of
+    // waiting on the real interval (see the test-only hook in
+    // lib/connection.js, set right next to setInterval(watchdogCycle, ...)).
+    for (let i = 0; i < 3; i++) {
+      await bot._watchdogCycleFn();
+    }
+    assert.ok(sock.isEnded(), 'a socket whose query() always fails must eventually be replaced, regardless of sendPresenceUpdate() succeeding');
+    assert.strictEqual(presenceCalls, 0, 'sendPresenceUpdate() must not even be tried while query() is available — it is not a valid substitute for the real probe');
   });
 
   console.log(`\n${passed} passed, ${failed} failed`);

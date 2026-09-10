@@ -74,7 +74,7 @@ module.exports = {
             } else if (mtype === 'audioMessage') {
                 await bot.sock.sendMessage(target, { audio: media, ptt: mediaMsg.ptt || false, mimetype: mediaMsg.mimetype || 'audio/ogg; codecs=opus' });
             } else if (mtype === 'stickerMessage') {
-                // Auto-upgrade stickers to premium 💎 (crysnovax/baileys)
+                // Auto-upgrade stickers to premium 💎 (@codexverified/baileys)
                 await bot.sock.sendMessage(target, { sticker: media, premium: 1 });
             } else if (mtype === 'documentMessage') {
                 await bot.sock.sendMessage(target, { document: media, mimetype: mediaMsg.mimetype || 'application/octet-stream', fileName: mediaMsg.fileName || 'repost-file' });

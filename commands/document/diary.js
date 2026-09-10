@@ -1,8 +1,14 @@
 
 const fs = require('fs');
 const path = require('path');
+// Anchored to the project root (not process.cwd()) so persistent data
+// lands in the same place regardless of the directory the process was
+// launched from. CODEX_PROJECT_ROOT is a test-only override; production
+// never sets it.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
 
-const DIARY_PATH = path.join(process.cwd(), 'database', 'diary.json');
+
+const DIARY_PATH = path.join(PROJECT_ROOT, 'database', 'diary.json');
 
 function loadDiary() {
     try { 

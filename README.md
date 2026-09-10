@@ -32,7 +32,7 @@
 <img src="https://img.shields.io/github/license/CEO-CODEX/CODEX-AI?style=for-the-badge&color=2ECC71" alt="License"/>
 <img src="https://img.shields.io/badge/version-3.0.0-00FFF0?style=for-the-badge" alt="Version"/>
 <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen?style=for-the-badge&logo=node.js" alt="Node"/>
-<img src="https://img.shields.io/badge/library-%40crysnovax%2Fbaileys-25D366?style=for-the-badge&logo=whatsapp" alt="Baileys"/>
+<img src="https://img.shields.io/badge/library-%40codexverified%2Fbaileys-25D366?style=for-the-badge&logo=whatsapp" alt="Baileys"/>
 
 </div>
 
@@ -57,7 +57,7 @@
 
 ## What is CODEX AI?
 
-**CODEX AI** is a full-stack, multifunctional WhatsApp bot built on Node.js and a hardened Baileys fork (`@crysnovax/baileys`). It runs on your own WhatsApp number and adds AI, group management, an entire RPG-style economy, and a GTA-inspired roleplay system on top of your chats — all through a fast, reliable and intact group managers, plugin-driven command engine and many more.
+**CODEX AI** is a full-stack, multifunctional WhatsApp bot built on Node.js and a hardened Baileys fork (`@codexverified/baileys`). It runs on your own WhatsApp number and adds AI, group management, an entire RPG-style economy, and a GTA-inspired roleplay system on top of your chats — all through a fast, reliable and intact group managers, plugin-driven command engine and many more.
 
 > Founded and built by **CODEX** 
 
@@ -71,7 +71,7 @@
 - A WhatsApp account (self-bot — runs on your own number)
 - Recommended: a VPS or hosting panel for 24/7 uptime
 
-> ⚠️ This project depends on the `@crysnovax/baileys` fork specifically — it will not run correctly on stock Baileys.
+> ⚠️ This project depends on the `@codexverified/baileys` fork specifically — it will not run correctly on stock Baileys.
 
 ---
 
@@ -82,7 +82,7 @@
 1. Fork this repository to your own GitHub account.
 2. On [Render](https://render.com), create a **New → Web Service** and connect your fork.
 3. Set:
-   - **Build Command:** `npm install`
+   - **Build Command:** `pnpm install`
    - **Start Command:** `npm start`
 4. Deploy the service once so Render has a live URL — you'll pair it in the next step.
 5. Generate your session ID from the [pairing site](https://codexai-paring-site.onrender.com/), then paste it into `sessionId` in `config.json` and redeploy (or commit the change and push).
@@ -93,13 +93,15 @@
 ```bash
 # Update & install prerequisites
 sudo apt update && sudo apt install -y nodejs npm git
+sudo npm install -g pnpm
 
 # Clone your fork
 git clone https://github.com/CEO-CODEX/CODEX-AI.git codex-ai
 cd codex-ai
 
-# Install dependencies
-npm install
+# Install dependencies (this repo pins exact versions via pnpm-lock.yaml —
+# use pnpm, not npm, so you actually get the locked/tested dependency graph)
+pnpm install
 
 # Configure the bot
 nano config.json   # set botName, prefix, owner.number, sessionId
@@ -129,7 +131,7 @@ Set `sessionId` and any other values directly in `config.json` before pushing, s
 1. Create a new server using a **Node.js** egg (Node 18+).
 2. Upload the project files via SFTP, or use the panel's **Git Pull** feature with your repo URL.
 3. In the **Startup** tab, set the startup command to `node index.js`.
-4. Open the console and run `npm install` once the files are in place.
+4. Open the console and run `pnpm install` once the files are in place (this repo pins versions via `pnpm-lock.yaml`; running plain `npm install` ignores that lockfile and can silently install different dependency versions than were tested).
 5. Edit `config.json` (via the panel's file manager) to set your `sessionId` and owner details.
 6. Start the server.
 
@@ -141,13 +143,14 @@ pkg update -y && pkg upgrade -y
 
 # Install prerequisites
 pkg install -y nodejs-lts git
+npm install -g pnpm
 
 # Clone the repo
 git clone https://github.com/CEO-CODEX/CODEX-AI.git codex-ai
 cd codex-ai
 
 # Install dependencies
-npm install
+pnpm install
 
 # Configure the bot
 nano config.json   # set botName, prefix, owner.number, sessionId

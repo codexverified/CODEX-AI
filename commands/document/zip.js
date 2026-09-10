@@ -1,6 +1,12 @@
 
 const fs = require('fs');
 const path = require('path');
+// Anchored to the project root (not process.cwd()) so persistent data
+// lands in the same place regardless of the directory the process was
+// launched from. CODEX_PROJECT_ROOT is a test-only override; production
+// never sets it.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+
 const archiver = require('archiver');
 
 module.exports = {
@@ -84,7 +90,7 @@ module.exports = {
             await m.reply('📦 Zipping files...');
 
             // Create temp directory in the root folder if it doesn't exist
-            const tempDir = path.join(process.cwd(), 'temp');
+            const tempDir = path.join(PROJECT_ROOT, 'temp');
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir, { recursive: true });
             }

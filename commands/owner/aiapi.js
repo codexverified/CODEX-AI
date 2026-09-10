@@ -1,9 +1,15 @@
 const fs   = require('fs-extra');
 const path = require('path');
+// Anchored to the project root (not process.cwd()) so persistent data
+// lands in the same place regardless of the directory the process was
+// launched from. CODEX_PROJECT_ROOT is a test-only override; production
+// never sets it.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+
 const axios = require('axios');
 const { PROVIDERS, clearMemory } = require('../../lib/smartAI');
 
-const DB = path.join(process.cwd(), 'database/variables.json');
+const DB = path.join(PROJECT_ROOT, 'database/variables.json');
 const readVars = () => { try { return JSON.parse(fs.readFileSync(DB, 'utf8')); } catch { return {}; } };
 const saveVars = (d) => { fs.ensureDirSync(path.dirname(DB)); fs.writeFileSync(DB, JSON.stringify(d, null, 2)); };
 

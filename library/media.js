@@ -35,7 +35,12 @@ async function download(message) {
 }
 
 function tempDir() {
-  const directory = path.join(process.cwd(), 'temp');
+  // Anchored to the project root (not process.cwd()) so the temp dir lands
+  // in the same place regardless of the directory the process was
+  // launched from. CODEX_PROJECT_ROOT is a test-only override; production
+  // never sets it.
+  const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..');
+  const directory = path.join(PROJECT_ROOT, 'temp');
   fs.mkdirSync(directory, { recursive: true });
   return directory;
 }

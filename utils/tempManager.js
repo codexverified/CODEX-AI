@@ -17,8 +17,13 @@
 
 const fs = require('fs');
 const path = require('path');
-
-const PROJECT_ROOT = process.cwd();
+// Anchored to the project root (not process.cwd()) so the temp dir lands
+// in the same place regardless of the directory the process was launched
+// from (e.g. a host that cds elsewhere before running `node index.js`).
+// CODEX_PROJECT_ROOT lets tests (and only tests) redirect persistent
+// storage to a throwaway directory; production never sets it, so this
+// always resolves to the real install directory there.
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..');
 const TEMP_DIR = path.join(PROJECT_ROOT, 'temp');
 
 function initializeTempSystem() {

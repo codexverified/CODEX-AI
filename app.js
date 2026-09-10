@@ -408,8 +408,48 @@ class CODEXAI {
       const http = require('http');
       const port = process.env.PORT || 3000;
       this._healthServer = http.createServer((req, res) => {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'ok', uptimeSec: Math.floor(process.uptime()) }));
+        const now = Date.now();
+        const socketUserPresent = !!(this.sock && this.sock.user);
+        const lastInboundEventAt = this._lastLiveEventAt || null;
+        const lastOutboundSuccessAt = this._lastOutboundSuccessAt || null;
+        // "Healthy" means WhatsApp is actually connected AND, if the bot
+        // has ever seen live traffic, that traffic isn't ancient. A quiet
+        // chat is fine (no traffic yet is not the same as stale traffic),
+        // so this only counts against health once there's a baseline to
+        // compare against.
+        const commandPipelineHealthy =
+          socketUserPresent &&
+          (!lastInboundEventAt || now - lastInboundEventAt < 30 * 60 * 1000);
+        const supervisorState = socketUserPresent
+          ? "OPEN"
+          : this._startingConnection
+            ? "STARTING"
+            : this._reconnectTimer
+              ? "RECONNECT_WAIT"
+              : "IDLE";
+        const mem = process.memoryUsage();
+        const body = {
+          // Never a bare "ok"/"ready" — a live Node process with a dead
+          // WhatsApp socket must not report the same status as a fully
+          // healthy one.
+          status: socketUserPresent && commandPipelineHealthy ? 'ok' : 'degraded',
+          uptimeSec: Math.floor(process.uptime()),
+          socketUserPresent,
+          supervisorState,
+          currentGeneration: this._connGeneration || 0,
+          lastInboundEventAt,
+          lastOutboundSuccessAt,
+          reconnectCount: this._reconnectCount || 0,
+          lastDisconnectCode: this._lastDisconnectCode ?? null,
+          lastDisconnectReason: this._lastDisconnectReason || null,
+          commandPipelineHealthy,
+          memory: {
+            rssMB: +(mem.rss / 1048576).toFixed(1),
+            heapUsedMB: +(mem.heapUsed / 1048576).toFixed(1),
+          },
+        };
+        res.writeHead(body.status === 'ok' ? 200 : 503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(body));
       });
       this._healthServer.listen(port, () => {
         console.log(chalk.blue(`[health] listening on port ${port}`));

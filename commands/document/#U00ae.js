@@ -29,7 +29,11 @@ module.exports = {
         }
 
         try {
-            const root = process.cwd();
+            // Anchored to the project root (not process.cwd()) — this is also
+            // the security boundary below (directory-traversal check), so it
+            // must be the real bot install directory regardless of whatever
+            // working directory the process happened to be launched from.
+            const root = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
             // Resolve path safely against the root directory
             const target = path.resolve(root, filePath);
 
