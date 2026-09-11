@@ -1,6 +1,9 @@
+
 'use strict';
  
-const { fmt } = require('../../lib/theme');
+// Inlined from the now-removed lib/theme.js — fmt() only ever stringified
+// a value safely.
+const fmt = (value) => String(value ?? '');
 const { resolvePhoneJid } = require('../../lib/phone-utils');
  
 // action = 'block' | 'unblock'
@@ -20,7 +23,7 @@ module.exports = {
     run: async (sock, message, args, ctx) => {
         const { jid, isOwner, contextInfo, mentionedJid, reply } = ctx;
  
-        if (!isOwner) return reply(fmt('â›” Only the owner can block/unblock numbers.'));
+        if (!isOwner) return reply(fmt('⛔ Only the owner can block/unblock numbers.'));
  
         const rawCmd = (
             message.message?.extendedTextMessage?.text ||
@@ -30,7 +33,7 @@ module.exports = {
         const isBlock   = rawCmd === 'block'   || rawCmd === 'blocknum';
         const isUnblock = rawCmd === 'unblock' || rawCmd === 'unblocknum';
  
-        // â”€â”€ Collect targets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Collect targets ───────────────────────────────────────────────────
         const targets = [];
  
         // Reply-quoted participant
@@ -58,16 +61,16 @@ module.exports = {
         if (!targets.length) {
             const verb = isBlock ? 'block' : 'unblock';
             return reply(fmt(
-                `âŒ No target found.\n\n` +
+                `❌ No target found.\n\n` +
                 `*Usage:*\n` +
-                `â€¢ \`.${verb} @user\` â€” mention them\n` +
-                `â€¢ Reply to their message + \`.${verb}\`\n` +
-                `â€¢ \`.${verb}num 2547XXXXXXXX\` â€” by phone number`
+                `• \`.${verb} @user\` — mention them\n` +
+                `• Reply to their message + \`.${verb}\`\n` +
+                `• \`.${verb}num 2547XXXXXXXX\` — by phone number`
             ));
         }
  
         const action = isBlock ? 'block' : 'unblock';
-        const emoji  = isBlock ? 'ðŸš«' : 'âœ…';
+        const emoji  = isBlock ? '🚫' : '✅';
         const verb   = isBlock ? 'Blocked' : 'Unblocked';
  
         const results = [];
@@ -77,7 +80,7 @@ module.exports = {
                 await setBlock(sock, t, action);
                 results.push(`${emoji} *${verb}:* +${num}`);
             } catch (e) {
-                results.push(`âŒ Failed for +${num}: ${e.message}`);
+                results.push(`❌ Failed for +${num}: ${e.message}`);
             }
         }
  
