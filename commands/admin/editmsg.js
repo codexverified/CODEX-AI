@@ -1,6 +1,10 @@
 'use strict';
  
-const { fmt } = require('../../lib/theme');
+// Inlined from the now-removed lib/theme.js — fmt() only ever stringified
+// a value safely (handling null/undefined); no other file's fmt() did
+// anything different, so each caller gets its own copy instead of a shared
+// module.
+const fmt = (value) => String(value ?? '');
  
 // Track the last bot-sent message per chat so .edit can find it
 if (!global.lastBotMsg) global.lastBotMsg = new Map();
@@ -17,12 +21,12 @@ module.exports = {
     run: async (sock, message, args, ctx) => {
         const { jid, isAdmin, isOwner, contextInfo, reply } = ctx;
  
-        if (!isAdmin && !isOwner) return reply(fmt('â›” Only admins can edit bot messages.'));
+        if (!isAdmin && !isOwner) return reply(fmt('Only admins can edit bot messages.'));
  
         const newText = args.join(' ').trim();
         if (!newText) {
             return reply(fmt(
-                `âœï¸ *Edit Bot Message*\n\n` +
+                `*Edit Bot Message*\n\n` +
                 `Reply to any message the bot sent, then:\n` +
                 `\`.edit The corrected text here\``
             ));
@@ -37,7 +41,7 @@ module.exports = {
             // Try the last bot message for this chat
             const lastKey = global.lastBotMsg?.get(jid);
             if (!lastKey) {
-                return reply(fmt('âŒ Reply to a bot message to edit it, or send a message first.'));
+                return reply(fmt('Reply to a bot message to edit it, or send a message first.'));
             }
             try {
                 await sock.sendMessage(jid, {
@@ -46,7 +50,7 @@ module.exports = {
                 });
                 return;
             } catch (err) {
-                return reply(fmt(`âŒ Edit failed: ${err.message}`));
+                return reply(fmt(`Edit failed: ${err.message}`));
             }
         }
  
@@ -64,7 +68,7 @@ module.exports = {
                 edit: editKey,
             });
         } catch (err) {
-            reply(fmt(`âŒ Could not edit â€” make sure you replied to a *bot* message.\n\n${err.message}`));
+            reply(fmt(`Could not edit make sure you replied to a *bot* message.\n\n${err.message}`));
         }
     }
 };
