@@ -1,6 +1,5 @@
 'use strict';
  
-const { getStr } = require('../../lib/theme');
 const GH_REGEX = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
  
 module.exports = {
@@ -13,7 +12,7 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         if (!args[0]) {
             return sock.sendMessage(sender, {
-                text: `âŒ Please provide a GitHub URL.\nExample: .gitclone https://github.com/CodexAI/CODEX AI`,
+                text: `Please provide a GitHub URL.\nExample: .gitclone https://github.com/CodexAI/CODEX AI`,
                 contextInfo
             }, { quoted: message });
         }
@@ -30,7 +29,7 @@ module.exports = {
         const url = `https://api.github.com/repos/${user}/${cleanRepo}/zipball`;
  
         await sock.sendMessage(sender, {
-            text: 'âœ³ï¸ Fetching repository, please wait...',
+            text: 'Fetching repository, please wait...',
             contextInfo
         }, { quoted: message });
  
@@ -44,7 +43,7 @@ module.exports = {
                 document: { url },
                 fileName: filename,
                 mimetype: 'application/zip',
-                caption:  `ðŸ“¦ *${user}/${cleanRepo}*\n_Downloaded via ${getStr('botName') || 'CODEX AI'}_`,
+                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via ${process.env.BOT_NAME || 'CODEX AI'}_`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {
