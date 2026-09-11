@@ -1,7 +1,9 @@
 'use strict';
  
 const axios = require('axios');
-const { fmt } = require('../../lib/theme');
+// Inlined from the now-removed lib/theme.js — fmt() only ever stringified
+// a value safely.
+const fmt = (value) => String(value ?? '');
  
 const BUILTIN_RHYMES = {
     moon:   ['June', 'tune', 'soon', 'noon', 'spoon', 'balloon', 'cartoon', 'lagoon', 'cocoon', 'monsoon'],
@@ -32,12 +34,12 @@ module.exports = {
         if (!word) {
             return sock.sendMessage(jid, {
                 text: fmt(
-                    `ðŸŽµ *Rhyme Finder*\n\n` +
+                    `*Rhyme Finder*\n\n` +
                     `Usage: \`.rhyme <word>\`\n\n` +
                     `_Examples:_\n` +
-                    `â€¢ \`.rhyme moon\`\n` +
-                    `â€¢ \`.rhyme love\`\n` +
-                    `â€¢ \`.rhyme night\`\n\n` +
+                    `\`.rhyme moon\`\n` +
+                    `\`.rhyme love\`\n` +
+                    `\`.rhyme night\`\n\n` +
                     `_Finds words that rhyme using the Datamuse API._`
                 ),
                 contextInfo
@@ -62,17 +64,17 @@ module.exports = {
  
         if (!rhymes.length) {
             return sock.sendMessage(jid, {
-                text: fmt(`ðŸŽµ No rhymes found for *"${word}"*.\n\n_Try a simpler word like: moon, love, night, fire._`),
+                text: fmt(`No rhymes found for *"${word}"*.\n\n_Try a simpler word like: moon, love, night, fire._`),
                 contextInfo
             }, { quoted: message });
         }
  
         const lines = [
-            `ðŸŽµ *Words that rhyme with "${word}"*`,
+            `*Words that rhyme with "${word}"*`,
             '',
             rhymes.join(', '),
             '',
-            `ðŸ“Š *${rhymes.length} rhyme${rhymes.length !== 1 ? 's' : ''} found*`,
+            `*${rhymes.length} rhyme${rhymes.length !== 1 ? 's' : ''} found*`,
             `_Source: ${source}_`,
         ];
  
@@ -82,3 +84,4 @@ module.exports = {
         }, { quoted: message });
     }
 };
+ 
