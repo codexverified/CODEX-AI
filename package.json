@@ -6,9 +6,6 @@
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js",
-        "postinstall": "node scripts/verify-deploy.js",
-        "verify-deploy": "node scripts/verify-deploy.js",
-        "verify-deploy:strict": "STRICT_DEPLOY_CHECK=1 node scripts/verify-deploy.js",
         "test": "node tests/connection.test.js"
     },
     "keywords": [
