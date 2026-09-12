@@ -6,7 +6,7 @@
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js",
-        "test": "node tests/connection.test.js"
+        "test": "node tests/connection.test.js && node tests/sessionCleanup.test.js && node tests/processLock.test.js && node tests/pluginManager.test.js"
     },
     "keywords": [
         "whatsapp",
@@ -18,7 +18,7 @@
     "license": "MIT",
     "dependencies": {
         "@adiwajshing/keyed-db": "^0.2.4",
-        "@codexverified/baileys": "2.12.12",
+        "@codexverified/baileys": "2.13.13",
         "@distube/ytdl-core": "^4.16.12",
         "@faker-js/faker": "^10.3.0",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",

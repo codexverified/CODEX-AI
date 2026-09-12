@@ -180,12 +180,38 @@ async function waitUntil(fn, timeoutMs = 2000, stepMs = 10) {
     // (WATCHDOG_MAX_CONSECUTIVE_MISSES = 2) before it forces a reconnect —
     // invoke the exact same function setInterval would call, directly,
     // instead of waiting out CONNECTION_WATCHDOG_MS of real time.
-    await bot._connectionWatchdogCallback();
-    assert.strictEqual(bot.sock, staleSocket, 'a single failed probe must not yet trigger a reconnect');
-    await bot._connectionWatchdogCallback();
+    //
+    // The watchdog's forced reconnect honors the same 10s minimum delay as
+    // every other reconnect path (previously 0ms) — see RECONNECT_DELAY_MS
+    // in lib/connection.js. Rather than block this test on 10 real
+    // seconds, install the fast-forward BEFORE the second probe cycle
+    // (which is what actually schedules the reconnect): intercept
+    // setTimeout calls in the 10s neighborhood and fire them on the next
+    // tick instead of waiting for real wall-clock time, while still
+    // proving the code requested a delay at or above the 10s floor.
+    const realSetTimeout = global.setTimeout;
+    let observedReconnectDelay = null;
+    global.setTimeout = (fn, ms, ...args) => {
+      if (typeof ms === 'number' && ms >= 9000 && ms <= 11000) {
+        observedReconnectDelay = ms;
+        return realSetTimeout(fn, 0, ...args);
+      }
+      return realSetTimeout(fn, ms, ...args);
+    };
+    try {
+      await bot._connectionWatchdogCallback();
+      assert.strictEqual(bot.sock, staleSocket, 'a single failed probe must not yet trigger a reconnect');
+      await bot._connectionWatchdogCallback();
 
-    const reconnected = await waitUntil(() => bot.sock === freshSocket, 2000);
-    assert.ok(reconnected, 'two consecutive failed probes with a stale last-event time must force a reconnect');
+      const reconnected = await waitUntil(() => bot.sock === freshSocket, 2000);
+      assert.ok(reconnected, 'two consecutive failed probes with a stale last-event time must force a reconnect');
+      assert.ok(
+        observedReconnectDelay !== null && observedReconnectDelay >= 10000,
+        `watchdog-forced reconnect must honor the 10s minimum delay (observed: ${observedReconnectDelay}ms)`,
+      );
+    } finally {
+      global.setTimeout = realSetTimeout;
+    }
     assert.ok(queryCalls >= 2, 'the real round-trip query probe must actually have been invoked');
     assert.ok(staleSocket.isEnded(), 'the stale socket must be force-closed');
   });
@@ -249,6 +275,10 @@ async function waitUntil(fn, timeoutMs = 2000, stepMs = 10) {
 
     assert.ok(fs.existsSync(sessionFile), 'session file must survive a transient disconnect');
     assert.ok(bot._reconnectTimer, 'a reconnect should be scheduled for a transient close');
+    assert.ok(
+      bot._reconnectTimer._idleTimeout >= 10000,
+      `every automatic reconnect must honor the 10s minimum delay (observed: ${bot._reconnectTimer._idleTimeout}ms)`,
+    );
 
     // Fire the reconnect now instead of waiting out the real backoff delay
     // (production uses up to 120s; tests shouldn't).

@@ -1,8 +1,10 @@
 const chalk = require("chalk");
+const path = require("path");
 const fs = require("fs-extra");
 const { getContentType, downloadContentFromMessage } = require("./lib/baileys");
 const { applyFont } = require("./lib/fontEngine");
 const mediaStore = require("./lib/mediaStore");
+const { acquireProcessLock, releaseProcessLock } = require("./lib/processLock");
 
 // Nigerian time helper (Africa/Lagos = UTC+1)
 function nigerianTime() {
@@ -463,8 +465,23 @@ class CODEXAI {
   }
 
   async start() {
+    // ── Single-instance guard ────────────────────────────────────────────
+    // Two processes pointed at the same ./session directory corrupt the
+    // multi-file auth state (both think they own creds.json). Refuse to
+    // start rather than silently racing another live instance — see
+    // lib/processLock.js for exactly what "another live instance" means.
+    const sessionDirForLock = path.join(__dirname, 'session');
+    const lockResult = acquireProcessLock(sessionDirForLock);
+    if (!lockResult.ok) {
+      console.log(chalk.red(`\n❌ ${lockResult.reason}\n`));
+      process.exit(1);
+      return;
+    }
+    this._processLockSessionDir = sessionDirForLock;
+
     this._startHealthServer();
     try { require('./utils/cleanup').startCleanup(); } catch (e) { console.log(chalk.yellow(`[cleanup] could not start: ${e.message}`)); }
+    this._startDiagnosticsLog();
     console.log(chalk.yellow('Starting codex ai...'));
     console.log(chalk.blue('Loading environment variables..'));
     const { loaded, failed } = await this.reloader.loadCommands();
@@ -473,6 +490,43 @@ class CODEXAI {
     this.successCmds = loaded;
     console.log('');
     await startConnection(this);
+  }
+
+  // Low-frequency (every 15 minutes) health snapshot: uptime, memory, free
+  // disk space, session file count, and reconnect metrics. Bounded/rotated
+  // implicitly — this only ever logs one short line per interval rather
+  // than accumulating its own file, so it can't fill the container's disk
+  // the way an unbounded debug log could.
+  _startDiagnosticsLog() {
+    if (this._diagnosticsInterval) return;
+    const DIAG_INTERVAL_MS = 15 * 60 * 1000;
+    const sessionDir = path.join(__dirname, 'session');
+    const log = () => {
+      const mem = process.memoryUsage();
+      let freeDiskMB = 'n/a';
+      try {
+        // fs.statfsSync is only available on Node 19.6+/18.15+; older
+        // runtimes fall through to the catch below and just log 'n/a'
+        // rather than crashing the diagnostics timer.
+        const st = fs.statfsSync(__dirname);
+        freeDiskMB = ((st.bfree * st.bsize) / 1048576).toFixed(0);
+      } catch {}
+      let sessionFileCount = 'n/a';
+      try {
+        sessionFileCount = fs.readdirSync(sessionDir).length;
+      } catch {}
+      console.log(
+        chalk.gray(
+          `[diagnostics] uptimeSec=${Math.floor(process.uptime())} ` +
+            `rssMB=${(mem.rss / 1048576).toFixed(1)} heapMB=${(mem.heapUsed / 1048576).toFixed(1)} ` +
+            `freeDiskMB=${freeDiskMB} sessionFiles=${sessionFileCount} ` +
+            `reconnects=${this._reconnectCount || 0} lastDisconnectCode=${this._lastDisconnectCode ?? 'n/a'}`,
+        ),
+      );
+    };
+    log();
+    this._diagnosticsInterval = setInterval(log, DIAG_INTERVAL_MS);
+    this._diagnosticsInterval.unref?.();
   }
 
   // ── Message cache ─────────────────────────────────────────────────────────
@@ -1119,6 +1173,18 @@ bot.start().catch((err) => {
 // button, systemd, Ctrl+C, etc.) killed the process while timers/intervals
 // (cleanup, scheduler, watchdog) and the health server were still running,
 // so the process either lingered or exited uncleanly mid-write.
+//
+// NOTE on SIGKILL: it cannot be caught, handled, or ignored by Node (this
+// is a Node/OS-level limitation, not something this file can work around).
+// A `kill -9`/SIGKILL, or a host-level OOM kill, ends the process
+// immediately with none of the flush/cleanup logic below ever running. The
+// process lock (lib/processLock.js) still recovers safely from this case —
+// the next boot sees a lock file with a now-dead PID and treats it as
+// stale — but any credential write that was still debounced/pending at the
+// moment of a SIGKILL can be lost. If Pterodactyl/host logs show an exit
+// with no matching "[shutdown] received SIG..." line immediately before
+// it, that is the signature of a SIGKILL or OOM kill, not a WhatsApp-side
+// disconnect — check the host's own memory/OOM logs for confirmation.
 let _shuttingDown = false;
 function _gracefulShutdown(signal) {
   if (_shuttingDown) return;
@@ -1130,11 +1196,24 @@ function _gracefulShutdown(signal) {
   // next boot.
   try { flushPendingCredsSave(); } catch {}
   try { require("./utils/cleanup").stopCleanup(); } catch {}
+  try { if (bot._diagnosticsInterval) clearInterval(bot._diagnosticsInterval); } catch {}
   try { if (bot._healthServer) bot._healthServer.close(); } catch {}
   try { if (bot.sock) bot.sock.end(); } catch {}
+  // Release the single-instance lock last, only after everything else has
+  // been told to stop — a process that still owns the lock while mid-
+  // shutdown should keep refusing a second instance until it's actually
+  // gone.
+  try { if (bot._processLockSessionDir) releaseProcessLock(bot._processLockSessionDir); } catch {}
   setTimeout(() => process.exit(0), 500).unref?.();
 }
 process.on("SIGINT", () => _gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => _gracefulShutdown("SIGTERM"));
+// Last-resort safety net: 'exit' handlers can only do synchronous work, but
+// releasing the lock file is synchronous fs, so this catches any exit path
+// that isn't SIGINT/SIGTERM/our own graceful path (e.g. a future
+// process.exit() call added elsewhere) without leaving a stale lock behind.
+process.on("exit", () => {
+  try { if (bot._processLockSessionDir) releaseProcessLock(bot._processLockSessionDir); } catch {}
+});
 
 module.exports = bot;
