@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios');
  
-// nexoracle.com returns bot-protection HTML â€” removed.
+// nexoracle.com returns bot-protection HTML; removed.
 // Trying savethreads.com API and instasave approach as primary.
  
 module.exports = {
@@ -17,7 +17,7 @@ module.exports = {
         const url = args[0];
         if (!url || !url.includes('threads.net')) {
             return sock.sendMessage(destination, {
-                text: 'âŒ Please provide a valid Threads URL.\nExample: `.threads https://www.threads.net/@user/post/abc`',
+                text: 'Please provide a valid Threads URL.\nExample: `.threads https://www.threads.net/@user/post/abc`',
                 contextInfo
             }, { quoted: message });
         }
@@ -80,10 +80,10 @@ module.exports = {
         if (!items?.length) {
             return sock.sendMessage(destination, {
                 text:
-                    `âŒ *Threads Download Failed*\n\n` +
+                    `*Threads Download Failed*\n\n` +
                     `Use one of these free tools:\n\n` +
-                    `ðŸ”— https://savethreads.io\n` +
-                    `ðŸ”— https://www.snapinsta.app/threads\n\n` +
+                    `https://savethreads.io\n` +
+                    `https://www.snapinsta.app/threads\n\n` +
                     `_Paste your Threads link there_`,
                 contextInfo
             }, { quoted: message });
@@ -94,7 +94,7 @@ module.exports = {
             try {
                 await sock.sendMessage(destination, {
                     [isVideo ? 'video' : 'image']: { url: item.url },
-                    caption: `ðŸ§µ *Threads Download*\n_Powered by CODEX AI_`,
+                    caption: `Threads Download\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             } catch {}

@@ -2,7 +2,7 @@
  
 const axios = require('axios');
  
-// nexoracle.com returns bot-protection HTML, not API data â€” removed.
+// nexoracle.com returns bot-protection HTML, not API data; removed.
 // Using vxtwitter (fxtwitter) API as primary: https://api.vxtwitter.com/{user}/status/{id}
 // Fallback: provide direct link to the tweet for manual download.
  
@@ -19,7 +19,7 @@ module.exports = {
         const url = args[0];
         if (!url || !/twitter\.com|x\.com|t\.co/.test(url)) {
             return sock.sendMessage(destination, {
-                text: 'âŒ Please provide a valid Twitter/X URL.\nExample: `.tw https://twitter.com/user/status/123`',
+                text: 'Please provide a valid Twitter/X URL.\nExample: `.tw https://twitter.com/user/status/123`',
                 contextInfo
             }, { quoted: message });
         }
@@ -30,7 +30,7 @@ module.exports = {
         const match = url.match(/(?:twitter\.com|x\.com)\/([^/?#]+)\/status\/(\d+)/);
         if (!match) {
             return sock.sendMessage(destination, {
-                text: `âŒ Could not parse tweet URL.\n\nðŸ”— Open manually: ${url}`,
+                text: `Could not parse tweet URL.\n\nOpen manually: ${url}`,
                 contextInfo
             }, { quoted: message });
         }
@@ -83,11 +83,11 @@ module.exports = {
         if (!items?.length) {
             return sock.sendMessage(destination, {
                 text:
-                    `âŒ *Twitter download failed*\n\n` +
+                    `*Twitter download failed*\n\n` +
                     `_${lastErr}_\n\n` +
                     `The video may be restricted or require login.\n` +
-                    `ðŸ”— Try: https://twittervideodownloader.com\n` +
-                    `ðŸ”— Or: https://twitsave.com`,
+                    `Try: https://twittervideodownloader.com\n` +
+                    `Or: https://twitsave.com`,
                 contextInfo
             }, { quoted: message });
         }
@@ -97,7 +97,7 @@ module.exports = {
             try {
                 await sock.sendMessage(destination, {
                     [isVideo ? 'video' : 'image']: { url: item.url },
-                    caption: `ðŸ¦ *Twitter Download*\n_Powered by CODEX AI_`,
+                    caption: `Twitter Download\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             } catch {

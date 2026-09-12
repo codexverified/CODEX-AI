@@ -13,7 +13,7 @@ module.exports = {
         const url = args[0];
         if (!url || !url.includes('reddit.com')) {
             return sock.sendMessage(destination, {
-                text: 'âŒ Please provide a valid Reddit URL.\nExample: .reddit https://reddit.com/r/sub/comments/abc/title/',
+                text: 'Please provide a valid Reddit URL.\nExample: .reddit https://reddit.com/r/sub/comments/abc/title/',
                 contextInfo
             }, { quoted: message });
         }
@@ -31,23 +31,23 @@ module.exports = {
                 const videoUrl = post.media.reddit_video.fallback_url.split('?')[0];
                 await sock.sendMessage(destination, {
                     video: { url: videoUrl },
-                    caption: `ðŸ“¤ *${title}*\nðŸ‘ ${post.ups} upvotes\n_Powered by CODEX AI_`,
+                    caption: `*${title}*\n${post.ups} upvotes\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             } else if (post.url && /\.(jpg|jpeg|png|gif|webp)$/i.test(post.url)) {
                 await sock.sendMessage(destination, {
                     image: { url: post.url },
-                    caption: `ðŸ“¤ *${title}*\nðŸ‘ ${post.ups} upvotes\n_Powered by CODEX AI_`,
+                    caption: `*${title}*\n${post.ups} upvotes\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             } else {
                 await sock.sendMessage(destination, {
-                    text: `ðŸ“¤ *${title}*\n\n${post.selftext ? post.selftext.slice(0, 500) : '(no text)'}\n\nðŸ‘ ${post.ups} upvotes`,
+                    text: `*${title}*\n\n${post.selftext ? post.selftext.slice(0, 500) : '(no text)'}\n\n${post.ups} upvotes`,
                     contextInfo
                 }, { quoted: message });
             }
         } catch (e) {
-            await sock.sendMessage(destination, { text: `âŒ Reddit fetch failed: ${e.message}`, contextInfo }, { quoted: message });
+            await sock.sendMessage(destination, { text: `Reddit fetch failed: ${e.message}`, contextInfo }, { quoted: message });
         }
     }
 };
