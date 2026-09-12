@@ -12,15 +12,16 @@ module.exports = {
     group:       true,
     private:     true,
  
-    run: async (sock, message, args, { sender, contextInfo }) => {
+    run: async (sock, message, args, { contextInfo }) => {
+        const destination = message.chat;
         const url = args[0];
         if (!url || !url.includes('threads.net')) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(destination, {
                 text: 'âŒ Please provide a valid Threads URL.\nExample: `.threads https://www.threads.net/@user/post/abc`',
                 contextInfo
             }, { quoted: message });
         }
-        await sock.sendMessage(sender, { text: 'â³ Fetching Threads media...', contextInfo }, { quoted: message });
+        await sock.sendMessage(destination, { text: 'Fetching Threads media...', contextInfo }, { quoted: message });
  
         const strategies = [
             // Strategy 1: IG/Threads embed API
@@ -77,7 +78,7 @@ module.exports = {
         }
  
         if (!items?.length) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(destination, {
                 text:
                     `âŒ *Threads Download Failed*\n\n` +
                     `Use one of these free tools:\n\n` +
@@ -91,7 +92,7 @@ module.exports = {
         for (const item of items.slice(0, 3)) {
             const isVideo = item.type === 'video';
             try {
-                await sock.sendMessage(sender, {
+                await sock.sendMessage(destination, {
                     [isVideo ? 'video' : 'image']: { url: item.url },
                     caption: `ðŸ§µ *Threads Download*\n_Powered by CODEX AI_`,
                     contextInfo

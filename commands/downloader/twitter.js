@@ -14,21 +14,22 @@ module.exports = {
     group:       true,
     private:     true,
  
-    run: async (sock, message, args, { sender, contextInfo }) => {
+    run: async (sock, message, args, { contextInfo }) => {
+        const destination = message.chat;
         const url = args[0];
         if (!url || !/twitter\.com|x\.com|t\.co/.test(url)) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(destination, {
                 text: 'âŒ Please provide a valid Twitter/X URL.\nExample: `.tw https://twitter.com/user/status/123`',
                 contextInfo
             }, { quoted: message });
         }
  
-        await sock.sendMessage(sender, { text: 'â³ Fetching Twitter media...', contextInfo }, { quoted: message });
+        await sock.sendMessage(destination, { text: 'Fetching Twitter media...', contextInfo }, { quoted: message });
  
         // Extract username + tweet ID from URL
         const match = url.match(/(?:twitter\.com|x\.com)\/([^/?#]+)\/status\/(\d+)/);
         if (!match) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(destination, {
                 text: `âŒ Could not parse tweet URL.\n\nðŸ”— Open manually: ${url}`,
                 contextInfo
             }, { quoted: message });
@@ -80,7 +81,7 @@ module.exports = {
         }
  
         if (!items?.length) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(destination, {
                 text:
                     `âŒ *Twitter download failed*\n\n` +
                     `_${lastErr}_\n\n` +
@@ -94,14 +95,14 @@ module.exports = {
         for (const item of items.slice(0, 3)) {
             const isVideo = item.type === 'video';
             try {
-                await sock.sendMessage(sender, {
+                await sock.sendMessage(destination, {
                     [isVideo ? 'video' : 'image']: { url: item.url },
                     caption: `ðŸ¦ *Twitter Download*\n_Powered by CODEX AI_`,
                     contextInfo
                 }, { quoted: message });
             } catch {
                 if (isVideo) {
-                    await sock.sendMessage(sender, {
+                    await sock.sendMessage(destination, {
                         document: { url: item.url },
                         mimetype: 'video/mp4',
                         fileName: `twitter_${tweetId}.mp4`,
