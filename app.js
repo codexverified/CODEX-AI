@@ -903,9 +903,8 @@ ${newText || "(could not read new text)"}
     const CHANNEL_LINK =
       "https://whatsapp.com/channel/0029Vb6sMEy96H4VI2w3I50F";
     const GROUP_LINK =
-      "https://chat.whatsapp.com/BGoUHjIS9W7Cug2cRPLvFe";
-    const CODEX_IMG =
-      "https://cdn.crysnovax.link/files/1782641945104-66399a32-3e86-4e1f-9a13-32c3b4031dd4.jpeg";
+      "https://chat.whatsapp.com/If0d4XKHITO2NUf6YvQ3Eg?s=cl&p=a&mlu=4&ilr=4";
+    const CODEX_IMG = "https://cdn.kord.live/serve/jZsGsCGzZMPv.jpg";
     const botName = c.settings?.title || c.botName || "CODEX AI";
     const prefix = c.prefix || ".";
     const ownerNum =

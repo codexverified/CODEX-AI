@@ -1,0 +1,1 @@
+module.exports = { get: async () => { throw new Error("no network in test"); } };

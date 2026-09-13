@@ -1,0 +1,1 @@
+const id = s => s; module.exports = new Proxy(id, { get: () => module.exports });

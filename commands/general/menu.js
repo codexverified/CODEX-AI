@@ -3,7 +3,7 @@ const path  = require('path');
 const axios = require('axios');
 const os    = require('os');
 
-const DEFAULT_THUMB = 'https://cdn.crysnovax.link/files/1786787052829-79de1d1d-ceea-4c16-8447-280eace31399.jpeg';
+const DEFAULT_THUMB = 'https://cdn.kord.live/serve/jZsGsCGzZMPv.jpg';
 const CACHED_IMG    = path.join(__dirname, '../../assets/menu.png');
 
 module.exports = {
@@ -21,7 +21,7 @@ module.exports = {
             const { listPlugins } = require('../../lib/pluginManager');
             const plugins = listPlugins(bot);
             if (!plugins.length) {
-                return await m.reply(`📦 No plugins installed.\n\nUse ${bot.prefix}install <link> to add one.`);
+                return await m.reply(`📦 No plugin installed.\n\nUse ${bot.prefix}install <link> to add one.`);
             }
             const text = plugins
                 .map((cmd, i) => `${i + 1}. ${bot.prefix}${cmd.name}${cmd.source ? `\n   ${cmd.source}` : ''}`)

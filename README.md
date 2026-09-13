@@ -49,7 +49,7 @@
 [![Telegram Group](https://img.shields.io/badge/Telegram%20Group-Join-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/CODEXV3)
 [![Developer](https://img.shields.io/badge/Developer-Contact-2CA5E0?style=for-the-badge&logo=telegram)](https://t.me/dev_codexx)
 [![Website](https://img.shields.io/badge/Website-Visit-8A2BE2?style=for-the-badge&logo=vercel)](https://codex-ai-site.vercel.app)
-[![Pairing Site](https://img.shields.io/badge/Get%20Session%20ID-Pair%20Now-FF4500?style=for-the-badge&logo=whatsapp)](https://codexai-paring-site.onrender.com/)
+[![Pairing Site](https://img.shields.io/badge/Get%20Session%20ID-Pair%20Now-FF4500?style=for-the-badge&logo=whatsapp)](https://codex-ai-v3.vercel.app/session)
 
 </div>
 
@@ -59,7 +59,7 @@
 
 **CODEX AI** is a full-stack, multifunctional WhatsApp bot built on Node.js and a hardened Baileys fork (`@codexverified/baileys`). It runs on your own WhatsApp number and adds AI, group management, an entire RPG-style economy, and a GTA-inspired roleplay system on top of your chats — all through a fast, reliable and intact group managers, plugin-driven command engine and many more.
 
-> Founded and built by **CODEX** 
+> Founded and built by**CODEX-ORGANIZATION** 
 
 ---
 
@@ -85,7 +85,7 @@
    - **Build Command:** `pnpm install`
    - **Start Command:** `npm start`
 4. Deploy the service once so Render has a live URL — you'll pair it in the next step.
-5. Generate your session ID from the [pairing site](https://codexai-paring-site.onrender.com/), then paste it into `sessionId` in `config.json` and redeploy (or commit the change and push).
+5. Generate your session ID from the [pairing site](https://codex-ai-v3.vercel.app/session), then paste it into `sessionId` in `config.json` and redeploy (or commit the change and push).
 6. **Note:** Render's free tier sleeps after inactivity. The first request after idle time can take 30–60s to wake back up — this is normal, not a broken deploy. For a bot that needs to stay online 24/7, consider a paid instance or an uptime pinger.
 
 ### 🖥️ Deploy on a VPS
@@ -168,7 +168,7 @@ node index.js
 
 ## 🔑 Getting a Session ID
 
-1. Visit the [CODEX AI Pairing Site](https://codexai-paring-site.onrender.com/).
+1. Visit the session generator here: https://codex-ai-v3.vercel.app/session
 2. Enter your WhatsApp number and follow the pairing steps.
 3. Copy the session ID it gives you.
 4. Paste it into the `sessionId` field of `config.json`.
