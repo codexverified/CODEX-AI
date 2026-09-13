@@ -42,18 +42,18 @@ module.exports = {
         }
  
         if (!targetJid) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(message.chat, {
                 text: lidNotCached
-                    ? 'âš ï¸ That user\'s phone number isn\'t cached yet â€” ask them to send a message first, then retry.'
-                    : 'âŒ Provide a number, mention someone, or reply to their message.',
+                    ? 'That user\'s phone number is not cached yet. Ask them to send a message first, then retry.'
+                    : 'Provide a number, mention someone, or reply to their message.',
                 contextInfo
             }, { quoted: message });
         }
  
         const number = phoneNum(targetJid);
  
-        await sock.sendMessage(sender, {
-            text: `ðŸ” Fetching info for +${number}â€¦`,
+        await sock.sendMessage(message.chat, {
+            text: `Fetching info for +${number}...`,
             contextInfo
         }, { quoted: message });
  
@@ -99,21 +99,21 @@ module.exports = {
         // â”€â”€ Build device line â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         let deviceLine;
         if (totalDev === 0) {
-            deviceLine = 'ðŸ“± Unknown (query returned no data)';
+            deviceLine = 'Unknown (query returned no data)';
         } else if (companions === 0) {
-            deviceLine = 'ðŸ“± Phone only';
+            deviceLine = 'Phone only';
         } else {
-            deviceLine = `ðŸ“± Phone + ${companions} companion${companions > 1 ? 's' : ''} (Web/Desktop)`;
+            deviceLine = `Phone + ${companions} companion${companions > 1 ? 's' : ''} (Web/Desktop)`;
         }
  
         // â”€â”€ Account type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         let accountLine, platformLine;
         if (biz?.wid) {
-            accountLine  = 'ðŸ¢ WhatsApp Business';
-            platformLine = 'ðŸ“² WhatsApp Business App';
+            accountLine  = 'WhatsApp Business';
+            platformLine = 'WhatsApp Business App';
         } else {
-            accountLine  = 'ðŸ‘¤ Personal (WhatsApp)';
-            platformLine = 'ðŸ“² WhatsApp (Android / iPhone)';
+            accountLine  = 'Personal (WhatsApp)';
+            platformLine = 'WhatsApp (Android / iPhone)';
         }
  
         // â”€â”€ Country â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -123,37 +123,34 @@ module.exports = {
         let bizBlock = '';
         if (biz?.wid) {
             const rows = [];
-            if (biz.description) rows.push(`ðŸ“ *About:*    ${biz.description.slice(0, 100)}${biz.description.length > 100 ? 'â€¦' : ''}`);
-            if (biz.email)        rows.push(`ðŸ“§ *Email:*    ${biz.email}`);
-            if (biz.website?.[0]) rows.push(`ðŸŒ *Website:*  ${biz.website[0]}`);
-            if (biz.address)      rows.push(`ðŸ“ *Address:*  ${biz.address}`);
-            if (rows.length)      bizBlock = '\nâ”‚\nâ”‚ ' + rows.join('\nâ”‚ ');
+            if (biz.description) rows.push(`*About:*    ${biz.description.slice(0, 100)}${biz.description.length > 100 ? '...' : ''}`);
+            if (biz.email)        rows.push(`*Email:*    ${biz.email}`);
+            if (biz.website?.[0]) rows.push(`*Website:*  ${biz.website[0]}`);
+            if (biz.address)      rows.push(`*Address:*  ${biz.address}`);
+            if (rows.length)      bizBlock = `\n${rows.join('\n')}`;
         }
  
         // â”€â”€ Compose reply â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const lines = [
-            `â•­â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€`,
-            `â”‚ ðŸ”Ž *WhatsApp Info*`,
-            `â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€`,
-            `â”‚ ðŸ“ž *Number:*    +${number}`,
+            `*WhatsApp Info*`,
+            `Number: +${number}`,
         ];
-        if (pushName)    lines.push(`â”‚ ðŸ‘¤ *Name:*      ${pushName}`);
+        if (pushName)    lines.push(`Name: ${pushName}`);
         lines.push(
-            `â”‚ ðŸŒ *Country:*   ${country}`,
-            `â”‚ ${accountLine.split(' ')[0]} *Account:*   ${accountLine.split(' ').slice(1).join(' ')}`,
-            `â”‚ ðŸ“² *Platform:*  ${platformLine}`,
-            `â”‚ ðŸ’» *Devices:*   ${deviceLine}`,
+            `Country: ${country}`,
+            `Account: ${accountLine}`,
+            `Platform: ${platformLine}`,
+            `Devices: ${deviceLine}`,
         );
-        if (statusText)  lines.push(`â”‚ ðŸ’¬ *Status:*    ${statusText.slice(0, 80)}${statusText.length > 80 ? 'â€¦' : ''}`);
-        lines.push(`â•°â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€`);
+        if (statusText)  lines.push(`Status: ${statusText.slice(0, 80)}${statusText.length > 80 ? '...' : ''}`);
         lines.push('');
-        lines.push('_â„¹ï¸ WhatsApp does not share exact OS (iOS/Android). Companion count = linked Web/Desktop sessions._');
+        lines.push('_WhatsApp does not share exact OS (iOS/Android). Companion count = linked Web/Desktop sessions._');
  
         const text = lines.join('\n');
  
         if (picUrl) {
             try {
-                await sock.sendMessage(sender, {
+                await sock.sendMessage(message.chat, {
                     image:    { url: picUrl },
                     caption:  text,
                     contextInfo
@@ -162,6 +159,6 @@ module.exports = {
             } catch { /* fall through to text-only */ }
         }
  
-        await sock.sendMessage(sender, { text, contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text, contextInfo }, { quoted: message });
     }
 };

@@ -14,12 +14,12 @@ module.exports = {
             || message.message?.imageMessage;
         const imgMsg = quoted?.imageMessage || (message.message?.imageMessage);
         if (!imgMsg) {
-            return sock.sendMessage(sender, {
-                text: 'ðŸ–¼ï¸ Please reply to an image to extract its text.\nExample: Reply to image with .ocr',
+            return sock.sendMessage(message.chat, {
+                text: 'Please reply to an image to extract its text.\nExample: Reply to image with .ocr',
                 contextInfo
             }, { quoted: message });
         }
-        await sock.sendMessage(sender, { text: 'â³ Extracting text from image...', contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text: 'Extracting text from image...', contextInfo }, { quoted: message });
         try {
             const stream = await downloadContentFromMessage(imgMsg, 'image');
             let buf = Buffer.from([]);
@@ -35,12 +35,12 @@ module.exports = {
             );
             const text = data?.ParsedResults?.[0]?.ParsedText?.trim();
             if (!text) throw new Error('No text detected in image.');
-            await sock.sendMessage(sender, {
-                text: `ðŸ“ *Extracted Text:*\n\n${text}`,
+            await sock.sendMessage(message.chat, {
+                text: `*Extracted Text:*\n\n${text}`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {
-            await sock.sendMessage(sender, { text: `âŒ OCR failed: ${e.message}`, contextInfo }, { quoted: message });
+            await sock.sendMessage(message.chat, { text: `OCR failed: ${e.message}`, contextInfo }, { quoted: message });
         }
     }
 };

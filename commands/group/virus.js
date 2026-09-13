@@ -13,8 +13,8 @@ module.exports = {
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
         if (!args[0]) {
-            return sock.sendMessage(sender, {
-                text: 'âŒ Please provide a URL to scan.\nExample: .scanurl https://example.com',
+            return sock.sendMessage(message.chat, {
+                text: 'Please provide a URL to scan.\nExample: .scanurl https://example.com',
                 contextInfo
             }, { quoted: message });
         }
@@ -23,14 +23,14 @@ module.exports = {
         if (!url.match(/^https?:\/\//)) url = 'https://' + url;
  
         try { new URL(url); } catch {
-            return sock.sendMessage(sender, {
-                text: 'âš ï¸ Invalid URL format.',
+            return sock.sendMessage(message.chat, {
+                text: 'Invalid URL format.',
                 contextInfo
             }, { quoted: message });
         }
  
-        await sock.sendMessage(sender, {
-            text: 'ðŸ” Scanning URL with VirusTotal... (may take ~15 seconds)',
+        await sock.sendMessage(message.chat, {
+            text: 'Scanning URL with VirusTotal... (may take ~15 seconds)',
             contextInfo
         }, { quoted: message });
  
@@ -60,7 +60,7 @@ module.exports = {
                     ? `âš ï¸ SUSPICIOUS (${stats.suspicious} engines flagged)`
                     : 'âœ… SAFE';
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 text:
 `ðŸ›¡ï¸ *URL Safety Report*
  
@@ -77,7 +77,7 @@ module.exports = {
             }, { quoted: message });
         } catch (err) {
             console.error('[VirusScan]', err.message);
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 text: `âš ï¸ Scan failed: ${err.message}`,
                 contextInfo
             }, { quoted: message });

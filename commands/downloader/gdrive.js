@@ -11,8 +11,8 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const url = args[0];
         if (!url || !url.includes('drive.google.com')) {
-            return sock.sendMessage(sender, {
-                text: 'âŒ Please provide a Google Drive URL.\nExample: .gdrive https://drive.google.com/file/d/FILE_ID/view',
+                return sock.sendMessage(message.chat, {
+                    text: 'Please provide a Google Drive URL.\nExample: .gdrive https://drive.google.com/file/d/FILE_ID/view',
                 contextInfo
             }, { quoted: message });
         }
@@ -25,12 +25,12 @@ module.exports = {
             const { headers } = await axios.head(dlLink, { timeout: 10000, maxRedirects: 3 });
             const fileName = (headers['content-disposition'] || '').match(/filename="?([^"]+)"?/)?.[1] || fileId;
             const size     = headers['content-length'] ? `${(parseInt(headers['content-length']) / 1024 / 1024).toFixed(2)} MB` : 'Unknown';
-            await sock.sendMessage(sender, {
-                text: `ðŸ“ *Google Drive File*\n\nðŸ“„ *Name:* ${fileName}\nðŸ“¦ *Size:* ${size}\nðŸ”— *Download:* ${confirm}\n\n_Powered by CODEX AI_`,
+            await sock.sendMessage(message.chat, {
+                    text: `Google Drive File\n\nName: ${fileName}\nSize: ${size}\nDownload: ${confirm}\n\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {
-            await sock.sendMessage(sender, { text: `âŒ Google Drive failed: ${e.message}`, contextInfo }, { quoted: message });
+            await sock.sendMessage(message.chat, { text: `Google Drive failed: ${e.message}`, contextInfo }, { quoted: message });
         }
     }
 };

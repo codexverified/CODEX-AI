@@ -16,13 +16,13 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const url = args[0];
         if (!url || !/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(url)) {
-            return sock.sendMessage(sender, {
-                text: 'ðŸŽµ Please provide a valid YouTube URL.\nExample: `.ytmp3 https://youtu.be/dQw4w9WgXcQ`',
+            return sock.sendMessage(message.chat, {
+                text: 'Please provide a valid YouTube URL.\nExample: `.ytmp3 https://youtu.be/dQw4w9WgXcQ`',
                 contextInfo
             }, { quoted: message });
         }
  
-        await sock.sendMessage(sender, { text: 'â³ Fetching audio...', contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text: 'Fetching audio...', contextInfo }, { quoted: message });
  
         try {
             let title = 'Audio', artist = 'Unknown', duration = '';
@@ -38,21 +38,21 @@ module.exports = {
             const audioUrl = data?.result?.download_url || data?.result?.downloadUrl || data?.result?.url || data?.url || data?.link;
             if (!audioUrl) throw new Error('Could not retrieve download link');
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 audio:    { url: audioUrl },
                 mimetype: 'audio/mpeg',
                 ptt:      false,
                 contextInfo
             }, { quoted: message });
  
-            await sock.sendMessage(sender, {
-                text: `ðŸŽµ *${title}*\nðŸŽ¤ ${artist}  â€¢  â± ${duration}`,
+            await sock.sendMessage(message.chat, {
+                text: `*${title}*\nArtist: ${artist}  -  Duration: ${duration}`,
                 contextInfo
             }, { quoted: message });
  
         } catch (err) {
-            await sock.sendMessage(sender, {
-                text: `âŒ Audio download failed: ${err.message}`,
+            await sock.sendMessage(message.chat, {
+                text: `Audio download failed: ${err.message}`,
                 contextInfo
             }, { quoted: message });
         }

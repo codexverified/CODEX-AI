@@ -40,29 +40,29 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const query = args.join(' ').trim();
         if (!query) {
-            return sock.sendMessage(sender, {
-                text: 'ðŸŽµ Usage: `.play <song name or YouTube link>`\nExample: `.play Blinding Lights`',
+            return sock.sendMessage(message.chat, {
+                text: 'Usage: `.play <song name or YouTube link>`\nExample: `.play Blinding Lights`',
                 contextInfo
             }, { quoted: message });
         }
  
-        await sock.sendMessage(sender, {
-            text: `ðŸ” Searching: *${query}*...`,
+        await sock.sendMessage(message.chat, {
+            text: `Searching: *${query}*...`,
             contextInfo
         }, { quoted: message });
  
         try {
             const track = await searchYoutube(query);
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 image:   { url: track.thumbnail || 'https://files.catbox.moe/5uli5p.jpeg' },
-                caption: `ðŸŽµ *${track.title}*\nðŸŽ¤ *Artist:* ${track.artist}\nâ± *Duration:* ${track.duration}\n\n_Downloading..._`,
+                caption: `*${track.title}*\nArtist: ${track.artist}\nDuration: ${track.duration}\n\n_Downloading..._`,
                 contextInfo
             }, { quoted: message });
  
             const audioUrl = await downloadMp3(track.url);
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 audio:    { url: audioUrl },
                 mimetype: 'audio/mpeg',
                 ptt:      false,
@@ -70,7 +70,7 @@ module.exports = {
             }, { quoted: message });
  
             const safeName = track.title.replace(/[^\w\s-]/g, '').trim().slice(0, 50);
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 document: { url: audioUrl },
                 mimetype: 'audio/mpeg',
                 fileName: `${safeName}.mp3`,
@@ -78,8 +78,8 @@ module.exports = {
             }, { quoted: message });
  
         } catch (err) {
-            await sock.sendMessage(sender, {
-                text: `âŒ *Download failed:* ${err.message}`,
+            await sock.sendMessage(message.chat, {
+                text: `*Download failed:* ${err.message}`,
                 contextInfo
             }, { quoted: message });
         }

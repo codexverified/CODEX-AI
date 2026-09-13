@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios');
  
-// nexoracle.com returns bot-protection HTML, not API data â€” removed.
+// nexoracle.com returns bot-protection HTML, not API data; removed.
 // Using ssstik.io API (no-key endpoint for CapCut) as primary; link fallback secondary.
  
 module.exports = {
@@ -15,12 +15,12 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const url = args[0];
         if (!url || !/capcut\.com/i.test(url)) {
-            return sock.sendMessage(sender, {
-                text: 'âŒ Please provide a valid CapCut URL.\nExample: `.capcut https://www.capcut.com/share/...`',
+                return sock.sendMessage(message.chat, {
+                    text: 'Please provide a valid CapCut URL.\nExample: `.capcut https://www.capcut.com/share/...`',
                 contextInfo
             }, { quoted: message });
         }
-        await sock.sendMessage(sender, { text: 'â³ Fetching CapCut video...', contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text: 'Fetching CapCut video...', contextInfo }, { quoted: message });
  
         try {
             // Try ssstik.io API (public no-key endpoint)
@@ -38,18 +38,18 @@ module.exports = {
                        || html.match(/href="(https?:\/\/[^"]+)"\s*[^>]*>\s*(?:Without|No)/i);
             const videoUrl = match?.[1];
             if (!videoUrl) throw new Error('no video found');
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 video:   { url: videoUrl },
-                caption: `âœ‚ï¸ *CapCut Download*\n_Powered by CODEX AI_`,
+                    caption: `*CapCut Download*\n_Powered by CODEX AI_`,
                 contextInfo
             }, { quoted: message });
         } catch {
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 text:
-                    `âœ‚ï¸ *CapCut Download*\n\n` +
+                    `*CapCut Download*\n\n` +
                     `Direct download unavailable. Use one of these free tools:\n\n` +
-                    `ðŸ”— https://ssstik.io\n` +
-                    `ðŸ”— https://capcutdownloader.io\n\n` +
+                        `https://ssstik.io\n` +
+                        `https://capcutdownloader.io\n\n` +
                     `_Paste your CapCut link there to download_`,
                 contextInfo
             }, { quoted: message });

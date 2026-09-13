@@ -17,8 +17,8 @@ module.exports = {
         const cmd  = message.body?.split(' ')[0]?.replace(prefix, '').toLowerCase();
         const text = args.join(' ');
         if (!text) {
-            return sock.sendMessage(sender, {
-                text: `ðŸ”„ *Encoder/Decoder*\n\n.encode <text>    â†’ Base64\n.decode <b64>    â†’ Text from Base64\n.binary <text>   â†’ Binary\n.hex2text <hex>  â†’ Text from Hex\n.rot13 <text>    â†’ ROT13\n.encode hex:<text> â†’ Hex\n.encode rev:<text> â†’ Reverse`,
+            return sock.sendMessage(message.chat, {
+                text: `*Encoder/Decoder*\n\n.encode <text>    -> Base64\n.decode <b64>    -> Text from Base64\n.binary <text>   -> Binary\n.hex2text <hex>  -> Text from Hex\n.rot13 <text>    -> ROT13\n.encode hex:<text> -> Hex\n.encode rev:<text> -> Reverse`,
                 contextInfo
             }, { quoted: message });
         }
@@ -38,12 +38,12 @@ module.exports = {
             } else if (cmd === 'rot13') {
                 result = rot13(text); label = 'ROT13';
             }
-            await sock.sendMessage(sender, {
-                text: `ðŸ”„ *${label}*\n\nðŸ“ Input: \`${text.slice(0, 100)}\`\n\nðŸ“¤ Output:\n${result}`,
+            await sock.sendMessage(message.chat, {
+                text: `*${label}*\n\nInput: \`${text.slice(0, 100)}\`\n\nOutput:\n${result}`,
                 contextInfo
             }, { quoted: message });
         } catch (e) {
-            await sock.sendMessage(sender, { text: `âŒ Encode/decode failed: ${e.message}`, contextInfo }, { quoted: message });
+            await sock.sendMessage(message.chat, { text: `Encode/decode failed: ${e.message}`, contextInfo }, { quoted: message });
         }
     }
 };

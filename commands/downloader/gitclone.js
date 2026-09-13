@@ -11,15 +11,15 @@ module.exports = {
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
         if (!args[0]) {
-            return sock.sendMessage(sender, {
+            return sock.sendMessage(message.chat, {
                 text: `Please provide a GitHub URL.\nExample: .gitclone https://github.com/CodexAI/CODEX AI`,
                 contextInfo
             }, { quoted: message });
         }
  
         if (!GH_REGEX.test(args[0])) {
-            return sock.sendMessage(sender, {
-                text: 'âš ï¸ Invalid GitHub link.',
+            return sock.sendMessage(message.chat, {
+                    text: 'Invalid GitHub link.',
                 contextInfo
             }, { quoted: message });
         }
@@ -28,7 +28,7 @@ module.exports = {
         const cleanRepo = repo.replace(/\.git$/, '');
         const url = `https://api.github.com/repos/${user}/${cleanRepo}/zipball`;
  
-        await sock.sendMessage(sender, {
+        await sock.sendMessage(message.chat, {
             text: 'Fetching repository, please wait...',
             contextInfo
         }, { quoted: message });
@@ -39,17 +39,17 @@ module.exports = {
             const cd       = response.headers.get('content-disposition') || '';
             const filename = cd.match(/attachment; filename=(.*)/)?.[1] || `${cleanRepo}.zip`;
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 document: { url },
                 fileName: filename,
                 mimetype: 'application/zip',
-                caption:  `📦 *${user}/${cleanRepo}*\n_Downloaded via ${process.env.BOT_NAME || 'CODEX AI'}_`,
+                    caption:  `*${user}/${cleanRepo}*\n_Downloaded via ${process.env.BOT_NAME || 'CODEX AI'}_`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {
             console.error('[GitClone]', err.message);
-            await sock.sendMessage(sender, {
-                text: `âŒ Failed to download repository.\n${err.message}`,
+                await sock.sendMessage(message.chat, {
+                    text: `Failed to download repository.\n${err.message}`,
                 contextInfo
             }, { quoted: message });
         }

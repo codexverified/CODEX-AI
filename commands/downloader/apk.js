@@ -12,13 +12,13 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const query = args.join(' ');
         if (!query) {
-            return sock.sendMessage(sender, {
-                text: 'âŒ Please provide an app name.\n\nExample: .apk whatsapp',
+                return sock.sendMessage(message.chat, {
+                    text: 'Please provide an app name.\n\nExample: .apk whatsapp',
                 contextInfo
             }, { quoted: message });
         }
  
-        await sock.sendMessage(sender, { text: `ðŸ” Searching for *${query}*...`, contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text: `Searching for *${query}*...`, contextInfo }, { quoted: message });
  
         try {
             const { data } = await axios.get(
@@ -31,8 +31,8 @@ module.exports = {
  
             const list = data?.datalist?.list;
             if (!list?.length) {
-                return sock.sendMessage(sender, {
-                    text: `âŒ No APK found for "*${query}*"`,
+                    return sock.sendMessage(message.chat, {
+                        text: `No APK found for "*${query}*"`,
                     contextInfo
                 }, { quoted: message });
             }
@@ -40,17 +40,17 @@ module.exports = {
             const app    = list[0];
             const sizeMB = (app.size / 1048576).toFixed(2);
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 document: { url: app.file.path_alt },
                 fileName: `${app.name}.apk`,
                 mimetype: 'application/vnd.android.package-archive',
-                caption:  `ðŸ“± *${app.name}* â€” ${sizeMB} MB`,
+                    caption:  `*${app.name}* - ${sizeMB} MB`,
                 contextInfo
             }, { quoted: message });
         } catch (err) {
             console.error('[APK]', err.message);
-            await sock.sendMessage(sender, {
-                text: `âš ï¸ APK download failed: ${err.message}`,
+                await sock.sendMessage(message.chat, {
+                text: `APK download failed: ${err.message}`,
                 contextInfo
             }, { quoted: message });
         }

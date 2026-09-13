@@ -16,13 +16,13 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const url = args[0];
         if (!url || !/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(url)) {
-            return sock.sendMessage(sender, {
-                text: 'ðŸŽ¬ Please provide a valid YouTube URL.\nExample: `.ytmp4 https://youtu.be/dQw4w9WgXcQ`',
+            return sock.sendMessage(message.chat, {
+                text: 'Please provide a valid YouTube URL.\nExample: `.ytmp4 https://youtu.be/dQw4w9WgXcQ`',
                 contextInfo
             }, { quoted: message });
         }
  
-        await sock.sendMessage(sender, { text: 'â³ Fetching video...', contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text: 'Fetching video...', contextInfo }, { quoted: message });
  
         try {
             let title = 'Video', artist = 'Unknown', duration = '', durationSec = 0;
@@ -36,8 +36,8 @@ module.exports = {
             } catch {}
  
             if (durationSec > 600) {
-                return sock.sendMessage(sender, {
-                    text: 'âŒ Video too long (max 10 minutes). Use `.play` for audio only.',
+                return sock.sendMessage(message.chat, {
+                    text: 'Video too long (max 10 minutes). Use `.play` for audio only.',
                     contextInfo
                 }, { quoted: message });
             }
@@ -46,15 +46,15 @@ module.exports = {
             const videoUrl = data?.result?.download_url || data?.result?.downloadUrl || data?.result?.url || data?.url || data?.link;
             if (!videoUrl) throw new Error('Could not retrieve download link');
  
-            await sock.sendMessage(sender, {
+            await sock.sendMessage(message.chat, {
                 video:   { url: videoUrl },
-                caption: `â–¶ï¸ *${title}*\nðŸ‘¤ ${artist}  â€¢  â± ${duration}`,
+                caption: `*${title}*\nArtist: ${artist}  -  Duration: ${duration}`,
                 contextInfo
             }, { quoted: message });
  
         } catch (err) {
-            await sock.sendMessage(sender, {
-                text: `âŒ Video download failed: ${err.message}`,
+            await sock.sendMessage(message.chat, {
+                text: `Video download failed: ${err.message}`,
                 contextInfo
             }, { quoted: message });
         }

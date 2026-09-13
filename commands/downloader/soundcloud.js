@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios');
  
-// nexoracle.com returns bot-protection HTML â€” removed.
+// nexoracle.com returns bot-protection HTML; removed.
 // Trying scdl.vercel.app (public no-key API) as primary.
  
 module.exports = {
@@ -15,12 +15,12 @@ module.exports = {
     run: async (sock, message, args, { sender, contextInfo }) => {
         const url = args[0];
         if (!url || !url.includes('soundcloud.com')) {
-            return sock.sendMessage(sender, {
-                text: 'ðŸŽµ Please provide a valid SoundCloud URL.\nExample: `.sc https://soundcloud.com/artist/track`',
+            return sock.sendMessage(message.chat, {
+                text: 'Please provide a valid SoundCloud URL.\nExample: `.sc https://soundcloud.com/artist/track`',
                 contextInfo
             }, { quoted: message });
         }
-        await sock.sendMessage(sender, { text: 'â³ Downloading SoundCloud audio...', contextInfo }, { quoted: message });
+        await sock.sendMessage(message.chat, { text: 'Downloading SoundCloud audio...', contextInfo }, { quoted: message });
  
         const strategies = [
             // Strategy 1: soundcloudmp3.io public endpoint
@@ -50,22 +50,22 @@ module.exports = {
         for (const strat of strategies) {
             try {
                 const { audioUrl, title, author } = await strat();
-                await sock.sendMessage(sender, {
+                await sock.sendMessage(message.chat, {
                     audio: { url: audioUrl }, mimetype: 'audio/mpeg', ptt: false, contextInfo
                 }, { quoted: message });
-                await sock.sendMessage(sender, {
-                    text: `ðŸŽµ *${title}*\nðŸ‘¤ ${author}\n_Powered by CODEX AI_`, contextInfo
+                await sock.sendMessage(message.chat, {
+                    text: `*${title}*\nArtist: ${author}\n_Powered by CODEX AI_`, contextInfo
                 }, { quoted: message });
                 return;
             } catch {}
         }
  
-        await sock.sendMessage(sender, {
+        await sock.sendMessage(message.chat, {
             text:
-                `âŒ *SoundCloud Download Failed*\n\n` +
+                `*SoundCloud Download Failed*\n\n` +
                 `Use one of these free tools instead:\n\n` +
-                `ðŸ”— https://soundcloudmp3.io\n` +
-                `ðŸ”— https://www.klickaud.co\n\n` +
+                `https://soundcloudmp3.io\n` +
+                `https://www.klickaud.co\n\n` +
                 `_Paste your SoundCloud link there_`,
             contextInfo
         }, { quoted: message });
