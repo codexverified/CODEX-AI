@@ -904,7 +904,7 @@ ${newText || "(could not read new text)"}
       "https://whatsapp.com/channel/0029Vb6sMEy96H4VI2w3I50F";
     const GROUP_LINK =
       "https://chat.whatsapp.com/If0d4XKHITO2NUf6YvQ3Eg?s=cl&p=a&mlu=4&ilr=4";
-    const CODEX_IMG = "https://cdn.kord.live/serve/jZsGsCGzZMPv.jpg";
+    const CODEX_IMG = "https://cdn.crysnova.qzz.io/files/1789324507568-ec72511b-fb7f-47d3-a4d7-ac10586ede2c.jpeg";
     const botName = c.settings?.title || c.botName || "CODEX AI";
     const prefix = c.prefix || ".";
     const ownerNum =
