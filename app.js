@@ -904,7 +904,7 @@ ${newText || "(could not read new text)"}
       "https://whatsapp.com/channel/0029Vb6sMEy96H4VI2w3I50F";
     const GROUP_LINK =
       "https://chat.whatsapp.com/If0d4XKHITO2NUf6YvQ3Eg?s=cl&p=a&mlu=4&ilr=4";
-    const CODEX_IMG = "https://cdn.crysnova.qzz.io/files/1789324507568-ec72511b-fb7f-47d3-a4d7-ac10586ede2c.jpeg";
+    const CODEX_IMG = "https://cdn.crysnova.qzz.io/files/1789325147298-88f7995e-9d59-48eb-a1b1-8791f440173f.jpeg";
     const botName = c.settings?.title || c.botName || "CODEX AI";
     const prefix = c.prefix || ".";
     const ownerNum =
@@ -946,7 +946,7 @@ ${newText || "(could not read new text)"}
 —͟͟͞͞𖣘 *TIME:* ${time}
 
 —͟͟͞͞𖣘 *ANTIDELETE* ${Object.keys(antiDelDb).filter((k) => !k.startsWith("_")).length > 0 ? "✓" : "✗"}
-—͟͟͞͞𖣘 *ANTIEDIT* ${Object.keys(antiEditDb.chats || {}).length > 0 ? "✓" : "✗"}
+—͟͟͞͞𖣘 *ANTIEDIT* ${Object.keys(antiEditDb.chats || {}).length > 0 ? "✗" : "✓"}
 —͟͟͞͞𖣘 *AUTOREACT* ${autoReactDb.enabled ? "✓" : "✗"}
 —͟͟͞͞𖣘 *AUTOREPLY* ${autoRepDb.enabled ? "✓" : "✗"}
 —͟͟͞͞𖣘 *AUTOSTATUS* ${statusDb.autoView || statusDb.autoview || statusDb.autoReact || statusDb.statusView?.enabled ? "✓" : "✗"}
