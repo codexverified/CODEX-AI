@@ -33,7 +33,7 @@ module.exports = {
         const { applied } = applyMode(groupId, 'smart', n);
 
         const text =
-`🛡️ *SMART MODE ENABLED*
+`*SMART MODE ENABLED*
 
 Every anti-system now warns up to ${n}/${n} times before kicking:
 ${applied.map(s => `• ${s}`).join('\n')}
