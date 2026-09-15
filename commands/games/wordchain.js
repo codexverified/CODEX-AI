@@ -186,7 +186,9 @@ module.exports = {
     acceptsBareInput: true,
     shouldHandleBare(message) {
         const game = games.get(message?.chat);
-        return Boolean(game && game.phase === 'active' && game.players[game.turn]?.jid === message?.sender);
+        if (!game) return false;
+        if (game.phase === 'lobby') return true;
+        return Boolean(game.phase === 'active' && game.players[game.turn]?.jid === message?.sender);
     },
     description: 'Play a timed multiplayer word chain game',
     category: 'games',
