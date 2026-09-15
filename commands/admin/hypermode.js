@@ -26,7 +26,7 @@ module.exports = {
         const { applied } = applyMode(groupId, 'hyper');
 
         const text =
-`🛡️ *HYPER MODE ENABLED*
+`*HYPER MODE ENABLED*
 
 Every anti-system now *KICKS* immediately:
 ${applied.map(s => `• ${s}`).join('\n')}
