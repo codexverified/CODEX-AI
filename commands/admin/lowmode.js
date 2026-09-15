@@ -1,36 +1,42 @@
-const { applyMode } = require('../../lib/advancedGroupSettings');
+const { applyMode, isModeEnabled, setModeEnabled } = require('../../lib/advancedGroupSettings');
 
 module.exports = {
     name: 'low',
-    aliases: ['lowmode'],
     category: 'admin',
     reactions: { start: '🛡️' },
-    description: 'Advanced group protection — LOW: every anti-system deletes offending messages immediately (no warnings, no kicks)',
+    description: 'Advanced group protection — LOW: every anti-system deletes only. .low on/off toggles it for this group.',
     adminOnly: true,
     groupOnly: true,
 
     async execute(bot, m, args) {
-        const { applied, skipped } = applyMode(m.chat, 'low');
+        const groupId = m.chat;
+        const sub = (args[0] || '').toLowerCase();
 
-        let text =
-`*Advanced Group Settings — LOW*
-
-Every anti-system below now just *DELETES* — no warnings, no kicks:
-${applied.map(s => `• ${s}`).join('\n')}
-
-Anti-GC-Status stays on KICK regardless of mode.`;
-
-        if (skipped.length) {
-            text += `\n\n_${skipped.join(', ')} has no delete action (join-based, no message to delete) — left unchanged, still enabled._`;
+        if (sub === 'off') {
+            setModeEnabled(groupId, 'low', false);
+            return await m.reply('❌ LOW mode *DISABLED* for this group.');
         }
 
-        text += `\n\nCheck any system individually, e.g. ${bot.prefix}antilink status.`;
+        if (sub === 'on') {
+            setModeEnabled(groupId, 'low', true);
+        } else if (!isModeEnabled(groupId, 'low')) {
+            return await m.reply(`🔒 LOW mode is OFF for this group. Run ${bot.prefix}low on to enable it.`);
+        }
+
+        const { applied, skipped } = applyMode(groupId, 'low');
+
+        let text =
+`🛡️ *LOW MODE ENABLED*
+
+Every anti-system now just *DELETES*:
+${applied.map(s => `• ${s}`).join('\n')}
+
+Anti-GC-Status stays on KICK. Admins are always exempt.`;
+
+        if (skipped.length) {
+            text += `\n\n_${skipped.join(', ')}: no delete action available, left unchanged._`;
+        }
+
         return await m.reply(text);
     }
 };
-
-
-
-
-
-
