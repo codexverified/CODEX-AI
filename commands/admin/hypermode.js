@@ -1,27 +1,37 @@
-const { applyMode } = require('../../lib/advancedGroupSettings');
+const { applyMode, isModeEnabled, setModeEnabled } = require('../../lib/advancedGroupSettings');
 
 module.exports = {
     name: 'hyper',
-    aliases: ['hypermode'],
     category: 'admin',
     reactions: { start: '🛡️' },
-    description: 'Advanced group protection — HYPER: every anti-system kicks immediately, zero tolerance',
+    description: 'Advanced group protection — HYPER: every anti-system kicks immediately. .hyper on/off toggles it for this group.',
     adminOnly: true,
     groupOnly: true,
 
     async execute(bot, m, args) {
-        const { applied } = applyMode(m.chat, 'hyper');
+        const groupId = m.chat;
+        const sub = (args[0] || '').toLowerCase();
+
+        if (sub === 'off') {
+            setModeEnabled(groupId, 'hyper', false);
+            return await m.reply('❌ HYPER mode *DISABLED* for this group.');
+        }
+
+        if (sub === 'on') {
+            setModeEnabled(groupId, 'hyper', true);
+        } else if (!isModeEnabled(groupId, 'hyper')) {
+            return await m.reply(`🔒 HYPER mode is OFF for this group. Run ${bot.prefix}hyper on to enable it.`);
+        }
+
+        const { applied } = applyMode(groupId, 'hyper');
 
         const text =
-`*Advanced Group Settings — HYPER*
+`🛡️ *HYPER MODE ENABLED*
 
-Every anti-system below now *KICKS* immediately, zero tolerance:
+Every anti-system now *KICKS* immediately:
 ${applied.map(s => `• ${s}`).join('\n')}
 
-Check any system individually, e.g. ${bot.prefix}antilink status.`;
+Admins are always exempt.`;
         return await m.reply(text);
     }
 };
-
-
-
