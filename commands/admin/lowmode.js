@@ -26,7 +26,7 @@ module.exports = {
         const { applied, skipped } = applyMode(groupId, 'low');
 
         let text =
-`🛡️ *LOW MODE ENABLED*
+`*LOW MODE ENABLED*
 
 Every anti-system now just *DELETES*:
 ${applied.map(s => `• ${s}`).join('\n')}
