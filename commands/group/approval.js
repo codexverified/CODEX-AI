@@ -3,15 +3,26 @@ module.exports = {
     aliases: ['adminapproval', 'joinapproval', 'memberapproval'],
     category: 'group',
     reactions: { start: '🛂' },
-    description: 'Turn admin approval for new members on/off in this group.',
+    description: 'Turn admin approval for new members on/off in this group, or check its status.',
     groupOnly: true,
     adminOnly: true,
 
     async execute(bot, m, args) {
         const prefix = bot.prefix || '.';
         const state = String(args?.[0] || '').toLowerCase();
+
+        if (!state || state === 'status') {
+            try {
+                const metadata = await bot.sock.groupMetadata(m.chat);
+                const isOn = !!metadata?.joinApprovalMode;
+                return m.reply(`🛂 Admin approval is currently ${isOn ? 'ON' : 'OFF'} in this group.`);
+            } catch (err) {
+                return m.reply(`Failed to check status: ${err.message}`);
+            }
+        }
+
         if (state !== 'on' && state !== 'off') {
-            return m.reply(`Use ${prefix}approval on, or ${prefix}approval off.`);
+            return m.reply(`Use ${prefix}approval on, ${prefix}approval off, or ${prefix}approval status.`);
         }
 
         try {
@@ -29,3 +40,4 @@ module.exports = {
         }
     },
 };
+        
