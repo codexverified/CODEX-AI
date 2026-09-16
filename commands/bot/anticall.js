@@ -10,8 +10,17 @@ module.exports = {
     const prefix = bot.prefix || '.';
     const config = loadConfig();
     const sub = String(args[0] || '').toLowerCase();
-    if (!sub) return reply(`📵 Anti-call manager\n\n${prefix}anticall on/off\n${prefix}anticall reason <text>\n${prefix}anticall unknownreason <text>\n${prefix}anticall schedule once <start ISO> <end ISO>\n${prefix}anticall schedule always <start HH:MM> <end HH:MM> [days] [dates] [months]\n${prefix}anticall schedule off\n${prefix}anticall reject add/remove/list <number or JID>\n${prefix}anticall whitelist add/remove/list <number or JID>\n${prefix}anticall status\n${prefix}anticall reset`);
+    if (!sub) return reply(`📵 Anti-call manager\n\n${prefix}anticall on/off\n${prefix}anticall block on/off\n${prefix}anticall reason <text>\n${prefix}anticall unknownreason <text>\n${prefix}anticall schedule once <start ISO> <end ISO>\n${prefix}anticall schedule always <start HH:MM> <end HH:MM> [days] [dates] [months]\n${prefix}anticall schedule off\n${prefix}anticall reject add/remove/list <number or JID>\n${prefix}anticall whitelist add/remove/list <number or JID>\n${prefix}anticall status\n${prefix}anticall reset`);
     if (sub === 'on' || sub === 'off') { config.enabled = sub === 'on'; saveConfig(config); return reply(`Anti-call unknown callers: ${sub.toUpperCase()}`); }
+    if (sub === 'block') {
+      const state = String(args[1] || '').toLowerCase();
+      if (state !== 'on' && state !== 'off') return reply(`Use ${prefix}anticall block on, or ${prefix}anticall block off.`);
+      config.mode = state === 'on' ? 'block' : 'reject';
+      saveConfig(config);
+      return reply(state === 'on'
+        ? '📵 Anti-call block: ON — callers will now get the anti-call message AND be blocked.'
+        : '📵 Anti-call block: OFF — callers will just get the anti-call message and have their call rejected.');
+    }
     if (sub === 'reason' || sub === 'unknownreason') { const text = args.slice(1).join(' ').trim(); if (!text) return reply('Provide a message.'); config[sub === 'reason' ? 'reason' : 'unknownReason'] = text; saveConfig(config); return reply('Anti-call message updated.'); }
     if (sub === 'schedule') {
       const action = String(args[1] || '').toLowerCase();
@@ -30,7 +39,7 @@ module.exports = {
       if (/^\d+$/.test(target) && sub === 'reject' && action === 'add' && !findLidForPhone(target)) config.pendingPhoneReject.push(target);
       saveConfig(config); return reply(`${sub} list updated.`);
     }
-    if (sub === 'status') return reply(`Anti-call: ${config.enabled ? 'ON' : 'OFF'}\nWhitelist: ${config.whitelist.length}\nBlacklist: ${config.blacklist.length}\nPending LID: ${config.pendingPhoneReject.length}\nSchedule: ${config.schedule.enabled ? 'ON' : 'OFF'}`);
+    if (sub === 'status') return reply(`Anti-call: ${config.enabled ? 'ON' : 'OFF'}\nBlock mode: ${config.mode === 'block' ? 'ON' : 'OFF'}\nWhitelist: ${config.whitelist.length}\nBlacklist: ${config.blacklist.length}\nPending LID: ${config.pendingPhoneReject.length}\nSchedule: ${config.schedule.enabled ? 'ON' : 'OFF'}`);
     if (sub === 'reset') { saveConfig(defaultConfig); return reply('Anti-call reset to defaults.'); }
     return reply('Unknown anti-call option. Use the command without arguments for help.');
   },
