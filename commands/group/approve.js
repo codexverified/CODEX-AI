@@ -1,11 +1,23 @@
 const { enrichRequests, findRequestByNumber } = require('../../lib/joinRequests');
 
+// Anything shorter than 7 digits can't be a real phone number (this
+// matches lib/phone-utils.js's own normalize(), which already refuses to
+// treat sub-7-digit input as a phone number) — so a bare short number is
+// read as "how many pending requests to approve", not a number to look up.
+function parseCount(raw) {
+    const text = String(raw ?? '').trim();
+    if (!/^\d+$/.test(text)) return null;
+    if (text.length >= 7) return null; // long enough to be a real phone number instead
+    const n = parseInt(text, 10);
+    return n > 0 ? n : null;
+}
+
 module.exports = {
     name: 'approve',
     aliases: ['acceptall', 'approveall'],
     category: 'group',
     reactions: { start: '📸' },
-    description: 'Approve all pending group join requests, or .approve <number> for just one.',
+    description: 'Approve all pending group join requests, .approve <number> for just one, or .approve <count> (e.g. .approve 20) for the first N pending.',
     groupOnly: true,
     adminOnly: true,
 
@@ -16,9 +28,24 @@ module.exports = {
 
             const target = args?.[0];
 
-            // .approve 234xxxxxxxxx — approve just that one pending request,
-            // leaving every other one untouched.
             if (target) {
+                const count = parseCount(target);
+
+                // .approve 50 / .approve 20 — approve up to that many
+                // pending requests, oldest-first, telling the admin if
+                // there weren't actually that many pending.
+                if (count !== null) {
+                    const batch = requests.slice(0, count);
+                    const jids = batch.map(r => r.jid);
+                    await bot.sock.groupRequestParticipantsUpdate(m.chat, jids, 'approve');
+                    if (count > requests.length) {
+                        return m.reply(`You asked for ${count}, but only ${requests.length} request(s) were pending — approved all ${requests.length}.`);
+                    }
+                    return m.reply(`✅ Approved ${jids.length} of ${count} requested join request(s).`);
+                }
+
+                // .approve 234xxxxxxxxx — approve just that one pending
+                // request, leaving every other one untouched.
                 const enriched = await enrichRequests(bot, requests);
                 const match = findRequestByNumber(enriched, target);
                 if (!match) return m.reply(`No pending join request from ${target}.`);
@@ -30,7 +57,7 @@ module.exports = {
                 );
             }
 
-            // No number given — original behaviour, approve everyone pending.
+            // No argument at all — original behaviour, approve everyone pending.
             const jids = requests.map(r => r.jid);
             await bot.sock.groupRequestParticipantsUpdate(m.chat, jids, 'approve');
             await m.reply(`Approved ${jids.length} join request(s).`);
@@ -42,3 +69,4 @@ module.exports = {
         }
     },
 };
+                    
