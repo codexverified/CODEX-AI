@@ -49,7 +49,7 @@
 [![Telegram Group](https://img.shields.io/badge/Telegram%20Group-Join-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/CODEXV3)
 [![Developer](https://img.shields.io/badge/Developer-Contact-2CA5E0?style=for-the-badge&logo=telegram)](https://t.me/dev_codexx)
 [![Website](https://img.shields.io/badge/Website-Visit-8A2BE2?style=for-the-badge&logo=vercel)](https://codex-ai-site.vercel.app)
-[![Pairing Site](https://img.shields.io/badge/Get%20Session%20ID-Pair%20Now-FF4500?style=for-the-badge&logo=whatsapp)](https://codex-ai-v3.vercel.app/session)
+[![Pairing Site](https://img.shields.io/badge/Get%20Session%20ID-Pair%20Now-FF4500?style=for-the-badge&logo=whatsapp)](https://codex-ai.site/session)
 
 </div>
 
