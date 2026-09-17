@@ -41,7 +41,7 @@ module.exports = {
                     if (count > requests.length) {
                         return m.reply(`You asked for ${count}, but only ${requests.length} request(s) were pending — approved all ${requests.length}.`);
                     }
-                    return m.reply(`✅ Approved ${jids.length} of ${count} requested join request(s).`);
+                    return m.reply(`✅ Approved ${jids.length} of ${requests.length} requested join request(s).`);
                 }
 
                 // .approve 234xxxxxxxxx — approve just that one pending
@@ -69,4 +69,3 @@ module.exports = {
         }
     },
 };
-                    
