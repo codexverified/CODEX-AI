@@ -3,7 +3,7 @@ const path  = require('path');
 const axios = require('axios');
 const os    = require('os');
 
-const DEFAULT_THUMB = 'https://cdn.kord.live/serve/jZsGsCGzZMPv.jpg';
+const DEFAULT_THUMB = 'https://cdn.kord.live/serve/2ssBORnrHDAK.jpg';
 const CACHED_IMG    = path.join(__dirname, '../../assets/menu.png');
 
 module.exports = {
