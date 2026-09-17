@@ -41,7 +41,7 @@ module.exports = {
                     if (count > requests.length) {
                         return m.reply(`You asked for ${count}, but only ${requests.length} request(s) were pending — rejected all ${requests.length}.`);
                     }
-                    return m.reply(`❌ Rejected ${jids.length} of ${count} requested join request(s).`);
+                    return m.reply(`❌ Rejected ${jids.length} of ${requests.length} requested join request(s).`);
                 }
 
                 // .reject 234xxxxxxxxx — reject just that one pending
