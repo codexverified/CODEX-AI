@@ -59,13 +59,13 @@
 
 **CODEX AI** is a full-stack, multifunctional WhatsApp bot built on Node.js and a hardened Baileys fork (`@codexverified/baileys`). It runs on your own WhatsApp number and adds AI, group management, an entire RPG-style economy, and a GTA-inspired roleplay system on top of your chats — all through a fast, reliable and intact group managers, plugin-driven command engine and many more.
 
-> Founded and built by**CODEX-ORGANIZATION** 
+> Founded and built by**codex. and registered under the codexverified organization** 
 
 ---
 
 ## ⚙️ Requirements
 
-- **Node.js** v18 or higher
+- **Node.js** v20 or higher
 - **npm**
 - **FFmpeg** (bundled via `ffmpeg-static`, no manual install needed)
 - A WhatsApp account (self-bot — runs on your own number)
@@ -85,7 +85,7 @@
    - **Build Command:** `pnpm install`
    - **Start Command:** `npm start`
 4. Deploy the service once so Render has a live URL — you'll pair it in the next step.
-5. Generate your session ID from the [pairing site](https://codex-ai-v3.vercel.app/session), then paste it into `sessionId` in `config.json` and redeploy (or commit the change and push).
+5. Generate your session ID from the [pairing site](https://codex-ai.site/session), then paste it into `sessionId` in `config.json` and redeploy (or commit the change and push).
 6. **Note:** Render's free tier sleeps after inactivity. The first request after idle time can take 30–60s to wake back up — this is normal, not a broken deploy. For a bot that needs to stay online 24/7, consider a paid instance or an uptime pinger.
 
 ### 🖥️ Deploy on a VPS
@@ -96,7 +96,7 @@ sudo apt update && sudo apt install -y nodejs npm git
 sudo npm install -g pnpm
 
 # Clone your fork
-git clone https://github.com/CEO-CODEX/CODEX-AI.git codex-ai
+git clone https://github.com/codexverified/CODEX-AI.git codex-ai
 cd codex-ai
 
 # Install dependencies (this repo pins exact versions via pnpm-lock.yaml —
