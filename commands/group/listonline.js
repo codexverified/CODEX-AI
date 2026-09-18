@@ -1,4 +1,4 @@
-const { parseDuration, formatDuration, MAX_DURATION_MS } = require('../../lib/duration');
+const { parseDuration, formatDuration, MAX_DURATION_MS } = require('../../lib/durations');
 const presenceStore = require('../../lib/presenceStore');
 
 module.exports = {
