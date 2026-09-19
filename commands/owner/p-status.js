@@ -30,12 +30,15 @@ module.exports = {
             else if (upSec < 86400) uptimeStr = `${Math.floor(upSec / 3600)}h`;
             else uptimeStr = `${Math.floor(upSec / 86400)}d`;
 
-            // "Restarts" — there's no PM2 wrapper here, so the closest real,
-            // already-tracked equivalent is how many times the WhatsApp
-            // connection itself has been (re)established this process
-            // lifetime (see bot._connGeneration in lib/connection.js).
-            // Generation 1 = the first, normal connect — not a restart.
-            const restarts = Math.max((bot._connGeneration || 1) - 1, 0);
+            // BUG (was): used bot._connGeneration — in-memory only, always
+            // resets to 0 on every real process restart, so it could never
+            // actually show how many times the bot has been restarted; it
+            // only ever showed WhatsApp reconnects within the CURRENT run.
+            // Now reads the real, disk-persisted count — see
+            // lib/restartCounter.js and where it's set once in app.js's
+            // start(). Falls back to 0 if app.js hasn't set it yet for any
+            // reason, rather than silently showing the wrong number again.
+            const restarts = typeof bot.restartCount === 'number' ? bot.restartCount : 0;
 
             const text =
                 `*✳️ Bot Status*\n\n` +
