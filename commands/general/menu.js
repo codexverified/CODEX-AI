@@ -56,17 +56,17 @@ module.exports = {
         };
 
         const getHost = () => {
-            const envName = [
+            const isPanelHost = [
                 process.env.PTERODACTYL,
                 process.env.PANEL,
-                process.env.REPL_SLUG,
-                process.env.DOCKER_CONTAINER,
-                process.env.KUBERNETES_SERVICE_HOST,
+                process.env.P_SERVER_UUID,
+                process.env.P_SERVER_MEMORY,
+                process.env.P_SERVER_PORT,
             ].find(Boolean);
 
-            if (envName) return 'Pterodactyl (panel)';
+            if (isPanelHost) return 'Pterodactyl (panel)';
 
-            return os.hostname?.() || 'Desktop';
+            return process.env.HOSTNAME || os.hostname?.() || 'unknown-host';
         };
 
         const senderName = m.pushName || m.sender?.split('@')[0] || 'Unknown';
