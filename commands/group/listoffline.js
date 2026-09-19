@@ -36,9 +36,9 @@ function isBotJid(bot, rawJid, phoneJid) {
 
 module.exports = {
     name: 'listoffline',
-    aliases: ['offline'],
+    aliases: [],
     category: 'group',
-    description: 'List members NOT active for at least a given time, e.g. .listoffline 24h (max 24h).',
+    description: 'List members who sent no message for a given time, e.g. .listoffline 24h (max 24h).',
     groupOnly: true,
     adminOnly: true,
 
@@ -49,25 +49,20 @@ module.exports = {
         if (ms === null) return m.reply(`Usage: ${prefix}listoffline <time>, e.g. ${prefix}listoffline 24h`);
         if (ms > duration.MAX_DURATION_MS) return m.reply('Max is 24h.');
 
-        const botDigits = digitsOf(bot?.sock?.user?.id);
-        const botLidDigits = digitsOf(bot?.sock?.user?.lid);
-
         let participants = [];
         try {
             const meta = await bot.sock.groupMetadata(m.chat);
-            participants = (meta?.participants || [])
-                .map(p => p.id)
-                .filter(Boolean)
-                .filter(jid => {
-                    const d = digitsOf(jid);
-                    return d && d !== botDigits && d !== botLidDigits;
-                });
+            for (const participant of meta?.participants || []) {
+                const rawJid = participant.id;
+                const phoneJid = await resolvePhoneJid(bot, rawJid);
+                if (!isBotJid(bot, rawJid, phoneJid)) participants.push(phoneJid);
+            }
         } catch (err) {
             return m.reply(`Failed: ${err.message}`);
         }
 
         const inactive = activityStore.getInactive(m.chat, ms, participants);
-        if (!inactive.length) return m.reply('No one offline.');
+        if (!inactive.length) return m.reply(`Everyone sent a message within the last ${duration.formatDuration(ms)}.`);
 
         const resolved = [];
         for (const r of inactive) {
@@ -75,10 +70,10 @@ module.exports = {
             if (isBotJid(bot, r.jid, phoneJid)) continue;
             resolved.push(phoneJid);
         }
-        if (!resolved.length) return m.reply('No one offline.');
+        if (!resolved.length) return m.reply(`Everyone sent a message within the last ${duration.formatDuration(ms)}.`);
 
         const lines = resolved.map(jid => `@${digitsOf(jid)}`);
-        await m.reply(lines.join('\n'), { mentions: resolved });
+        await m.reply(`⚪ No message from these members in the last ${duration.formatDuration(ms)} (${resolved.length}):\n\n${lines.join('\n')}`, { mentions: resolved });
     },
 };
             

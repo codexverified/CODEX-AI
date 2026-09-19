@@ -36,9 +36,9 @@ function isBotJid(bot, rawJid, phoneJid) {
 
 module.exports = {
     name: 'listonline',
-    aliases: ['online'],
+    aliases: [],
     category: 'group',
-    description: 'List members active within a given time, e.g. .listonline 10m (max 24h).',
+    description: 'List members who sent a message within a given time, e.g. .listonline 10m (max 24h).',
     groupOnly: true,
     adminOnly: true,
 
@@ -50,7 +50,7 @@ module.exports = {
         if (ms > duration.MAX_DURATION_MS) return m.reply('Max is 24h.');
 
         const recent = activityStore.getRecentlyActive(m.chat, ms);
-        if (!recent.length) return m.reply('No one online.');
+        if (!recent.length) return m.reply('No members have sent a message in that time window.');
 
         const resolved = [];
         for (const r of recent) {
@@ -58,9 +58,9 @@ module.exports = {
             if (isBotJid(bot, r.jid, phoneJid)) continue;
             resolved.push(phoneJid);
         }
-        if (!resolved.length) return m.reply('No one online.');
+        if (!resolved.length) return m.reply('No members have sent a message in that time window.');
 
         const lines = resolved.map(jid => `@${digitsOf(jid)}`);
-        await m.reply(lines.join('\n'), { mentions: resolved });
+        await m.reply(`🟢 Active in the last ${duration.formatDuration(ms)} (${resolved.length}):\n\n${lines.join('\n')}`, { mentions: resolved });
     },
 };
