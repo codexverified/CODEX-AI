@@ -1,10 +1,11 @@
-const { parseDuration, formatDuration, MAX_DURATION_MS } = require('../../lib/duration');
-const presenceStore = require('../../lib/presenceStore');
+const duration = require('../../lib/duration');
+const activityStore = require('../../lib/activityStore');
 
 // Resolves a @lid pseudo-id down to the real phone-number jid where
-// possible, using Baileys' own lid<->PN mapping store, so a tag never
-// shows a meaningless @lid number. Falls back to the jid as-is if it's
-// already a phone jid, or if no mapping is known yet.
+// possible, using Baileys' own lid<->PN mapping store. Most stored
+// activity is already a real phone jid (see messageHandler.js, which
+// prefers key.participantPn when recording) — this is just a safety net
+// for the rare case that wasn't available.
 async function resolvePhoneJid(bot, jid) {
     const clean = String(jid || '').replace(/:[0-9]+@/, '@');
     if (clean.endsWith('@lid')) {
@@ -23,42 +24,61 @@ function digitsOf(jid) {
     return String(jid || '').split('@')[0].replace(/\D/g, '');
 }
 
+// The bot itself must never show up in its own online/offline list.
+function isBotJid(bot, rawJid, phoneJid) {
+    const botDigits = digitsOf(bot?.sock?.user?.id);
+    const botLidDigits = digitsOf(bot?.sock?.user?.lid);
+    const d1 = digitsOf(rawJid);
+    const d2 = digitsOf(phoneJid);
+    return (botDigits && (d1 === botDigits || d2 === botDigits)) ||
+           (botLidDigits && (d1 === botLidDigits || d2 === botLidDigits));
+}
+
 module.exports = {
     name: 'listoffline',
     aliases: ['offline'],
     category: 'group',
-    reactions: { start: '⚪' },
-    description: `List members NOT seen online for at least a given time, e.g. .listoffline 3m (max ${formatDuration(MAX_DURATION_MS)}).`,
+    description: 'List members NOT active for at least a given time, e.g. .listoffline 24h (max 24h).',
     groupOnly: true,
     adminOnly: true,
 
     async execute(bot, m, args) {
         const prefix = bot.prefix || '.';
-        const ms = parseDuration(args?.[0]);
+        const ms = typeof duration.parseDuration === 'function' ? duration.parseDuration(args?.[0]) : null;
 
-        if (ms === null) return m.reply(`Usage: ${prefix}listoffline <time>, e.g. ${prefix}listoffline 3m`);
-        if (ms > MAX_DURATION_MS) return m.reply(`Max is ${formatDuration(MAX_DURATION_MS)}.`);
+        if (ms === null) return m.reply(`Usage: ${prefix}listoffline <time>, e.g. ${prefix}listoffline 24h`);
+        if (ms > duration.MAX_DURATION_MS) return m.reply('Max is 24h.');
 
-        await presenceStore.ensureSubscribed(bot.sock, m.chat);
+        const botDigits = digitsOf(bot?.sock?.user?.id);
+        const botLidDigits = digitsOf(bot?.sock?.user?.lid);
 
         let participants = [];
         try {
             const meta = await bot.sock.groupMetadata(m.chat);
-            participants = (meta?.participants || []).map(p => p.id).filter(Boolean);
+            participants = (meta?.participants || [])
+                .map(p => p.id)
+                .filter(Boolean)
+                .filter(jid => {
+                    const d = digitsOf(jid);
+                    return d && d !== botDigits && d !== botLidDigits;
+                });
         } catch (err) {
             return m.reply(`Failed: ${err.message}`);
         }
 
-        const offline = presenceStore.getOffline(m.chat, ms, participants);
-        if (!offline.length) return m.reply('No one offline.');
+        const inactive = activityStore.getInactive(m.chat, ms, participants);
+        if (!inactive.length) return m.reply('No one offline.');
 
-        const resolved = await Promise.all(offline.map(async (r) => ({
-            ...r,
-            phoneJid: await resolvePhoneJid(bot, r.jid),
-        })));
+        const resolved = [];
+        for (const r of inactive) {
+            const phoneJid = await resolvePhoneJid(bot, r.jid);
+            if (isBotJid(bot, r.jid, phoneJid)) continue;
+            resolved.push(phoneJid);
+        }
+        if (!resolved.length) return m.reply('No one offline.');
 
-        const lines = resolved.map(r => `@${digitsOf(r.phoneJid)} — ${r.lastOnlineAt ? formatDuration(Date.now() - r.lastOnlineAt) : '?'}`);
-        const mentions = resolved.map(r => r.phoneJid);
-        await m.reply(lines.join('\n'), { mentions });
+        const lines = resolved.map(jid => `@${digitsOf(jid)}`);
+        await m.reply(lines.join('\n'), { mentions: resolved });
     },
 };
+            
