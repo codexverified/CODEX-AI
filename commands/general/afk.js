@@ -23,7 +23,7 @@ Mentioned ${count} time(s) while away.`
 
         // ── .afk config — show modes ──────────────────────────────────────────
         if (sub === 'config') {
-            const currentMode = bot.afkSystem.getMode(m.sender);
+            const currentMode = await bot.afkSystem.getMode(m.sender);
             return await m.reply(
 `⚙️ *AFK CONFIG*
 Current mode: *${currentMode.toUpperCase()}*
@@ -46,13 +46,13 @@ Change with:
             if (!['tag', 'mention', 'all'].includes(newMode)) {
                 return await m.reply(`Invalid mode. Use: tag, mention, or all`);
             }
-            bot.afkSystem.setMode(m.sender, newMode);
+            await bot.afkSystem.setMode(m.sender, newMode);
             return await m.reply(`✅ AFK mode set to: *${newMode.toUpperCase()}*`);
         }
 
         // ── .afk <reason> — enable AFK ────────────────────────────────────────
         const reason = args.join(' ').trim() || 'AFK';
-        const mode   = bot.afkSystem.getMode(m.sender);
+        const mode   = await bot.afkSystem.getMode(m.sender);
         bot.afkSystem.setAFK(m.sender, reason, m.pushName);
 
         // CRITICAL: Use m.reply() NOT bot.sendMessage() to avoid triggering checkAFK

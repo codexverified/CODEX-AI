@@ -55,6 +55,20 @@ module.exports = {
             } catch { return 'N/A'; }
         };
 
+        const getHost = () => {
+            const envName = [
+                process.env.PTERODACTYL,
+                process.env.PANEL,
+                process.env.REPL_SLUG,
+                process.env.DOCKER_CONTAINER,
+                process.env.KUBERNETES_SERVICE_HOST,
+            ].find(Boolean);
+
+            if (envName) return 'Pterodactyl (panel)';
+
+            return os.hostname?.() || 'Desktop';
+        };
+
         const senderName = m.pushName || m.sender?.split('@')[0] || 'Unknown';
         const readmore   = String.fromCharCode(0x200E).repeat(4001);
 
@@ -62,7 +76,7 @@ module.exports = {
         text += `╔═══〔 𖣘 *${(c.settings?.title || c.botName || 'CODEX AI').toUpperCase()}* 𖣘 〕═══❒\n`;
         text += `║╭───────────────◆\n`;
         text += `║│ 𖣘 *USER:* ${senderName}\n`;
-        text += `║│ 𖣘 *HOST:* Pterodactyl (panel)\n`;
+        text += `║│ 𖣘 *HOST:* ${getHost()}\n`;
         text += `║│ 𖣘 *PREFIX:* ${prefix}\n`;
         text += `║│ 𖣘 *CMDS:* ${uniqueCount}\n`;
         // Applied the d-h-m-s pattern here inside backticks
