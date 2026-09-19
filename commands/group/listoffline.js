@@ -1,4 +1,5 @@
-const { parseDuration, formatDuration, MAX_DURATION_MS } = require('../../lib/durations');
+const { parseDuration, formatDuration, MAX_DURATION_MS } = require('../../lib/duration');
+const { resolvePhoneJid, digitsOf } = require('../../lib/joinRequests');
 const presenceStore = require('../../lib/presenceStore');
 
 module.exports = {
@@ -14,12 +15,8 @@ module.exports = {
         const prefix = bot.prefix || '.';
         const ms = parseDuration(args?.[0]);
 
-        if (ms === null) {
-            return m.reply(`Usage: ${prefix}listoffline <time>, e.g. ${prefix}listoffline 3m (units: s/m/h/d, max ${formatDuration(MAX_DURATION_MS)}).`);
-        }
-        if (ms > MAX_DURATION_MS) {
-            return m.reply(`That's too long — the max allowed window is ${formatDuration(MAX_DURATION_MS)}.`);
-        }
+        if (ms === null) return m.reply(`Usage: ${prefix}listoffline <time>, e.g. ${prefix}listoffline 3m`);
+        if (ms > MAX_DURATION_MS) return m.reply(`Max is ${formatDuration(MAX_DURATION_MS)}.`);
 
         await presenceStore.ensureSubscribed(bot.sock, m.chat);
 
@@ -28,23 +25,21 @@ module.exports = {
             const meta = await bot.sock.groupMetadata(m.chat);
             participants = (meta?.participants || []).map(p => p.id).filter(Boolean);
         } catch (err) {
-            return m.reply(`Failed to load group members: ${err.message}`);
+            return m.reply(`Failed: ${err.message}`);
         }
 
         const offline = presenceStore.getOffline(m.chat, ms, participants);
-        if (!offline.length) {
-            return m.reply(`Everyone tracked has been online within the last ${formatDuration(ms)}.`);
-        }
+        if (!offline.length) return m.reply('No one offline.');
 
-        const lines = offline.map((r, i) => {
-            const since = r.lastOnlineAt ? `last online ${formatDuration(Date.now() - r.lastOnlineAt)} ago` : 'no presence data yet';
-            return `${i + 1}. @${r.jid.split('@')[0]} — ${since}`;
-        });
-        const mentions = offline.map(r => r.jid);
-        await m.reply(
-            `⚪ Offline for at least ${formatDuration(ms)} (${offline.length}):\n\n${lines.join('\n')}\n\n` +
-            `(Members WhatsApp never reports presence for — due to their own privacy settings — always show up as "no presence data yet".)`,
-            { mentions }
-        );
+        // Same LID → phone number resolution as listonline.js — never
+        // tag/display a raw @lid pseudo-id.
+        const resolved = await Promise.all(offline.map(async (r) => ({
+            ...r,
+            phoneJid: await resolvePhoneJid(bot, r.jid),
+        })));
+
+        const lines = resolved.map(r => `@${digitsOf(r.phoneJid)} — ${r.lastOnlineAt ? formatDuration(Date.now() - r.lastOnlineAt) : '?'}`);
+        const mentions = resolved.map(r => r.phoneJid);
+        await m.reply(lines.join('\n'), { mentions });
     },
 };
