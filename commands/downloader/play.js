@@ -7,12 +7,12 @@ module.exports = {
     alias: ['song', 'music', 'ytmp3'],
     desc: 'Download and send YouTube music',
     category: 'downloader',
-    reactions: { start: 'START' },
+    reactions: { start: '⏰' },
 
     execute: async (sock, m, { reply, args, prefix }) => {
         const query = args.join(' ').trim();
         if (!query) {
-            return await reply(`_*provide a query*_\n_Example: ${prefix}play unstoppable_`);
+            return await reply(`_*provide a query*_\n_❡ example: ${prefix}play unstoppable_`);
         }
 
         try {
@@ -21,7 +21,7 @@ module.exports = {
             const ytsa = ytsr.videos[0];
             
             if (!ytsa) {
-                return await reply('No results found for: ' + query);
+                return await reply('❌ No results found for: ' + query);
             }
 
             // Try multiple download APIs
@@ -54,11 +54,11 @@ module.exports = {
             }
 
             if (!audioBuffer || audioBuffer.length < 5000) {
-                return await reply(`Download failed. Try again later.\nSong: *${ytsa.title}*\nURL: ${ytsa.url}`);
+                return await reply(`❌ Download failed. Try again later.\nSong: *${ytsa.title}*\nURL: ${ytsa.url}`);
             }
 
             // Build your custom caption
-            const cap = `*${ytsa.title}*\n\n00:00 - [PLAYING] - ${ytsa.duration?.timestamp || ytsa.timestamp || '?'}`;
+            const cap = `*${ytsa.title}*\n\n00:00 ───◁ㅤ ❚❚ ㅤ▷─── ${ytsa.duration?.timestamp || ytsa.timestamp || '?'} ♡`;
 
             // 1. Send the thumbnail image WITH your caption
             await sock.sendMessage(m.chat, {
@@ -75,7 +75,7 @@ module.exports = {
 
         } catch (err) {
             console.error(err);
-            return await reply(`An error occurred: ${err.message || err}`);
+            return await reply(`an error occured: ${err.message || err}`);
         }
     }
 };
