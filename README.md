@@ -273,7 +273,7 @@ CODEX AI is provided as an extensible open-source automation project. Its securi
 
 <br>
 
-<sub>Thanks for visiting the my repository.</sub>
+<sub>Thanks for visiting my repository.</sub>
 
 <img src="https://i.imgur.com/dBaSKWF.gif" height="16" width="88%" alt="animated coloured footer line" />
 
