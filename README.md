@@ -1,121 +1,175 @@
 <div align="center">
 
-<img src="https://cdn.kord.live/serve/UrtTy3IkVnmE.jpg" alt="CODEX AI Banner" width="100%">
+# ◈ CODEX AI
 
-<img src="https://i.imgur.com/dBaSKWF.gif" height="18" width="100%">
+### **The intelligent security and productivity layer for WhatsApp.**
 
-<a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Ribeye&size=28&pause=1000&color=00FFF0&center=true&vCenter=true&width=910&height=70&repeat=true&lines=CODEX+AI;A+MULTIFUNCTIONAL+WHATSAPP+BOT+BUILT+WITH+BAILEYS.;AI+HYPER+SPEED+POWERED.;FULL+STACK+ACTIVE+AND+INTACT+GROUP+MANAGERS.;ALWAYS+ACTIVE+AND+ONLINE.;DON%27T+FORGET+TO+STAR+AND+FORK+MY+REPO.;BUILT+AND+FOUNDED+BY+CODEX." alt="Typing SVG" />
-</a>
+<img src="https://readme-typing-svg.demolab.com?font=Space+Mono&size=22&pause=1200&color=00FFF0&center=true&vCenter=true&width=900&height=70&repeat=true&lines=SECURE+YOUR+COMMUNITIES.;AUTOMATE+THE+ORDINARY.;BUILD+WITH+INTELLIGENCE.;YOUR+GROUPS%2C+PROTECTED+BY+DESIGN." alt="CODEX AI animated tagline" />
 
-<img src="https://i.imgur.com/dBaSKWF.gif" height="18" width="100%">
+<img src="https://i.imgur.com/dBaSKWF.gif" height="16" width="88%" alt="divider" />
 
-</div>
+<img src="./assets/rolling-circle.svg" width="90" alt="CODEX AI rolling circle" />
 
-<img src="https://readme-typing-svg.demolab.com?font=Courier+New&size=13&duration=3000&pause=100000000&color=6C7A89&center=false&vCenter=true&width=400&height=20&repeat=false&lines=P+R+E+M+I+U+M+++W+H+A+T+S+A+P+P+++B+O+T" alt="Premium WhatsApp Bot">
-
-<img src="./assets/rolling-circle.svg" width="90" alt="CODEX AI orb">
-
-# 𝐂𝚯𝐃𝚵𝚾 𝚫𝚰
-
----
-
-<div align="center">
-
-<em>YOUR WHATSAPP HYPER CHARGED.</em>
-
-<br>
-
-<img src="https://img.shields.io/github/stars/CEO-CODEX/CODEX-AI?style=for-the-badge&color=FFD700&logo=github" alt="Stars"/>
-<img src="https://img.shields.io/github/forks/CEO-CODEX/CODEX-AI?style=for-the-badge&color=00BFFF&logo=github" alt="Forks"/>
-<img src="https://img.shields.io/github/issues/CEO-CODEX/CODEX-AI?style=for-the-badge&color=FF6B6B&logo=github" alt="Issues"/>
-<img src="https://img.shields.io/github/license/CEO-CODEX/CODEX-AI?style=for-the-badge&color=2ECC71" alt="License"/>
-<img src="https://img.shields.io/badge/version-3.0.0-00FFF0?style=for-the-badge" alt="Version"/>
-<img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen?style=for-the-badge&logo=node.js" alt="Node"/>
-<img src="https://img.shields.io/badge/library-%40codexverified%2Fbaileys-25D366?style=for-the-badge&logo=whatsapp" alt="Baileys"/>
+[![Version](https://img.shields.io/badge/version-3.0.0-00FFF0?style=for-the-badge&labelColor=07111F)](https://github.com/CEO-CODEX/CODEX-AI)
+[![Developer CODEX](https://img.shields.io/badge/Developer-CODEX-B88CFF?style=for-the-badge&logo=telegram&labelColor=07111F)](https://t.me/codexverified)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-7CFFB2?style=for-the-badge&logo=node.js&logoColor=white&labelColor=07111F)](https://nodejs.org/)
+[![Powered by codexverified/baileys](https://img.shields.io/badge/powered%20by-codexverified%2Fbaileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=07111F)](https://github.com/WhiskeySockets/Baileys)
+[![License](https://img.shields.io/badge/license-open%20source-B88CFF?style=for-the-badge&labelColor=07111F)](LICENSE)
 
 </div>
 
 ---
 
-<div align="center">
+## A more intelligent way to run your groups
 
-### ✦ LINKS
+**CODEX AI** is a multifunctional WhatsApp automation platform built for safer communities, faster workflows, and more capable users. It combines proactive group protection, intelligent automation, developer utilities, and an always-available AI assistant in one extensible system.
 
-[![WhatsApp Channel](https://img.shields.io/badge/Main%20Channel-Follow-25D366?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/channel/0029Vb78BHmL2AU7fsANSH2y)
-[![Backup Channel](https://img.shields.io/badge/Backup%20Channel-Follow-25D366?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/channel/0029Vb6sMEy96H4VI2w3I50F)
-[![Support Group](https://img.shields.io/badge/Support%20Group-Join-25D366?style=for-the-badge&logo=whatsapp)](https://chat.whatsapp.com/K7R4qGt8Z7E2PjWr4OvQeG)
-[![Telegram Channel](https://img.shields.io/badge/Telegram%20Channel-Join-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/CODEX_AIV3)
-[![Telegram Group](https://img.shields.io/badge/Telegram%20Group-Join-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/CODEXV3)
-[![Developer](https://img.shields.io/badge/Developer-Contact-2CA5E0?style=for-the-badge&logo=telegram)](https://t.me/dev_codexx)
-[![Website](https://img.shields.io/badge/Website-Visit-8A2BE2?style=for-the-badge&logo=vercel)](https://codex-ai-site.vercel.app)
-[![Pairing Site](https://img.shields.io/badge/Get%20Session%20ID-Pair%20Now-FF4500?style=for-the-badge&logo=whatsapp)](https://codex-ai.site/session)
+Whether you manage a busy community, build digital products, or simply want a smarter everyday assistant, CODEX AI helps you reduce noise, respond faster, and keep your conversations more secure.
 
-</div>
+> **One platform. Three priorities:** protect your conversations, accelerate your work, and make everyday tasks simpler.
+
+> **Project notice:** CODEX AI was built by **Codex** and is developed and maintained under the **CODEXVERIFIED** organization.
 
 ---
 
-## What is CODEX AI?
+## At a glance
 
-**CODEX AI** is a full-stack, multifunctional WhatsApp bot built on Node.js and a hardened Baileys fork (`@codexverified/baileys`). It runs on your own WhatsApp number and adds AI, group management, an entire RPG-style economy, and a GTA-inspired roleplay system on top of your chats — all through a fast, reliable and intact group managers, plugin-driven command engine and many more.
+Use this quick map to jump directly to any part of the project:
 
-> Founded and built by **codex. and registered under the codexverified organization** 
+1. [A more intelligent way to run your groups](#a-more-intelligent-way-to-run-your-groups)
+2. [Core capabilities](#core-capabilities)
+   - [Intelligent group protection](#-intelligent-group-protection)
+   - [Smart automation](#-smart-automation)
+   - [AI assistant for everyday tasks](#-ai-assistant-for-everyday-tasks)
+   - [Developer workspace](#-developer-workspace)
+   - [Community operations](#-community-operations)
+3. [Why CODEX AI?](#why-codex-ai)
+4. [Technology](#technology)
+5. [Requirements](#requirements)
+6. [Deploy CODEX AI](#deploy-codex-ai)
+   - [Deploy on Render](#deploy-on-render)
+   - [Deploy on a VPS](#deploy-on-a-vps)
+   - [Deploy on Heroku](#deploy-on-heroku)
+   - [Deploy on a hosting panel](#deploy-on-a-hosting-panel)
+   - [Deploy on Termux](#deploy-on-termux)
+7. [Connect your WhatsApp account](#connect-your-whatsapp-account)
+8. [Optional developer integrations](#optional-developer-integrations)
+9. [Community and support](#community-and-support)
+10. [Project disclaimer](#project-disclaimer)
 
 ---
 
-## ⚙️ Requirements
+## Core capabilities
 
-- **Node.js** v20 or higher
-- **npm**
-- **FFmpeg** (bundled via `ffmpeg-static`, no manual install needed)
-- A WhatsApp account (self-bot — runs on your own number)
-- Recommended: a VPS or hosting panel for 24/7 uptime
+### 🛡️ Intelligent group protection
 
-> ⚠️ This project depends on the `@codexverified/baileys` fork specifically — it will not run correctly on stock Baileys.
+CODEX AI is designed to help protect group chats from common digital threats. It can help identify suspicious links, phishing attempts, automated billing messages, spam patterns, and other unwanted activity before they overwhelm your community.
+
+Use configurable moderation tools to reduce message noise, enforce group rules, and give administrators greater visibility over what enters the conversation. Protection behaviour can be adapted to the needs of each group.
+
+### ⚡ Smart automation
+
+Automate routine actions without turning your community into a complicated control panel. CODEX AI can help with welcome messages, group information, moderation responses, reminders, utilities, and other repeatable workflows.
+
+Its plugin-driven architecture makes it possible to extend the bot with new commands and integrations as your needs evolve.
+
+### 🧠 AI assistant for everyday tasks
+
+The built-in AI assistant helps users with daily basics and practical requests. Ask for explanations, summaries, ideas, translations, writing assistance, planning help, or quick answers directly inside WhatsApp.
+
+CODEX AI is built to make useful intelligence available where conversations already happen—without requiring users to switch between multiple tools for every small task.
+
+### 🧰 Developer workspace
+
+CODEX AI also provides a growing collection of tools for developers and technical teams. Use it to support coding workflows, generate or refine ideas, inspect technical information, work with repositories, and automate repetitive project tasks.
+
+The platform is designed for experimentation and extension, so developers can build their own commands, services, and productivity modules on top of the core system.
+
+### 📡 Community operations
+
+Give group owners and administrators a clearer way to manage their spaces. Configure permissions, moderation behaviour, automated notices, administrative utilities, and community-specific commands from a single platform.
+
+The result is a more organised, responsive, and dependable group experience.
 
 ---
 
-## 🚀 Deployment
+## Why CODEX AI?
 
-### 🌐 Deploy on Render
+| Capability | What it provides |
+|---|---|
+| **Security-first automation** | Tools designed to reduce phishing, spam, suspicious links, and automated bill-message noise. |
+| **Practical intelligence** | An AI assistant for everyday questions, writing, summaries, planning, and explanations. |
+| **Developer-friendly design** | An extensible command and plugin system for technical workflows and custom features. |
+| **Community control** | Flexible group-management utilities for owners, moderators, and administrators. |
+| **Always available** | Deploy on your preferred host and keep your assistant available around the clock. |
+| **Built to evolve** | A modular foundation that can grow with new tools, integrations, and use cases. |
 
-1. Fork this repository to your own GitHub account.
-2. On [Render](https://render.com), create a **New → Web Service** and connect your fork.
-3. Set:
-   - **Build Command:** `pnpm install`
-   - **Start Command:** `npm start`
-4. Deploy the service once so Render has a live URL — you'll pair it in the next step.
-5. Generate your session ID from the [pairing site](https://codex-ai.site/session), then paste it into `sessionId` in `config.json` and redeploy (or commit the change and push).
-6. **Note:** Render's free tier sleeps after inactivity. The first request after idle time can take 30–60s to wake back up — this is normal, not a broken deploy. For a bot that needs to stay online 24/7, consider a paid instance or an uptime pinger.
+---
 
-### 🖥️ Deploy on a VPS
+## Technology
+
+CODEX AI runs on **Node.js** and a hardened Baileys fork, with a modular command engine and plugin-oriented architecture. It operates through a WhatsApp account and can be hosted on a VPS, hosting panel, cloud service, or compatible mobile environment.
+
+> CODEX AI is a self-hosted automation project. Review your hosting provider's terms, WhatsApp's policies, and the permissions granted to every integration before deploying it in a production community.
+
+---
+
+## Requirements
+
+- **Node.js** version 20 or higher
+- **npm** and **pnpm**
+- **FFmpeg**, bundled through `ffmpeg-static`
+- A WhatsApp account for the self-hosted bot
+- A VPS or hosting panel for reliable 24/7 availability
+- The project-specific `@codexverified/baileys` dependency
+
+---
+
+## Deploy CODEX AI
+
+### Deploy on Render
+
+1. Fork this repository to your GitHub account.
+2. In [Render](https://render.com), create a **New → Web Service** and connect your fork.
+3. Use the following commands:
+
+   ```text
+   Build Command: pnpm install
+   Start Command: npm start
+   ```
+
+4. Deploy once so Render provides a live service URL.
+5. Generate a session ID from the [pairing site](https://codex-ai.site/session), add it to `config.json`, and redeploy.
+
+Render's free tier may sleep after inactivity. For consistent 24/7 availability, use a suitable paid instance or another host that supports persistent services.
+
+### Deploy on a VPS
 
 ```bash
-# Update & install prerequisites
+# Install prerequisites
 sudo apt update && sudo apt install -y nodejs npm git
 sudo npm install -g pnpm
 
-# Clone your fork
+# Clone the repository
 git clone https://github.com/codexverified/CODEX-AI.git codex-ai
 cd codex-ai
 
-# Install dependencies (this repo pins exact versions via pnpm-lock.yaml —
-# use pnpm, not npm, so you actually get the locked/tested dependency graph)
+# Install the locked dependency graph
 pnpm install
 
-# Configure the bot
-nano config.json   # set botName, prefix, owner.number, sessionId
+# Configure your bot
+nano config.json
 
-# Run it persistently with pm2
+# Run persistently with PM2
 sudo npm install -g pm2
 pm2 start index.js --name codex-ai
 pm2 save
 pm2 startup
 ```
 
-### 🟣 Deploy on Heroku
+### Deploy on Heroku
 
-> Heroku no longer offers a free tier — you'll need a paid dyno.
+Heroku requires a paid dyno for persistent operation.
 
 ```bash
 heroku login
@@ -124,74 +178,107 @@ git push heroku main
 heroku ps:scale web=1
 ```
 
-Set `sessionId` and any other values directly in `config.json` before pushing, since Heroku's filesystem resets on every deploy/dyno restart.
+Set `sessionId` and the required configuration values before deploying. Heroku's filesystem can reset after a dyno restart, so use a deployment-safe configuration strategy for production environments.
 
-### 📦 Deploy on a Panel (Pterodactyl)
+### Deploy on a hosting panel
 
-1. Create a new server using a **Node.js** egg (Node 18+).
-2. Upload the project files via SFTP, or use the panel's **Git Pull** feature with your repo URL.
-3. In the **Startup** tab, set the startup command to `node index.js`.
-4. Open the console and run `pnpm install` once the files are in place (this repo pins versions via `pnpm-lock.yaml`; running plain `npm install` ignores that lockfile and can silently install different dependency versions than were tested).
-5. Edit `config.json` (via the panel's file manager) to set your `sessionId` and owner details.
-6. Start the server.
+1. Create a Node.js server using Node 20 or later.
+2. Upload the project with SFTP or use the panel's Git integration.
+3. Set the startup command to `node index.js`.
+4. Run `pnpm install` from the console.
+5. Configure `sessionId`, owner details, and the bot settings in `config.json`.
+6. Start the service and monitor its logs.
 
-### 📱 Deploy on Termux
+### Deploy on Termux
 
 ```bash
-# Update Termux packages
+# Update Termux
 pkg update -y && pkg upgrade -y
 
 # Install prerequisites
 pkg install -y nodejs-lts git
 npm install -g pnpm
 
-# Clone the repo
+# Clone and install
 git clone https://github.com/CEO-CODEX/CODEX-AI.git codex-ai
 cd codex-ai
-
-# Install dependencies
 pnpm install
 
-# Configure the bot
-nano config.json   # set botName, prefix, owner.number, sessionId
-
-# Start the bot
+# Configure and start
+nano config.json
 node index.js
 ```
 
-**Keeping it alive on your phone:**
-- Run `termux-wake-lock` before starting the bot so Android doesn't kill Termux in the background.
-- Disable battery optimization for Termux in your phone's Settings → Apps.
-- To keep it running after you close the Termux window, start it inside `tmux`: `pkg install tmux`, then `tmux new -s codex`, run `node index.js` inside it, and detach with `Ctrl+B` then `D`. Reattach anytime with `tmux attach -t codex`.
+For longer sessions on Android, use `termux-wake-lock`, disable battery optimisation for Termux, and run the service inside `tmux` when appropriate.
 
 ---
 
-## 🔑 Getting a Session ID
+## Connect your WhatsApp account
 
-1. Visit the session generator here: https://codex-ai-v3.vercel.app/session
-2. Enter your WhatsApp number and follow the pairing steps.
-3. Copy the session ID it gives you.
-4. Paste it into the `sessionId` field of `config.json`.
-5. Start the bot — it will automatically restore your session on boot.
+1. Open the [CODEX AI session generator](https://codex-ai.site/session).
+2. Choose your preferred connection method:
+   - **Pairing link:** enter your WhatsApp number and complete the pairing steps.
+   - **QR code:** open WhatsApp on your phone, go to **Linked devices**, choose **Link a device**, and scan the QR code shown by the session generator.
+3. Copy the generated session ID.
+4. Paste it into the `sessionId` field in `config.json`.
+5. Start CODEX AI. The service will restore the session on boot.
+
+Keep session credentials private. Never publish them in a repository, issue, screenshot, or public chat.
 
 ---
 
-## 🔐 Optional Environment Variables
+## Optional developer integrations
 
-These commands are disabled by default and only activate once the matching variable is set:
+The following environment variables enable repository-related commands when configured:
 
-| Variable | Used by | Purpose |
-|---|---|---|
-| `GITHUB_TOKEN` | `.createrepo`, `.delrepo`, `.listrepo`, `.update` | A GitHub personal access token with `repo` scope |
-| `GITHUB_USERNAME` | `.createrepo`, `.delrepo` | Your GitHub username, for repo lookups |
+| Variable | Purpose |
+|---|---|
+| `GITHUB_TOKEN` | GitHub personal access token for authorised repository operations. |
+| `GITHUB_USERNAME` | GitHub username used for repository lookups. |
 
-Set these in your host's environment (or `config.env`) — never commit them to source control.
+Store secrets in your host's environment or a protected configuration file. Never commit credentials to source control.
+
+---
+
+## Project disclaimer
+
+CODEX AI was built by **Codex** and is officially developed under the **CODEXVERIFIED** organization. The project may include community contributions, third-party libraries, and optional integrations that are maintained independently.
+
+CODEX AI is provided as an extensible open-source automation project. Its security and moderation tools are designed to help identify and reduce phishing, spam, suspicious links, and automated messages, but no automated system can guarantee that every malicious or unwanted message will be detected. Always review permissions, protect session credentials, follow WhatsApp's policies, and configure the project responsibly for your community.
+
+---
+
+## Community and support
+
+<div align="center">
+
+[![Main WhatsApp Channel](https://img.shields.io/badge/WhatsApp%20Channel-Follow-25D366?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/channel/0029Vb78BHmL2AU7fsANSH2y)
+[![Backup WhatsApp Channel](https://img.shields.io/badge/Backup%20Channel-Follow-25D366?style=for-the-badge&logo=whatsapp)](https://whatsapp.com/channel/0029Vb6sMEy96H4VI2w3I50F)
+[![Support Group](https://img.shields.io/badge/Support%20Group-Join-25D366?style=for-the-badge&logo=whatsapp)](https://chat.whatsapp.com/K7R4qGt8Z7E2PjWr4OvQeG)
+[![Telegram Channel](https://img.shields.io/badge/Telegram%20Channel-Join-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/CODEX_AIV3)
+[![Telegram Group](https://img.shields.io/badge/Telegram%20Group-Join-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/CODEXV3)
+[![Developer](https://img.shields.io/badge/Developer-Contact-B88CFF?style=for-the-badge&logo=telegram)](https://t.me/codexverified)
+[![Website](https://img.shields.io/badge/Website-Visit-00FFF0?style=for-the-badge&logo=vercel&logoColor=black)](https://codex-ai-site.vercel.app)
+[![Pairing Site](https://img.shields.io/badge/Get%20Session%20ID-Pair%20Now-FF7A59?style=for-the-badge&logo=whatsapp)](https://codex-ai.site/session)
+
+</div>
 
 ---
 
 <div align="center">
-  <img src="https://i.imgur.com/dBaSKWF.gif" height="18" width="100%">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=00ff66&height=90&section=footer" style="margin-top:-20px;" />
-  <br>
-  <sub>If CODEX AI is useful to you, star and fork the repo — your support is all I need. Thank you for visiting my repo.</sub>
+
+### **Protect the conversation. Accelerate the work. Empower every user.**
+
+<sub>CODEX AI — intelligent automation for modern WhatsApp communities.</sub>
+
+<br>
+
+<sub>Thanks for visiting the my repository.</sub>
+
+<img src="https://i.imgur.com/dBaSKWF.gif" height="16" width="88%" alt="animated coloured footer line" />
+
+<br><br>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=00FFF0&height=100&section=footer" alt="CODEX AI footer" />
+
 </div>
