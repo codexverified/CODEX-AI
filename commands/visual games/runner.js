@@ -138,6 +138,10 @@ canvas#field {
     touch-action: manipulation;
 }
 
+.reload.spin {
+    animation: restartSpin .55s ease;
+}
+
 .hint {
     text-align: center;
     margin: 7px 0 0;
@@ -200,6 +204,16 @@ canvas#field {
     var bestEl = document.getElementById('best');
     var soundBtn = document.getElementById('sound');
     var soundIcon = document.getElementById('soundIcon');
+    var restartBtn = document.getElementById('reload');
+
+    function animateRestart() {
+        restartBtn.classList.remove('spin');
+        void restartBtn.offsetWidth;
+        restartBtn.classList.add('spin');
+        window.setTimeout(function () {
+            restartBtn.classList.remove('spin');
+        }, 900);
+    }
 
     var player;
     var obstacles;
@@ -1233,7 +1247,10 @@ canvas#field {
         }
     );
 
-    document.getElementById('reload').addEventListener('click', begin);
+    restartBtn.addEventListener('click', function () {
+        animateRestart();
+        begin();
+    });
 
     document.addEventListener('keydown', function (e) {
         if (e.repeat) return;

@@ -50,8 +50,13 @@ body { padding: 6px; background: radial-gradient(circle at 50% 4%, #163b70, #050
 .drop { font-size: 12px !important; letter-spacing: .5px; }
 .pause { font-size: 12px !important; }
 .reload { font-size: 22px !important; }
+.reload.spin { animation: restartSpin .55s ease; }
 .boost { font-size: 12px !important; }
 .hint { text-align: center; margin: 7px 0 0; color: #83b3d2; font: 10px monospace; }
+@keyframes restartSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 @media (max-width: 360px) { .card { padding: 9px; } .title { font-size: 20px; } .controls { max-width: 280px; } }
 </style>
 </head>
@@ -98,6 +103,15 @@ body { padding: 6px; background: radial-gradient(circle at 50% 4%, #163b70, #050
     var btnPause = document.getElementById('btnPause');
     var btnReload = document.getElementById('btnReload');
     var btnBoost = document.getElementById('btnBoost');
+
+    function animateRestart() {
+        btnReload.classList.remove('spin');
+        void btnReload.offsetWidth;
+        btnReload.classList.add('spin');
+        window.setTimeout(function () {
+            btnReload.classList.remove('spin');
+        }, 900);
+    }
 
     // ---- logical coordinate space (never changes, whatever the device) ----
     var W = 540, H = 400;
@@ -462,6 +476,7 @@ body { padding: 6px; background: radial-gradient(circle at 50% 4%, #163b70, #050
     }
 
     function restart() {
+        animateRestart();
         if (countdownTimer) { clearTimeout(countdownTimer); countdownTimer = null; }
         countingDown = false;
         stopBackground();

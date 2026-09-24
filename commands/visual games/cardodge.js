@@ -279,6 +279,10 @@ canvas#road{
     font-size:18px!important
 }
 
+.restart.spin {
+    animation: restartSpin .55s ease;
+}
+
 .left{
     grid-column:1 / span 2;
     grid-row:2
@@ -314,6 +318,11 @@ canvas#road{
     color:#648e9d;
     text-align:center;
     font:8px monospace
+}
+
+@keyframes restartSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 @media(max-width:360px){
@@ -412,6 +421,15 @@ canvas#road{
     var jumpButton=document.getElementById('jump');
     var soundButton=document.getElementById('sound');
     var soundIcon=document.getElementById('soundIcon');
+
+    function animateRestart() {
+        restartButton.classList.remove('spin');
+        void restartButton.offsetWidth;
+        restartButton.classList.add('spin');
+        window.setTimeout(function () {
+            restartButton.classList.remove('spin');
+        }, 900);
+    }
 
     var W=230;
     var H=360;

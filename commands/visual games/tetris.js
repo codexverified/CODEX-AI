@@ -328,6 +328,10 @@ canvas#next{
     font-size:18px!important
 }
 
+.restart.spin {
+    animation: restartSpin .55s ease;
+}
+
 .left{
     grid-column:1;
     grid-row:2
@@ -371,6 +375,11 @@ canvas#next{
     margin:6px 0 0;
     color:#527c8d;
     font:8px monospace
+}
+
+@keyframes restartSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 @media(max-width:360px){
@@ -1809,7 +1818,7 @@ document.getElementById('change').onclick=function(){
     changeBlock();
 };
 
-document.getElementById('restart').onclick=function(){
+restartButton.onclick=function(){
     restartGame();
 };
 

@@ -278,6 +278,10 @@ body{padding:6px;background:radial-gradient(circle at 50% 4%,#075985,#061323 74%
     font-size:24px!important
 }
 
+.reload.spin {
+    animation: restartSpin .55s ease;
+}
+
 .right{
     grid-column:3;
     grid-row:2
@@ -293,6 +297,11 @@ body{padding:6px;background:radial-gradient(circle at 50% 4%,#075985,#061323 74%
     margin:7px 0 0;
     color:#7fc58d;
     font:10px monospace
+}
+
+@keyframes restartSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 @media(max-width:360px){
@@ -380,6 +389,16 @@ var countdown=document.getElementById('countdown');
 var countdownNumber=document.getElementById('countdownNumber');
 var soundButton=document.getElementById('sound');
 var soundIcon=document.getElementById('soundIcon');
+var reloadButton=document.getElementById('reload');
+
+function animateRestart() {
+    reloadButton.classList.remove('spin');
+    void reloadButton.offsetWidth;
+    reloadButton.classList.add('spin');
+    window.setTimeout(function () {
+        reloadButton.classList.remove('spin');
+    }, 900);
+}
 
 var cells=[];
 var snake=[];
