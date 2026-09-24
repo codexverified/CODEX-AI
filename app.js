@@ -355,6 +355,30 @@ class CODEXAI {
         const num = Number(v);
         this.config[k] = v !== "" && !isNaN(num) ? num : v;
       }
+
+      const fs = require("fs-extra");
+      const autoreplyPath = "./database/autoreply.json";
+      const autoreplyDb = fs.existsSync(autoreplyPath)
+        ? JSON.parse(fs.readFileSync(autoreplyPath, "utf8"))
+        : {};
+
+      const triggerList = String(
+        this.config.AUTOREPLY || autoreplyDb.trigger || autoreplyDb.triggers || "",
+      )
+        .split(/[|,\n]+/)
+        .map((part) => String(part).trim())
+        .filter(Boolean);
+
+      if (triggerList.length) {
+        autoreplyDb.enabled = autoreplyDb.enabled !== false;
+        autoreplyDb.trigger = autoreplyDb.trigger || triggerList[0];
+        autoreplyDb.triggers = [...new Set([
+          ...(Array.isArray(autoreplyDb.triggers) ? autoreplyDb.triggers : []),
+          ...triggerList,
+        ])];
+        this.config.AUTOREPLY = triggerList.join(",");
+        fs.writeFileSync(autoreplyPath, JSON.stringify(autoreplyDb, null, 2));
+      }
     } catch {}
     // prefix as getter so setvar PREFIX takes effect immediately without restart.
     // .setvar PREFIX=null stores the literal 3-character STRING "null" (setvar

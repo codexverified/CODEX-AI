@@ -57,7 +57,7 @@ module.exports = {
                 BOT_FONT:     'BOT_FONT',
                 BOT_CHARACTER:'BOT_CHARACTER',
                 AI_BADGE:     'AI_BADGE',
-            STATUS_EMOJI:  'statusReact.emoji',
+                STATUS_EMOJI:'statusReact.emoji',
             };
             if (keyMap[key]) {
                 const parts = keyMap[key].split('.');
@@ -65,6 +65,37 @@ module.exports = {
                 for (let i = 0; i < parts.length - 1; i++) obj = obj[parts[i]] = obj[parts[i]] || {};
                 obj[parts[parts.length - 1]] = value;
             }
+            if (key === 'AUTOREPLY') {
+                bot.config.AUTOREPLY = value;
+                try {
+                    const fs = require('fs-extra');
+                    const dbPath = './database/autoreply.json';
+                    const db = fs.existsSync(dbPath) ? JSON.parse(fs.readFileSync(dbPath, 'utf8')) : {};
+                    const triggers = [
+                        ...new Set(String(value).split(/[|,\n]+/).map((v) => String(v).trim()).filter(Boolean)),
+                    ];
+                    db.trigger = triggers[0] || '';
+                    db.triggers = triggers;
+                    db.enabled = db.enabled !== false;
+                    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+                } catch {}
+            }
+            if (key === 'AUTOREPLY_MSG') {
+                bot.config.AUTOREPLY_MSG = value;
+                try {
+                    const fs = require('fs-extra');
+                    const dbPath = './database/autoreply.json';
+                    const db = fs.existsSync(dbPath) ? JSON.parse(fs.readFileSync(dbPath, 'utf8')) : {};
+                    db.message = value;
+                    db.type = 'text';
+                    if (!db.enabled && (bot.config.AUTOREPLY || db.trigger || db.triggers?.length)) {
+                        db.enabled = true;
+                    }
+                    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+                } catch {}
+            }
+            if (key === 'AUTOREPLY_TYPE') bot.config.AUTOREPLY_TYPE = value;
+            if (key === 'AUTOREPLY_STICKER') bot.config.AUTOREPLY_STICKER = value;
             // Apply PREFIX live so commands work without restart
             if (key === 'PREFIX') {
                 bot.config.prefix = value;

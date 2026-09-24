@@ -3,98 +3,210 @@ const fs = require('fs-extra');
 const DB_PATH = './database/autoreply.json';
 
 function readDB() {
-    try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); }
-    catch { return { enabled: false, mode: 'text', emojis: [], rules: [] }; }
+    try {
+        return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    } catch {
+        return { enabled: false, trigger: '', triggers: [], message: '', type: 'text', stickerData: '' };
+    }
 }
-function saveDB(db) { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); }
+
+function saveDB(db) {
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+}
+
+function normalizeText(value) {
+    return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
+
+function parseTriggers(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+        return value
+            .map((item) => normalizeText(item))
+            .filter(Boolean)
+            .flatMap((item) => item.split(/[|,\n]+/).map((part) => normalizeText(part)))
+            .filter(Boolean);
+    }
+    return String(value)
+        .split(/[|,\n]+/)
+        .map((item) => normalizeText(item))
+        .filter(Boolean);
+}
+
+function getQuotedTextValue(quoted) {
+    if (!quoted) return '';
+    const direct = [
+        quoted.text,
+        quoted.caption,
+        quoted.body,
+        quoted.message?.conversation,
+        quoted.message?.extendedTextMessage?.text,
+        quoted.message?.imageMessage?.caption,
+        quoted.message?.videoMessage?.caption,
+    ].find((v) => typeof v === 'string' && v.trim());
+    if (direct) return normalizeText(direct);
+    return '';
+}
+
+async function resolveQuotedReplyPayload(m) {
+    const quoted = m?.quoted;
+    if (!quoted) return null;
+
+    if (quoted.mtype === 'stickerMessage' || quoted.message?.stickerMessage) {
+        try {
+            const buffer = await quoted.download();
+            if (buffer && buffer.length) {
+                return {
+                    type: 'sticker',
+                    stickerData: buffer.toString('base64'),
+                };
+            }
+        } catch {}
+    }
+
+    const text = getQuotedTextValue(quoted);
+    if (text) {
+        return { type: 'text', message: text };
+    }
+
+    return null;
+}
+
+function getAutoReplyConfig(bot, db) {
+    const triggerList = [
+        ...parseTriggers(bot.config?.AUTOREPLY),
+        ...parseTriggers(db.triggers),
+        ...parseTriggers(db.trigger),
+    ].filter((value, index, arr) => arr.indexOf(value) === index);
+
+    const trigger = triggerList[0] || '';
+    const triggers = triggerList;
+    const message = String(bot.config?.AUTOREPLY_MSG ?? db.message ?? '').trim();
+    const type = String(bot.config?.AUTOREPLY_TYPE ?? db.type ?? 'text').toLowerCase();
+    const stickerData = String(bot.config?.AUTOREPLY_STICKER ?? db.stickerData ?? '').trim();
+    return { trigger, triggers, message, type, stickerData };
+}
 
 module.exports = {
     name: 'autoreply',
     aliases: ['ar', 'autoresponse'],
     category: 'bot',
     reactions: { start: '💬' },
-    description: 'Configure auto-reply rules triggered by keywords or tag',
+    description: 'Simple auto-reply trigger based on a configured word or name.',
 
     async execute(bot, m, args) {
-        const db  = readDB();
-        const sub = args[0]?.toLowerCase();
+        const db = readDB();
+        const sub = String(args[0] || '').toLowerCase();
+        const { trigger, triggers, message } = getAutoReplyConfig(bot, db);
 
-        const areplyNum = bot.config.AREPLY_NUMBER || 'not set';
-
-        if (!sub) {
-            const ruleList = db.rules?.length
-                ? db.rules.map((r, i) => `${i + 1}. "${r.trigger}" → "${r.reply}"`).join('\n')
-                : 'No rules set.';
+        if (!sub || sub === 'status') {
             return await m.reply(
-`AUTOREPLY SETTINGS
+`AUTO-REPLY SETTINGS
 
 Status: ${db.enabled ? 'ON' : 'OFF'}
-Mode: ${db.mode || 'text'}
-Emojis: ${db.emojis?.length ? db.emojis.join(' ') : 'none'}
-Tag trigger number: ${areplyNum}
-
-Rules:
-${ruleList}
+Triggers: ${triggers.length ? triggers.join(', ') : 'not set'}
+Reply: ${message || 'not set'}
 
 Usage:
+${bot.prefix}setvar AUTOREPLY=word1,word2
+${bot.prefix}autoreply trigger word1 word2
 ${bot.prefix}autoreply on
+${bot.prefix}autoreply setmsg=your default reply
 ${bot.prefix}autoreply off
-${bot.prefix}autoreply mode text
-${bot.prefix}autoreply mode emoji
-${bot.prefix}autoreply setemoji 😂 🔥 ❤
-${bot.prefix}autoreply add <trigger> | <reply>
-${bot.prefix}autoreply remove <number>
-${bot.prefix}autoreply list
-
-Tag trigger:
-.setvar AREPLY_NUMBER=2348012345678
-When that number gets tagged, bot replies with the first rule's reply.`
+${bot.prefix}autoreply clear`
             );
         }
 
-        if (sub === 'on')  { db.enabled = true;  saveDB(db); return await m.reply('Auto-reply enabled.'); }
-        if (sub === 'off') { db.enabled = false; saveDB(db); return await m.reply('Auto-reply disabled.'); }
-
-        if (sub === 'mode') {
-            const mode = args[1]?.toLowerCase();
-            if (!mode || !['text','emoji'].includes(mode))
-                return await m.reply('Use: text or emoji');
-            db.mode = mode; saveDB(db);
-            return await m.reply(`Auto-reply mode set to: ${mode}`);
-        }
-
-        if (sub === 'setemoji') {
-            const emojis = args.slice(1).filter(e => /\p{Emoji}/u.test(e)).slice(0, 5);
-            if (!emojis.length) return await m.reply('Provide up to 5 emojis.');
-            db.emojis = emojis; saveDB(db);
-            return await m.reply(`Emojis set: ${emojis.join(' ')}`);
-        }
-
-        if (sub === 'add') {
-            const rest  = args.slice(1).join(' ');
-            const parts = rest.split('|');
-            if (parts.length < 2) return await m.reply(`Format: ${bot.prefix}autoreply add <trigger> | <reply>`);
-            const trigger = parts[0].trim().toLowerCase();
-            const reply   = parts.slice(1).join('|').trim();
-            if (!trigger || !reply) return await m.reply('Trigger and reply cannot be empty.');
-            if (!db.rules) db.rules = [];
-            db.rules.push({ trigger, reply });
+        if (sub === 'on') {
+            const activeTriggers = [...new Set([
+                ...triggers,
+                ...parseTriggers(bot.config?.AUTOREPLY),
+                ...parseTriggers(db.trigger),
+                ...parseTriggers(db.triggers),
+            ])];
+            if (!activeTriggers.length) {
+                return await m.reply('No trigger set yet. Use `.setvar AUTOREPLY=word1,word2` or `.autoreply trigger word1 word2` first.');
+            }
+            db.enabled = true;
+            db.trigger = activeTriggers[0];
+            db.triggers = activeTriggers;
+            bot.config.AUTOREPLY = activeTriggers.join(',');
             saveDB(db);
-            return await m.reply(`Rule added:\n"${trigger}" → "${reply}"`);
+            return await m.reply(`Auto-reply enabled for trigger(s): "${activeTriggers.join(', ')}"`);
         }
 
-        if (sub === 'remove') {
-            const idx = parseInt(args[1]) - 1;
-            if (isNaN(idx) || !db.rules?.[idx]) return await m.reply('Invalid rule number.');
-            const removed = db.rules.splice(idx, 1)[0];
+        if (sub === 'off') {
+            db.enabled = false;
             saveDB(db);
-            return await m.reply(`Removed: "${removed.trigger}" → "${removed.reply}"`);
+            return await m.reply('Auto-reply disabled.');
         }
 
-        if (sub === 'list') {
-            if (!db.rules?.length) return await m.reply('No rules set.');
-            const list = db.rules.map((r, i) => `${i + 1}. "${r.trigger}" → "${r.reply}"`).join('\n');
-            return await m.reply(`AUTO-REPLY RULES\n\n${list}`);
+        if (sub === 'setmsg' || sub.startsWith('setmsg=')) {
+            let msgText = sub.startsWith('setmsg=')
+                ? sub.slice('setmsg='.length) + (args.length > 1 ? ' ' + args.slice(1).join(' ') : '')
+                : args.slice(1).join(' ');
+
+            if (!msgText.trim() && m.quoted) {
+                const payload = await resolveQuotedReplyPayload(m);
+                if (!payload) return await m.reply('Reply to a text message or sticker, or use `.autoreply setmsg=your reply`');
+
+                db.type = payload.type;
+                if (payload.type === 'sticker') {
+                    db.message = '';
+                    db.stickerData = payload.stickerData;
+                    bot.config.AUTOREPLY_TYPE = 'sticker';
+                    bot.config.AUTOREPLY_STICKER = payload.stickerData;
+                } else {
+                    db.message = payload.message;
+                    db.stickerData = '';
+                    bot.config.AUTOREPLY_TYPE = 'text';
+                    bot.config.AUTOREPLY_MSG = payload.message;
+                }
+                saveDB(db);
+                return await m.reply(`Auto-reply content saved from your reply.\nType: ${payload.type}`);
+            }
+
+            msgText = normalizeText(msgText);
+            if (!msgText) {
+                return await m.reply('Usage: `.autoreply setmsg=Your default reply`');
+            }
+
+            db.type = 'text';
+            db.message = msgText;
+            db.stickerData = '';
+            bot.config.AUTOREPLY_TYPE = 'text';
+            bot.config.AUTOREPLY_MSG = db.message;
+            saveDB(db);
+            return await m.reply(`Auto-reply message saved:\n${db.message}`);
+        }
+
+        if (sub === 'settrigger' || sub === 'trigger') {
+            const newTrigger = args.slice(1).join(' ').trim();
+            const parsed = parseTriggers(newTrigger);
+            if (!parsed.length) {
+                return await m.reply('Usage: `.autoreply trigger your word` or `.autoreply trigger hello,hi`');
+            }
+
+            db.trigger = parsed[0];
+            db.triggers = parsed;
+            bot.config.AUTOREPLY = parsed.join(',');
+            saveDB(db);
+            return await m.reply(`Auto-reply trigger(s) set to: "${parsed.join(', ')}"`);
+        }
+
+        if (sub === 'clear' || sub === 'reset') {
+            delete db.trigger;
+            delete db.triggers;
+            delete db.message;
+            delete db.type;
+            delete db.stickerData;
+            db.enabled = false;
+            delete bot.config.AUTOREPLY;
+            delete bot.config.AUTOREPLY_MSG;
+            delete bot.config.AUTOREPLY_TYPE;
+            delete bot.config.AUTOREPLY_STICKER;
+            saveDB(db);
+            return await m.reply('Auto-reply cleared and disabled.');
         }
 
         await m.reply('Unknown option. Use ' + bot.prefix + 'autoreply');
