@@ -178,4 +178,3 @@ _Time units: s m h d w. Owner/admin commands can never be permitted._`);
         return m.reply(msg + hint + off());
     },
 };
-            
