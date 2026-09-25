@@ -1,5 +1,6 @@
 'use strict';
  
+const { quotedUrl } = require('../../lib/quotedUrl');
 const GH_REGEX = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i;
  
 module.exports = {
@@ -10,21 +11,22 @@ module.exports = {
     group:       true,
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
-        if (!args[0]) {
+        const repoUrl = args[0] || quotedUrl(message);
+        if (!repoUrl) {
             return sock.sendMessage(message.chat, {
                 text: `Please provide a GitHub URL.\nExample: .gitclone https://github.com/CodexAI/CODEX AI`,
                 contextInfo
             }, { quoted: message });
         }
  
-        if (!GH_REGEX.test(args[0])) {
+        if (!GH_REGEX.test(repoUrl)) {
             return sock.sendMessage(message.chat, {
                     text: 'Invalid GitHub link.',
                 contextInfo
             }, { quoted: message });
         }
  
-        const [, user, repo] = args[0].match(GH_REGEX);
+        const [, user, repo] = repoUrl.match(GH_REGEX);
         const cleanRepo = repo.replace(/\.git$/, '');
         const url = `https://api.github.com/repos/${user}/${cleanRepo}/zipball`;
  

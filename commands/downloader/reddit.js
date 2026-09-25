@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 module.exports = {
     commands:    ['reddit', 'rdl'],
@@ -10,7 +11,7 @@ module.exports = {
     private:     true,
     run: async (sock, message, args, { contextInfo }) => {
         const destination = message.chat;
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !url.includes('reddit.com')) {
             return sock.sendMessage(destination, {
                 text: 'Please provide a valid Reddit URL.\nExample: .reddit https://reddit.com/r/sub/comments/abc/title/',

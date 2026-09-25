@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 // nexoracle.com returns bot-protection HTML; removed.
 // Trying scdl.vercel.app (public no-key API) as primary.
@@ -13,7 +14,7 @@ module.exports = {
     private:     true,
  
     run: async (sock, message, args, { sender, contextInfo }) => {
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !url.includes('soundcloud.com')) {
             return sock.sendMessage(message.chat, {
                 text: 'Please provide a valid SoundCloud URL.\nExample: `.sc https://soundcloud.com/artist/track`',

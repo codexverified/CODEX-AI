@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
 
 module.exports = {
     name: 'yt',
@@ -9,7 +10,7 @@ module.exports = {
     usage: '.yt <url>',
 
     async execute(bot, m, args) {
-        const url = args[0]?.trim();
+        const url = args[0]?.trim() || quotedUrl(m);
         if (!url) return m.reply(`Usage: ${bot.prefix}yt <url>`);
 
         try {

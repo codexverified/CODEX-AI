@@ -1,6 +1,7 @@
 'use strict';
  
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 // nexoracle.com returns bot-protection HTML, not API data; removed.
 // Using vxtwitter (fxtwitter) API as primary: https://api.vxtwitter.com/{user}/status/{id}
@@ -16,18 +17,29 @@ module.exports = {
  
     run: async (sock, message, args, { contextInfo }) => {
         const destination = message.chat;
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !/twitter\.com|x\.com|t\.co/.test(url)) {
             return sock.sendMessage(destination, {
                 text: 'Please provide a valid Twitter/X URL.\nExample: `.tw https://twitter.com/user/status/123`',
                 contextInfo
             }, { quoted: message });
         }
+
+        if (/https?:\/\/t\.co\//i.test(url)) {
+            try {
+                const res = await axios.get(url, {
+                    headers: { 'User-Agent': 'Mozilla/5.0' },
+                    maxRedirects: 5,
+                    timeout: 12000,
+                });
+                url = res.request?.res?.responseUrl || res.headers?.location || url;
+            } catch {}
+        }
  
         await sock.sendMessage(destination, { text: 'Fetching Twitter media...', contextInfo }, { quoted: message });
  
         // Extract username + tweet ID from URL
-        const match = url.match(/(?:twitter\.com|x\.com)\/([^/?#]+)\/status\/(\d+)/);
+        const match = url.match(/(?:twitter\.com|x\.com)\/([^/?#]+)\/status\/(\d+)/i);
         if (!match) {
             return sock.sendMessage(destination, {
                 text: `Could not parse tweet URL.\n\nOpen manually: ${url}`,

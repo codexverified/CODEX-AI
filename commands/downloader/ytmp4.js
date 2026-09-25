@@ -2,6 +2,7 @@
  
 const axios  = require('axios');
 const playdl = require('play-dl');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 const BASE = 'https://apis.davidcyriltech.my.id';
  
@@ -14,7 +15,7 @@ module.exports = {
     private:     true,
  
     run: async (sock, message, args, { sender, contextInfo }) => {
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)/.test(url)) {
             return sock.sendMessage(message.chat, {
                 text: 'Please provide a valid YouTube URL.\nExample: `.ytmp4 https://youtu.be/dQw4w9WgXcQ`',

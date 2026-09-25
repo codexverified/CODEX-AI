@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 // nexoracle.com returns bot-protection HTML; removed.
 // Trying savethreads.com API and instasave approach as primary.
@@ -14,7 +15,7 @@ module.exports = {
  
     run: async (sock, message, args, { contextInfo }) => {
         const destination = message.chat;
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !url.includes('threads.net')) {
             return sock.sendMessage(destination, {
                 text: 'Please provide a valid Threads URL.\nExample: `.threads https://www.threads.net/@user/post/abc`',

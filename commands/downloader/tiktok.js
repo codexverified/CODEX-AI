@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
 
 function quotedText(m) {
     const qm = m.msg?.contextInfo?.quotedMessage;
@@ -14,13 +15,12 @@ module.exports = {
     description: 'Download TikTok video without watermark',
 
     async execute(bot, m, args) {
-        let url = args[0]?.trim();
+        let url = args[0]?.trim() || quotedUrl(m);
         const prefix = bot.prefix || '.';
 
         // Check if replying to a message with a TikTok URL
         if (!url || !url.includes('tiktok.com')) {
-            const match = quotedText(m).match(/(https?:\/\/(?:www\.|vm\.|vt\.)?tiktok\.com\/[^\s]+)/);
-            if (match) url = match[0];
+            url = quotedUrl(m);
         }
 
         if (!url || !url.includes('tiktok.com')) {

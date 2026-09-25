@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 // nexoracle.com returns bot-protection HTML, not API data; removed.
 // Using ssstik.io API (no-key endpoint for CapCut) as primary; link fallback secondary.
@@ -13,7 +14,7 @@ module.exports = {
     private:     true,
  
     run: async (sock, message, args, { sender, contextInfo }) => {
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !/capcut\.com/i.test(url)) {
                 return sock.sendMessage(message.chat, {
                     text: 'Please provide a valid CapCut URL.\nExample: `.capcut https://www.capcut.com/share/...`',

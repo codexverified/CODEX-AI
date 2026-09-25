@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
 
 function quotedText(m) {
     const qm = m.msg?.contextInfo?.quotedMessage;
@@ -14,7 +15,7 @@ module.exports = {
     usage: '.pinterest <link>',
 
     async execute(bot, m, args) {
-        const url = args[0] || quotedText(m);
+        const url = args[0] || quotedUrl(m);
         if (!url) return m.reply(`Usage: ${bot.prefix}pinterest <link>`);
 
         try {

@@ -1,5 +1,6 @@
 'use strict';
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
  
 module.exports = {
     commands:    ['gdrive', 'googledrive', 'gdl'],
@@ -9,7 +10,7 @@ module.exports = {
     group:       true,
     private:     true,
     run: async (sock, message, args, { sender, contextInfo }) => {
-        const url = args[0];
+        const url = args[0] || quotedUrl(message);
         if (!url || !url.includes('drive.google.com')) {
                 return sock.sendMessage(message.chat, {
                     text: 'Please provide a Google Drive URL.\nExample: .gdrive https://drive.google.com/file/d/FILE_ID/view',

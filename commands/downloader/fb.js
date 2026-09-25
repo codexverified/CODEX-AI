@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { quotedUrl } = require('../../lib/quotedUrl');
 
 const GATEWAY_URL = process.env.GATEWAY_URL || 'https://api.crysnovax.link';
 const GATEWAY_TOKEN = process.env.GATEWAY_TOKEN || '';
@@ -39,7 +40,7 @@ module.exports = {
     usage: '.fb <Facebook URL> (or reply to a message containing one)',
 
     async execute(bot, m, args) {
-        let url = args[0]?.trim();
+        let url = args[0]?.trim() || quotedUrl(m);
 
         if (!url || !url.includes('facebook.com')) {
             const match = quotedText(m).match(/(https?:\/\/[^\s]+facebook\.com[^\s]*)/i);
