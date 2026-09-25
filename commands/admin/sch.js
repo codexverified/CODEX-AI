@@ -6,6 +6,8 @@
  *   .sch -unmute 1am to 6am daily       → unmutes at 1am, mutes at 6am
  *   .sch -muteuser @user 1am to 6am daily
  *   .sch -unmuteuser @user 1am to 6am daily
+ *   .sch -permit ping 6pm to 9pm daily   → (owner/mod) opens .ping to everyone every day
+ *   .sch -permit economy 6pm to 9pm daily   (global — all groups; see lib/permit.js)
  *   .sch list                            → list schedules for this chat
  *   .sch clear                           → cancel all schedules for this chat
  *
@@ -47,6 +49,36 @@ module.exports = {
             return m.reply('🗑️ All recurring schedules cleared for this chat.');
         }
 
+        // ── -permit <cmd|category> <from> to <to> daily ───────────────────────
+        // Global (all groups) and owner/mod only. Windows live under the pseudo
+        // chat "permit", so .sch clear in a group never touches them —
+        // use `.list permit` / `.clear permit` / `.permit remove <cmd>` instead.
+        if (a0 === '-permit' || a0 === 'permit') {
+            const isPriv = m.key?.fromMe || bot.permission.isOwner(m.sender) || bot.permission.isMod(m.sender, m._participantRaw);
+            if (!isPriv) return m.reply('❌ Owner/mod only — permits apply to every group.');
+
+            const permit = require('../../lib/permit');
+            const usage = `${P}sch -permit ping 6pm to 9pm daily\n${P}sch -permit economy 6pm to 9pm daily`;
+            if (!args[1]) return m.reply(`📅 *Scheduled permit*\n\n*Usage:*\n${usage}\n\n_Opens the command to everyone (all groups) during that window, every day (Nigeria time)._`);
+
+            const res = permit.resolveTarget(bot, args[1]);
+            if (!res.ok) return m.reply(`❌ ${res.error}`);
+
+            const ptext  = args.slice(2).join(' ');
+            const pMatch = ptext.match(/(.+?)\s+to\s+(.+?)(?:\s+daily)?$/i);
+            if (!pMatch) return m.reply(`Couldn't parse time range. Example:\n${P}sch -permit ${res.name} 6pm to 9pm daily`);
+
+            const pFrom = parseTimeOfDay(pMatch[1].trim());
+            const pTo   = parseTimeOfDay(pMatch[2].trim());
+            if (!pFrom) return m.reply(`Couldn't parse start time: "${pMatch[1].trim()}"\nExamples: 1am, 6:30pm, 23:00`);
+            if (!pTo)   return m.reply(`Couldn't parse end time: "${pMatch[2].trim()}"\nExamples: 6am, 18:30, 08:00`);
+            if (pFrom.hour === pTo.hour && pFrom.minute === pTo.minute) return m.reply('⚠️ Start and end time can\'t be the same.');
+
+            permit.addWindow({ target: res, by: m.sender, timeFrom: pFrom, timeTo: pTo });
+            const off = permit.isEnabled() ? '' : `\n\n⚠️ The permit system is currently *OFF* — use ${P}permit on.`;
+            return m.reply(`✅ *Scheduled permit created!*\n\n🔓 ${res.type === 'cat' ? `All *${res.name}* commands` : `*${res.label}*`} will be open to *everyone* (all groups) from *${permit.hhmm(pFrom)}* to *${permit.hhmm(pTo)}* every day (Nigeria time).\n\nUse ${P}list permit to view or ${P}permit remove ${res.name} to remove.${off}`);
+        }
+
         // ── parse -type [target] <from> to <to> daily ─────────────────────────
         const typeMap = {
             '-mute':        'sch-muteGroup',
@@ -70,6 +102,7 @@ ${P}sch -unmute 1am to 6am daily
 ${P}sch -muteuser @user 1am to 6am daily   (or: ${P}sch user @user 1am to 6am daily)
 ${P}sch -unmuteuser @user 1am to 6am daily (or: ${P}sch unmuteuser @user 1am to 6am daily)
 ${P}sch -dnd 12am to 6pm daily             (or: ${P}sch dnd 12am to 6pm daily)
+${P}sch -permit ping 6pm to 9pm daily      (owner/mod — opens a command to everyone)
 ${P}sch list
 ${P}sch clear
 
