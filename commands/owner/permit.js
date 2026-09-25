@@ -70,6 +70,7 @@ ${P}permit ping 2h  _(ends after 2h)_
 ${P}permit ping after 2h  _(starts in 2h)_
 ${P}permit ping after 2h for 1h
 ${P}permit economy  _(all economy cmds)_
+${P}permit visual games  /  ${P}permit media editor  _(multi-word categories work too)_
 
 *Manage*
 ${P}permit remove ping
@@ -100,32 +101,32 @@ _Time units: s m h d w. Owner/admin commands can never be permitted._`);
 
         // ── remove ───────────────────────────────────────────────────────────
         if (REMOVE_WORDS.has(a0)) {
-            const names = args.slice(1);
-            if (!names.length) return m.reply(`Usage: ${P}permit remove <command>\nExample: ${P}permit remove ping`);
+            const nameWords = args.slice(1);
+            if (!nameWords.length) return m.reply(`Usage: ${P}permit remove <command or category>\nExample: ${P}permit remove ping\n${P}permit remove media editor`);
+
+            const raw = permit.splitLeadingTarget(bot, nameWords).text; // one target, may be "media editor"
+            let key = null, label = raw;
+            const res = permit.resolveTarget(bot, raw);
+            if (res.ok) { key = res.key; label = res.label; }
+            else {
+                // command/category may have been deleted since — fall back to any stored key with that name
+                const clean = raw.toLowerCase().replace(new RegExp(`^${P.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), '');
+                const stored = permit.storedKeys();
+                key = [`cmd:${clean}`, `cat:${clean}`].find(k => stored.includes(k)) || null;
+                if (key) label = permit.describeKey(bot, key);
+            }
+            if (!key) return m.reply(`❌ ${res.error || `No permit found for *${raw}*.`}`);
+
+            const r = permit.revoke(key);
             const out = [];
-            for (const raw of names) {
-                let key = null, label = raw;
-                const res = permit.resolveTarget(bot, raw);
-                if (res.ok) { key = res.key; label = res.label; }
-                else {
-                    // command may have been deleted since — fall back to any stored key with that name
-                    const clean = raw.toLowerCase().replace(new RegExp(`^${P.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`), '');
-                    const stored = permit.storedKeys();
-                    key = [`cmd:${clean}`, `cat:${clean}`].find(k => stored.includes(k)) || null;
-                    if (key) label = permit.describeKey(bot, key);
-                }
-                if (!key) { out.push(`❌ ${res.error || `No permit found for *${raw}*.`}`); continue; }
+            if (!r.hadGrant && !r.windowsRemoved) out.push(`ℹ️ *${label}* had no permit.`);
+            else out.push(`🗑️ Permit removed: *${label}*${r.windowsRemoved ? ' (and its daily schedule)' : ''}`);
 
-                const r = permit.revoke(key);
-                if (!r.hadGrant && !r.windowsRemoved) { out.push(`ℹ️ *${label}* had no permit.`); }
-                else out.push(`🗑️ Permit removed: *${label}*${r.windowsRemoved ? ' (and its daily schedule)' : ''}`);
-
-                // still open through its category?
-                if (key.startsWith('cmd:')) {
-                    const cmd = bot.commandHandler.getCommand(key.slice(4));
-                    if (cmd && permit.isCommandPermitted(bot, cmd)) {
-                        out.push(`   ↳ still open via its *${cmd.category}* category permit — ${P}permit remove ${cmd.category} to close it.`);
-                    }
+            // still open through its category?
+            if (key.startsWith('cmd:')) {
+                const cmd = bot.commandHandler.getCommand(key.slice(4));
+                if (cmd && permit.isCommandPermitted(bot, cmd)) {
+                    out.push(`   ↳ still open via its *${cmd.category}* category permit — ${P}permit remove ${cmd.category} to close it.`);
                 }
             }
             return m.reply(out.join('\n'));
@@ -135,10 +136,11 @@ _Time units: s m h d w. Owner/admin commands can never be permitted._`);
         if (parseTime(a0) || a0 === 'after' || a0 === 'for') {
             return m.reply(`⚠️ Which command? Put the command first, then the time:\n${P}permit ping ${a0 === 'after' ? 'after 2h' : '2h'}`);
         }
-        const target = permit.resolveTarget(bot, args[0]);
+        const split  = permit.splitLeadingTarget(bot, args); // handles 2-word categories like "media editor"
+        const target = permit.resolveTarget(bot, split.text);
         if (!target.ok) return m.reply(`❌ ${target.error}`);
 
-        const rest = args.slice(1);
+        const rest = split.rest;
         if (rest.length === 1 && /^(off|remove|rm)$/i.test(rest[0])) {
             const r = permit.revoke(target.key);
             return m.reply(r.hadGrant || r.windowsRemoved ? `🗑️ Permit removed: *${target.label}*` : `ℹ️ *${target.label}* had no permit.`);
@@ -176,4 +178,4 @@ _Time units: s m h d w. Owner/admin commands can never be permitted._`);
         return m.reply(msg + hint + off());
     },
 };
-                     
+            
