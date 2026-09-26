@@ -1,4 +1,8 @@
 const fs = require('fs-extra');
+const path = require('path');
+
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+const DB_PATH = path.join(PROJECT_ROOT, 'database', 'sticker_cmds.json');
 
 module.exports = {
     name: 'listcmd',
@@ -8,8 +12,8 @@ module.exports = {
     description: 'List all sticker-linked commands',
 
     async execute(bot, m, args) {
-        const dbPath = './database/stickercmds.json';
-        let db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+        let db = {};
+        try { db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); } catch {}
         const entries = Object.entries(db);
         if (entries.length === 0) return await m.reply(`No sticker commands set yet.\nAdd one: reply a sticker then type ${bot.prefix}setcmd <command>`);
         let text = 'Sticker commands:\n';

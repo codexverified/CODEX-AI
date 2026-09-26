@@ -1,93 +1,57 @@
-const fs   = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
-// Anchored to the project root (not process.cwd()) so persistent data
-// lands in the same place regardless of the directory the process was
-// launched from. CODEX_PROJECT_ROOT is a test-only override; production
-// never sets it.
+
 const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+const DB_PATH = path.join(PROJECT_ROOT, 'database', 'sticker_cmds.json');
 
-
-const STICKER_CMD_FILE = path.join(PROJECT_ROOT, 'database/sticker_cmds.json');
-
-let stickerCmds = {};
-
-const loadStickerCmds = () => {
-    try {
-        if (fs.existsSync(STICKER_CMD_FILE)) {
-            stickerCmds = JSON.parse(fs.readFileSync(STICKER_CMD_FILE, 'utf8'));
-        }
-    } catch (e) {
-        console.error('[STICKER CMD LOAD ERROR]', e.message);
-        stickerCmds = {};
+function getStickerId(sha256) {
+    if (Buffer.isBuffer(sha256) || sha256 instanceof Uint8Array) {
+        return Buffer.from(sha256).toString('base64');
     }
-};
-
-const saveStickerCmds = () => {
-    try {
-        fs.mkdirSync(path.dirname(STICKER_CMD_FILE), { recursive: true });
-        fs.writeFileSync(STICKER_CMD_FILE, JSON.stringify(stickerCmds, null, 2));
-    } catch (e) {
-        console.error('[STICKER CMD SAVE ERROR]', e.message);
+    if (typeof sha256 === 'string' && sha256.trim()) {
+        return Buffer.from(sha256, 'base64').toString('base64');
     }
-};
-
-loadStickerCmds();
+    return null;
+}
 
 module.exports = {
     name: 'setcmd',
-    aliases: ['bindcmd', 'stickercmd'],
-    desc: 'Bind a command to a sticker',
+    aliases: [],
     category: 'owner',
-    reactions: { start: '📝' },
     ownerOnly: true,
-    usage: '.setcmd <command> (reply to sticker)',
+    reactions: { start: '📝' },
+    description: 'Reply to a sticker to link it to a command',
 
-    execute: async (bot, m, args) => {
-        const reply  = (t) => m.reply(t);
-        const prefix = bot.prefix;
-
-        const quotedMsg = m.quoted?.message ||
-            m.quoted?.msg ||
-            m.contextInfo?.quotedMessage ||
-            m.msg?.contextInfo?.quotedMessage ||
-            m.message?.extendedTextMessage?.contextInfo?.quotedMessage ||
-            m.message?.imageMessage?.contextInfo?.quotedMessage ||
-            m.message?.videoMessage?.contextInfo?.quotedMessage;
-        const stickerData = quotedMsg?.stickerMessage ||
-            (quotedMsg?.message?.stickerMessage) ||
-            (m.quoted?.stickerMessage);
-
-        if (!stickerData) {
-            return reply(
-                `╭─❍ *SETCMD*\n│\n│ ✘ Reply to a sticker\n│ ⚉ Usage: ${prefix}setcmd <command>\n│\n│ 𓄄 Example: ${prefix}setcmd ping\n╰──────────────────`
-            );
+    async execute(bot, m, args) {
+        const quoted = m.message?.extendedTextMessage?.contextInfo?.quotedMessage
+            || m.msg?.contextInfo?.quotedMessage;
+        if (!quoted?.stickerMessage) {
+            return await m.reply(`Reply to a sticker with ${bot.prefix}setcmd <command>.`);
         }
 
-        if (!args[0]) {
-            return reply('╭─❍ *SETCMD*\n│\n│ ✘ Provide a command\n╰──────────────────');
+        const stickerId = getStickerId(quoted.stickerMessage.fileSha256);
+        if (!stickerId) return await m.reply('Could not read the sticker ID.');
+
+        let commandName = String(args.join(' ')).trim();
+        if (bot.prefix && commandName.startsWith(bot.prefix)) {
+            commandName = commandName.slice(bot.prefix.length).trim();
+        }
+        commandName = commandName.split(/\s+/)[0]?.toLowerCase();
+        if (!commandName) {
+            return await m.reply(`Usage: reply to a sticker with ${bot.prefix}setcmd <command>`);
+        }
+        if (!bot.commandHandler?.getCommand(commandName)) {
+            return await m.reply(`Unknown command: ${commandName}`);
         }
 
-        const fileSha256 = stickerData.fileSha256;
-        if (!fileSha256) {
-            return reply('╭─❍ *SETCMD*\n│\n│ ✘ Could not get sticker hash\n╰──────────────────');
-        }
+        let db = {};
+        try {
+            db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+        } catch {}
+        db[stickerId] = { command: commandName };
 
-        // _handleStickerCommand (lib/messageHandler.js) looks up by the HEX form.
-        const hash = Buffer.isBuffer(fileSha256)
-            ? fileSha256.toString('hex')
-            : Buffer.from(fileSha256, 'base64').toString('hex');
-
-        const command = args.join(' ');
-        const cmdName = command.split(/\s+/)[0];
-
-        // Must match the shape _handleStickerCommand expects: { type, command }
-        loadStickerCmds();
-        stickerCmds[hash] = { type: 'command', command };
-        saveStickerCmds();
-
-        return reply(`\`⎙ Bounded to ${cmdName}\``);
+        fs.ensureDirSync(path.dirname(DB_PATH));
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        return await m.reply(`Sticker linked to ${bot.prefix}${commandName}.`);
     }
 };
-
-module.exports.stickerCmds = stickerCmds;
-module.exports.loadStickerCmds = loadStickerCmds;

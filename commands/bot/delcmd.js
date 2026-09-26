@@ -1,4 +1,8 @@
 const fs = require('fs-extra');
+const path = require('path');
+
+const PROJECT_ROOT = process.env.CODEX_PROJECT_ROOT || path.join(__dirname, '..', '..');
+const DB_PATH = path.join(PROJECT_ROOT, 'database', 'sticker_cmds.json');
 
 module.exports = {
     name: 'delcmd',
@@ -13,15 +17,17 @@ module.exports = {
 
         const sha256 = quoted.stickerMessage.fileSha256;
         if (!sha256) return await m.reply('Could not read sticker ID.');
-        const stickerId = Buffer.from(sha256).toString('base64');
+        const stickerId = (Buffer.isBuffer(sha256) || sha256 instanceof Uint8Array
+            ? Buffer.from(sha256)
+            : Buffer.from(sha256, 'base64')).toString('base64');
 
-        const dbPath = './database/stickercmds.json';
-        let db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+        let db = {};
+        try { db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); } catch {}
         if (!db[stickerId]) return await m.reply('This sticker has no command linked to it.');
 
         const removed = db[stickerId].command;
         delete db[stickerId];
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
         await m.reply(`Sticker unlinked from ${bot.prefix}${removed}.`);
     }
 };
