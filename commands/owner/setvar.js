@@ -25,6 +25,7 @@ module.exports = {
             `• ${bot.prefix}setvar BOT_NAME=CODEX AI\n` +
             `• ${bot.prefix}setvar PREFIX=.\n` +
             `• ${bot.prefix}setvar MODE=public\n` +
+            `• ${bot.prefix}setvar MENU_IMAGE=https://example.com/menu.jpg\n` +
             `• ${bot.prefix}setvar OWNER=2349064626405`
         );
 
@@ -58,6 +59,7 @@ module.exports = {
                 BOT_CHARACTER:'BOT_CHARACTER',
                 AI_BADGE:     'AI_BADGE',
                 STATUS_EMOJI:'statusReact.emoji',
+                MENU_IMAGE:   'MENU_IMAGE',
             };
             if (keyMap[key]) {
                 const parts = keyMap[key].split('.');
