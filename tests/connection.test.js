@@ -341,6 +341,35 @@ async function waitUntil(fn, timeoutMs = 2000, stepMs = 10) {
     assert.strictEqual(presenceCalls, 0, 'sendPresenceUpdate() must not even be tried while query() is available — it is not a valid substitute for the real probe');
   });
 
+  await test('a hung message handler does not block later upsert batches', async () => {
+    const bot = makeBot();
+    bot._messageHandlerTimeoutMs = 10;
+    const handledIds = [];
+    bot.messageHandler = {
+      handle: async (msg) => {
+        handledIds.push(msg.key.id);
+        if (msg.key.id === 'stuck') return new Promise(() => {});
+      },
+    };
+    socketQueue.length = 0;
+    const sock = makeFakeSocket();
+    socketQueue.push(sock);
+    await connection.startConnection(bot);
+
+    const upsert = (id) => ({
+      type: 'notify',
+      messages: [{
+        key: { id, remoteJid: '1234567890@s.whatsapp.net' },
+        message: { conversation: `.${id}` },
+      }],
+    });
+    sock.ev._emit('messages.upsert', upsert('stuck'));
+    sock.ev._emit('messages.upsert', upsert('next'));
+
+    const laterBatchHandled = await waitUntil(() => handledIds.includes('next'));
+    assert.ok(laterBatchHandled, 'the next upsert batch should proceed after the stuck handler times out');
+  });
+
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
 })();
