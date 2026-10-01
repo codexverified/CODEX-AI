@@ -3,9 +3,8 @@
  *
  * NOTE: your menu command's image (media.codex-ai.workers.dev) is a static
  * fixed link, not an upload API — there's nothing there I can call to turn
- * an arbitrary photo into a URL. This uses catbox.moe instead (free, no key,
- * well-established). If you do have an upload endpoint on that Worker, give
- * me its request format and I'll switch this over to it.
+ * an arbitrary photo into a URL. This uses 0x0.st (free, no key, temporary
+ * hosting) instead.
  */
 const axios    = require('axios');
 const FormData = require('form-data');
@@ -52,10 +51,9 @@ module.exports = {
 
             const ext = (mediaMsg.mimetype || 'image/jpeg').split('/')[1] || 'jpg';
             const form = new FormData();
-            form.append('reqtype', 'fileupload');
-            form.append('fileToUpload', buffer, { filename: `image.${ext}` });
+            form.append('file', buffer, { filename: `image.${ext}` });
 
-            const { data } = await axios.post('https://catbox.moe/user/api.php', form, {
+            const { data } = await axios.post('https://0x0.st', form, {
                 headers: form.getHeaders(),
                 timeout: 30000,
             });

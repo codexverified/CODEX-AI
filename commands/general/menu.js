@@ -110,7 +110,7 @@ module.exports = {
         text += `╚══════════════════❒`;
 
         const getMenuImage = async () => {
-            const menuUrl = c.MENU_IMAGE || c.thumbUrl || null;
+            const menuUrl = c.MENU_IMAGE || null;
             if (menuUrl) {
                 try {
                     const res = await axios.get(menuUrl, { responseType: 'arraybuffer', timeout: 15000 });
@@ -121,7 +121,8 @@ module.exports = {
             }
             if (fs.existsSync(CACHED_IMG)) return fs.readFileSync(CACHED_IMG);
             try {
-                const res = await axios.get(DEFAULT_THUMB, { responseType: 'arraybuffer', timeout: 15000 });
+                const fallbackUrl = c.thumbUrl || DEFAULT_THUMB;
+                const res = await axios.get(fallbackUrl, { responseType: 'arraybuffer', timeout: 15000 });
                 fs.mkdirSync(path.dirname(CACHED_IMG), { recursive: true });
                 fs.writeFileSync(CACHED_IMG, res.data);
                 return Buffer.from(res.data);

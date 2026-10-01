@@ -49,6 +49,22 @@ function text(value) {
     return String(value || '').trim().toLowerCase();
 }
 
+function replyWordText(message) {
+    const quoted = message?.quoted?.message || message?.msg?.contextInfo?.quotedMessage || message?.message?.extendedTextMessage?.contextInfo?.quotedMessage || {};
+    const candidates = [
+        quoted?.conversation,
+        quoted?.text,
+        quoted?.caption,
+        quoted?.extendedTextMessage?.conversation,
+        quoted?.extendedTextMessage?.text,
+        quoted?.imageMessage?.caption,
+        quoted?.videoMessage?.caption,
+        quoted?.documentMessage?.caption,
+    ];
+    const value = candidates.find(part => typeof part === 'string' && part.trim());
+    return text(value);
+}
+
 function mention(jid) {
     return `@${String(jid).split('@')[0]}`;
 }
@@ -135,6 +151,7 @@ function startTurn(sock, chatId, game) {
         await send(sock, chatId, {
             text: `⏰ ${mention(eliminated.jid)} was eliminated for running out of time.\n\n` +
                 `🎯 ${mention(next.jid)}, your turn. Start with *${game.requiredLetter.toUpperCase()}*.\n` +
+                `💬 Reply to this message with your word, or type it in chat.\n` +
                 `⏳ You have *30 seconds*.`,
             mentions: [eliminated.jid, next.jid]
         });
@@ -159,6 +176,7 @@ function startGame(sock, chatId, game, message) {
         text: `🔗 *WORD CHAIN STARTED*\n\n` +
             `👥 Players: *${game.players.length}*\n` +
             `🎯 ${mention(game.players[0].jid)}, you play first with any word.\n` +
+            `💬 Reply to the bot with your word, or type it in chat.\n` +
             `⏳ Each turn lasts *30 seconds*.\n` +
             `🚫 Three invalid attempts eliminate a player.\n` +
             `🏁 The game ends after *${MAX_ROUNDS} rounds*.`,
@@ -169,14 +187,15 @@ function startGame(sock, chatId, game, message) {
 
 function help(prefix) {
     return `*WORD CHAIN COMMANDS*\n\n` +
-        `${prefix}wc start — open a lobby\n` +
+        `${prefix}wc create — create a lobby\n` +
+        `${prefix}wc stop — close the lobby\n` +
+        `${prefix}wc start — start a created lobby\n` +
+        `${prefix}wc end — end an active game and reopen the lobby\n` +
         `${prefix}wc join — join the lobby\n` +
-        `${prefix}wc begin — start with at least 2 players\n` +
         `${prefix}wc <word> — play your word\n` +
         `${prefix}wc status — show turn and scores\n` +
         `${prefix}wc score — show scores\n` +
-        `${prefix}wc leave — leave the game\n` +
-        `${prefix}wc stop — end the game`;
+        `${prefix}wc leave — leave the game\n`;
 }
 
 module.exports = {
@@ -188,7 +207,12 @@ module.exports = {
         const game = games.get(message?.chat);
         if (!game) return false;
         if (game.phase === 'lobby') return true;
-        return Boolean(game.phase === 'active' && game.players[game.turn]?.jid === message?.sender);
+        if (game.phase !== 'active') return false;
+        const current = game.players[game.turn];
+        if (!current || current.jid !== message?.sender) return false;
+        const directWord = text(message?.text || message?.msg?.text || message?.conversation || '');
+        const quotedWord = replyWordText(message);
+        return Boolean(directWord || quotedWord);
     },
     description: 'Play a timed multiplayer word chain game',
     category: 'games',
@@ -198,7 +222,7 @@ module.exports = {
     async execute(sock, message, { reply, args, prefix = '.' }, commandName) {
         const chatId = message.chat;
         const sender = message.sender;
-        const action = text(args?.[0]);
+        const action = text(args?.[0] || replyWordText(message));
         const option = text(args?.[1]);
 
         if (!chatId || !sender || !message.isGroup) return reply('❌ Word Chain only works in group chats.');
@@ -207,7 +231,7 @@ module.exports = {
         const joining = action === 'join' || action === 'joinwc' || (!action && (commandName === 'joinwc' || commandName === 'join'));
 
         if (joining) {
-            if (!game) return reply(`❌ No lobby is open. Use ${prefix}wc start.`);
+            if (!game) return reply(`❌ No lobby is open. Use ${prefix}wc create.`);
             if (game.phase !== 'lobby') return reply('⚠️ This game has already started.');
             if (game.players.some(player => player.jid === sender)) return reply('ℹ️ You already joined this game.');
             game.players.push({ jid: sender, name: playerName(message), score: 0, words: 0, streak: 0, invalid: 0 });
@@ -216,8 +240,7 @@ module.exports = {
 
         if (action === 'help' || !action) return reply(help(prefix));
 
-        if (action === 'start') {
-            if (game && game.phase === 'lobby' && (option === 'manual' || option === 'now' || option === 'begin')) return startGame(sock, chatId, game, message);
+        if (action === 'create') {
             if (game) return reply(game.phase === 'active' ? '⚠️ A game is already active.' : `⚠️ A lobby is already open. Use ${prefix}wc join.`);
             const newGame = {
                 phase: 'lobby',
@@ -240,13 +263,48 @@ module.exports = {
             return send(sock, chatId, { text: `🔗 *WORD CHAIN LOBBY OPENED*\n\nHost: ${mention(sender)}\nJoin with ${prefix}wc join.\nThe lobby closes in *30 seconds*.`, mentions: [sender] }, message);
         }
 
-        if (action === 'begin' || (action === 'start' && option === 'manual')) {
-            if (!game) return reply(`❌ No lobby is open. Use ${prefix}wc start.`);
+        if (action === 'start') {
+            if (!game) return reply(`❌ No lobby is open. Use ${prefix}wc create.`);
+            if (game.phase === 'active') return reply('⚠️ A game is already active.');
+            if (game.phase !== 'lobby') return reply('⚠️ This lobby is not ready to start.');
             return startGame(sock, chatId, game, message);
         }
 
-        if (!game) return reply(`❌ No active game. Use ${prefix}wc start.`);
-        if (action === 'stop') { clearGame(chatId, game); return reply('🛑 Word Chain stopped.'); }
+        if (action === 'begin' || (action === 'start' && option === 'manual')) {
+            if (!game) return reply(`❌ No lobby is open. Use ${prefix}wc create.`);
+            return startGame(sock, chatId, game, message);
+        }
+
+        if (action === 'stop') {
+            if (!game) return reply(`❌ No lobby or game is open. Use ${prefix}wc create.`);
+            const wasLobby = game.phase === 'lobby';
+            clearGame(chatId, game);
+            return reply(wasLobby ? '🛑 Lobby closed.' : '🛑 Word Chain session stopped.');
+        }
+
+        if (action === 'end') {
+            if (!game) return reply(`❌ No active game. Use ${prefix}wc create.`);
+            if (game.phase === 'lobby') return reply('ℹ️ The lobby has not started yet. Use .wc stop to close it.');
+            clearTimer(game, 'turnTimer');
+            game.phase = 'lobby';
+            game.turn = 0;
+            game.requiredLetter = null;
+            game.rounds = 0;
+            game.usedWords = new Set();
+            game.turnStartedAt = null;
+            for (const player of game.players) {
+                player.score = 0;
+                player.words = 0;
+                player.streak = 0;
+                player.invalid = 0;
+            }
+            return send(sock, chatId, {
+                text: `🔁 *WORD CHAIN SESSION ENDED*\n\nThe lobby is open again for more players.\nJoin with ${prefix}wc join.`,
+                mentions: playerMentions(game)
+            }, message);
+        }
+
+        if (!game) return reply(`❌ No active game. Use ${prefix}wc create.`);
         if (action === 'score') return send(sock, chatId, {
             text: `📊 *WORD CHAIN SCORES*\n\n${scoreText(game)}`,
             mentions: playerMentions(game)
@@ -310,7 +368,7 @@ module.exports = {
         if (game.rounds >= MAX_ROUNDS || !availableContinuation(game, game.requiredLetter)) return finish(sock, chatId, game, `${mention(sender)} completed the final playable round.`, message);
         game.turn = (game.turn + 1) % game.players.length;
         const next = game.players[game.turn];
-        await send(sock, chatId, { text: `✅ ${mention(sender)} played *${word.toUpperCase()}* (+${gained} points).\n\n🔤 Next letter: *${game.requiredLetter.toUpperCase()}*\n🎯 ${mention(next.jid)}, your turn.\n⏳ 30 seconds remaining.`, mentions: [sender, next.jid] }, message);
+        await send(sock, chatId, { text: `✅ ${mention(sender)} played *${word.toUpperCase()}* (+${gained} points).\n\n🔤 Next letter: *${game.requiredLetter.toUpperCase()}*\n🎯 ${mention(next.jid)}, your turn.\n💬 Reply to this message with your word, or type it in chat.\n⏳ 30 seconds remaining.`, mentions: [sender, next.jid] }, message);
         startTurn(sock, chatId, game);
     }
 };
