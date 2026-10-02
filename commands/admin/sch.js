@@ -8,6 +8,7 @@
  *   .sch -unmuteuser @user 1am to 6am daily
  *   .sch -permit ping 6pm to 9pm daily   → (owner/mod) opens .ping to everyone every day
  *   .sch -permit economy 6pm to 9pm daily   (global — all groups; see lib/permit.js)
+ *   .sch -ban @user 6pm to 9pm daily     → (owner/mod) bans a user from the bot every day in that window
  *   .sch list                            → list schedules for this chat
  *   .sch clear                           → cancel all schedules for this chat
  *
@@ -79,6 +80,39 @@ module.exports = {
             return m.reply(`✅ *Scheduled permit created!*\n\n🔓 ${res.type === 'cat' ? `All *${res.name}* commands` : `*${res.label}*`} will be open to *everyone* (all groups) from *${permit.hhmm(pFrom)}* to *${permit.hhmm(pTo)}* every day (Nigeria time).\n\nUse ${P}list permit to view or ${P}permit remove ${res.name} to remove.${off}`);
         }
 
+        // ── -ban @user <from> to <to> daily ───────────────────────────────────
+        // Global (all groups) and owner/mod only. Like permits, these windows live
+        // under the pseudo chat "ban", so .sch list / .sch clear never touch them —
+        // use `.ban list` / `.unban @user` instead (see lib/banStore.js).
+        if (a0 === '-ban' || a0 === 'ban') {
+            const isPriv = m.key?.fromMe || bot.permission.isOwner(m.sender) || bot.permission.isMod(m.sender, m._participantRaw);
+            if (!isPriv) return m.reply('❌ Owner/mod only — bans apply to every group.');
+
+            const banStore = require('../../lib/banStore');
+            const usage = `${P}sch -ban @user 6pm to 9pm daily`;
+            const t = await banStore.targetFromMessage(bot, m, args.slice(1));
+            if (!t) return m.reply(`📅 *Scheduled ban*\n\n*Usage:*\n${usage}\n(or reply to the user's message)\n\n_Bans the user from the bot (all groups) during that window, every day (Nigeria time)._`);
+
+            const why = banStore.protectedReason(bot, t.forms);
+            if (why) return m.reply(`⛔ ${why}`);
+
+            const bText  = t.rest.join(' ');
+            const bMatch = bText.match(/(.+?)\s+to\s+(.+?)(?:\s+daily)?$/i);
+            if (!bMatch) return m.reply(`Couldn't parse time range. Example:\n${usage}`);
+
+            const bFrom = parseTimeOfDay(bMatch[1].trim());
+            const bTo   = parseTimeOfDay(bMatch[2].trim());
+            if (!bFrom) return m.reply(`Couldn't parse start time: "${bMatch[1].trim()}"\nExamples: 1am, 6:30pm, 23:00`);
+            if (!bTo)   return m.reply(`Couldn't parse end time: "${bMatch[2].trim()}"\nExamples: 6am, 18:30, 08:00`);
+            if (bFrom.hour === bTo.hour && bFrom.minute === bTo.minute) return m.reply('⚠️ Start and end time can\'t be the same.');
+
+            banStore.addWindow({ jid: t.jid, forms: t.forms, by: m.sender, timeFrom: bFrom, timeTo: bTo });
+            return m.reply(
+                `✅ *Scheduled ban created!*\n\n🔨 @${t.jid.split('@')[0]} will be banned from the bot (all groups) from *${banStore.hhmm(bFrom)}* to *${banStore.hhmm(bTo)}* every day (Nigeria time).\n\nUse ${P}ban list to view or ${P}unban @user to remove.`,
+                { mentions: [t.jid] },
+            );
+        }
+
         // ── parse -type [target] <from> to <to> daily ─────────────────────────
         const typeMap = {
             '-mute':        'sch-muteGroup',
@@ -103,6 +137,7 @@ ${P}sch -muteuser @user 1am to 6am daily   (or: ${P}sch user @user 1am to 6am da
 ${P}sch -unmuteuser @user 1am to 6am daily (or: ${P}sch unmuteuser @user 1am to 6am daily)
 ${P}sch -dnd 12am to 6pm daily             (or: ${P}sch dnd 12am to 6pm daily)
 ${P}sch -permit ping 6pm to 9pm daily      (owner/mod — opens a command to everyone)
+${P}sch -ban @user 6pm to 9pm daily        (owner/mod — bans a user from the bot in that window)
 ${P}sch list
 ${P}sch clear
 
@@ -148,3 +183,4 @@ _Times: 1am, 6pm, 6:30pm, 23:00 (Nigeria time)_`
     }
 };
 
+        
