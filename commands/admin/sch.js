@@ -9,6 +9,7 @@
  *   .sch -permit ping 6pm to 9pm daily   → (owner/mod) opens .ping to everyone every day
  *   .sch -permit economy 6pm to 9pm daily   (global — all groups; see lib/permit.js)
  *   .sch -ban @user 6pm to 9pm daily     → (owner/mod) bans a user from the bot every day in that window
+ *   .sch -unban @user 6pm to 9pm daily   → (owner/mod) the user is unbanned in that window and banned the rest of the day
  *   .sch list                            → list schedules for this chat
  *   .sch clear                           → cancel all schedules for this chat
  *
@@ -84,14 +85,15 @@ module.exports = {
         // Global (all groups) and owner/mod only. Like permits, these windows live
         // under the pseudo chat "ban", so .sch list / .sch clear never touch them —
         // use `.ban list` / `.unban @user` instead (see lib/banStore.js).
-        if (a0 === '-ban' || a0 === 'ban') {
+        if (a0 === '-ban' || a0 === 'ban' || a0 === '-unban' || a0 === 'unban') {
+            const isUnban = a0 === '-unban' || a0 === 'unban';
             const isPriv = m.key?.fromMe || bot.permission.isOwner(m.sender) || bot.permission.isMod(m.sender, m._participantRaw);
             if (!isPriv) return m.reply('❌ Owner/mod only — bans apply to every group.');
 
             const banStore = require('../../lib/banStore');
-            const usage = `${P}sch -ban @user 6pm to 9pm daily`;
+            const usage = `${P}sch ${isUnban ? '-unban' : '-ban'} @user 6pm to 9pm daily`;
             const t = await banStore.targetFromMessage(bot, m, args.slice(1));
-            if (!t) return m.reply(`📅 *Scheduled ban*\n\n*Usage:*\n${usage}\n(or reply to the user's message)\n\n_Bans the user from the bot (all groups) during that window, every day (Nigeria time)._`);
+            if (!t) return m.reply(`📅 *Scheduled ${isUnban ? 'unban' : 'ban'}*\n\n*Usage:*\n${usage}\n(or reply to the user's message)\n\n_${isUnban ? 'Unbans the user during that window and bans them the rest of the day' : 'Bans the user from the bot during that window'}, every day, in all groups (Nigeria time)._`);
 
             const why = banStore.protectedReason(bot, t.forms);
             if (why) return m.reply(`⛔ ${why}`);
@@ -106,9 +108,11 @@ module.exports = {
             if (!bTo)   return m.reply(`Couldn't parse end time: "${bMatch[2].trim()}"\nExamples: 6am, 18:30, 08:00`);
             if (bFrom.hour === bTo.hour && bFrom.minute === bTo.minute) return m.reply('⚠️ Start and end time can\'t be the same.');
 
-            banStore.addWindow({ jid: t.jid, forms: t.forms, by: m.sender, timeFrom: bFrom, timeTo: bTo });
+            banStore.addWindow({ jid: t.jid, forms: t.forms, by: m.sender, timeFrom: bFrom, timeTo: bTo, kind: isUnban ? 'unban' : 'ban' });
             return m.reply(
-                `✅ *Scheduled ban created!*\n\n🔨 @${t.jid.split('@')[0]} will be banned from the bot (all groups) from *${banStore.hhmm(bFrom)}* to *${banStore.hhmm(bTo)}* every day (Nigeria time).\n\nUse ${P}ban list to view or ${P}unban @user to remove.`,
+                isUnban
+                    ? `✅ *Scheduled unban created!*\n\n🔓 @${t.jid.split('@')[0]} will be *unbanned* from *${banStore.hhmm(bFrom)}* to *${banStore.hhmm(bTo)}* every day and *banned* the rest of the time (all groups, Nigeria time).\n\nUse ${P}ban list to view or ${P}unban @user to remove.`
+                    : `✅ *Scheduled ban created!*\n\n🔨 @${t.jid.split('@')[0]} will be banned from the bot (all groups) from *${banStore.hhmm(bFrom)}* to *${banStore.hhmm(bTo)}* every day (Nigeria time).\n\nUse ${P}ban list to view or ${P}unban @user to remove.`,
                 { mentions: [t.jid] },
             );
         }
@@ -138,6 +142,7 @@ ${P}sch -unmuteuser @user 1am to 6am daily (or: ${P}sch unmuteuser @user 1am to 
 ${P}sch -dnd 12am to 6pm daily             (or: ${P}sch dnd 12am to 6pm daily)
 ${P}sch -permit ping 6pm to 9pm daily      (owner/mod — opens a command to everyone)
 ${P}sch -ban @user 6pm to 9pm daily        (owner/mod — bans a user from the bot in that window)
+${P}sch -unban @user 6pm to 9pm daily      (owner/mod — user is unbanned in that window, banned the rest of the day)
 ${P}sch list
 ${P}sch clear
 
