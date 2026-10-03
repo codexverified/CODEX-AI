@@ -592,6 +592,18 @@ class CODEXAI {
   }
 
   // ── Message cache ─────────────────────────────────────────────────────────
+  // anti-delete is one global on/off (database/antidelete.json). Cached for 5s so
+  // this is not a disk read per message.
+  _antiDeleteOn() {
+    const now = Date.now();
+    if (this._adAt && now - this._adAt < 5000) return this._adOn;
+    let on = false;
+    try { on = !!JSON.parse(fs.readFileSync("./database/antidelete.json", "utf8")).enabled; } catch {}
+    this._adOn = on;
+    this._adAt = now;
+    return on;
+  }
+
   _cacheMessage(msg) {
     try {
       const messageStore = require('./lib/messageStore');
@@ -633,7 +645,10 @@ class CODEXAI {
         // media later — by delete time WhatsApp's CDN link is often
         // already gone, so re-downloading at that point isn't reliable.
         const cat = _MEDIA_CATEGORY[type];
-        if (cat) {
+        // The saved bytes are only ever used by anti-delete. With it off (the default)
+        // this downloaded + wrote EVERY photo/video/sticker/voice note from EVERY chat
+        // to disk, which grows with every group the bot joins — so skip it.
+        if (cat && this._antiDeleteOn()) {
           _queueMediaDownload(async () => {
             const stream = await downloadContentFromMessage(inner, cat);
             const chunks = [];
