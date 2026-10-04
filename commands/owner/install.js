@@ -55,14 +55,15 @@ module.exports = {
         for (const link of links) {
             let label = link;
             try {
-                const result = await saveAndLoad(bot, link, async (name) => {
-                    label = name;
-                    await m.reply(`Installing ${name}...`);
-                });
-                await m.reply(`${result.command.name} installed`);
+                // No "installing…" message — the only thing said on success is "<name> Installed".
+                const result = await saveAndLoad(bot, link, (name) => { label = name; });
+                // Already installed (same plugin tried again) → ignore it, say nothing.
+                if (result.skipped) continue;
+                await m.reply(`${result.command.name} Installed`);
             } catch (e) {
                 await m.reply(`${label} failed: ${e.message}`);
             }
         }
     }
 };
+        
