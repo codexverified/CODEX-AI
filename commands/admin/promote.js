@@ -16,7 +16,7 @@ module.exports = {
         try {
             await bot.sock.groupParticipantsUpdate(m.chat, [target], 'promote');
             await bot.sendMessage(m.chat, {
-                text: `✅ @${target.split('@')[0]} is now an admin.`,
+                text: `*_✓ @${target.split('@')[0]} Promoted_*.`,
                 mentions: [target]
             });
         } catch (err) {
