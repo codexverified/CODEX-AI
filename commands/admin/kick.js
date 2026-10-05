@@ -16,7 +16,7 @@ module.exports = {
         try {
             await bot.sock.groupParticipantsUpdate(m.chat, [target], 'remove');
             await bot.sendMessage(m.chat, {
-                text: `✅ @${target.split('@')[0]} has been removed from the group.`,
+                text: `_*✓ @${target.split('@')[0]} Kicked*_.`,
                 mentions: [target]
             });
         } catch (err) {
