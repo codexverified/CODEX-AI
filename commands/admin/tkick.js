@@ -80,11 +80,11 @@ _Time units: s m h d w_`;
             extra: { alt },
         });
 
-        const who = `@${(alt || hit.id).split('@')[0]}`;
+        const who = `@${hit.id.split('@')[0]}`;
         return bot.sendMessage(m.chat, {
             text: `✅ ${who} was kicked and will be added back in *${mc.humanize(ms)}*.`,
-            mentions: [hit.id, alt].filter(Boolean),
+            mentions: [hit.id],
         });
     },
 };
-                                             
+
