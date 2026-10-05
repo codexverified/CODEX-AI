@@ -16,7 +16,7 @@ module.exports = {
         try {
             await bot.sock.groupParticipantsUpdate(m.chat, [target], 'demote');
             await bot.sendMessage(m.chat, {
-                text: `✅ @${target.split('@')[0]} has been demoted to member.`,
+                text: `_*✓ @${target.split('@')[0]} Demoted*_.`,
                 mentions: [target]
             });
         } catch (err) {
