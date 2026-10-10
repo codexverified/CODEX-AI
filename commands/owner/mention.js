@@ -2,6 +2,8 @@ const fs   = require('fs');
 const path = require('path');
 
 const MENTION_FILE = path.join(__dirname, '../../database/mention_config.json');
+// The sticker the owner chose with `.mention -sticker` (raw .webp, sent as-is).
+const STICKER_FILE = path.join(__dirname, '../../database/mention_sticker.webp');
 
 // IMPORTANT: Never reassign this object — always mutate it with Object.assign
 // so that the exported reference in handler stays valid across reloads
@@ -64,6 +66,7 @@ module.exports = {
                 `│ 𓄄 Action : ${mentionConfig.action || 'None'}\n` +
                 `│ ✦ Emoji  : ${mentionConfig.emoji  || '-'}\n` +
                 `│ ❏ Text   : ${mentionConfig.text   || '-'}\n` +
+                `│ ✧ Sticker: ${fs.existsSync(STICKER_FILE) ? 'saved' : '-'}\n` +
                 `╰──────────────────`
             );
         }
@@ -90,6 +93,55 @@ module.exports = {
             mentionConfig.text   = '';
             saveMentionConfig();
             return reply(`╭─❍ *MENTION*\n│\n│ ✦ Status : ON\n│ 𓄄 Action : REACT\n│ ⚉ Emoji  : ${mentionConfig.emoji}\n╰──────────────────`);
+        }
+
+        // STICKER: reply to the sticker you want with `.mention -sticker`.
+        // `.mention -sticker off` disables it; `.mention -sticker on` re-enables
+        // the sticker already saved.
+        if (option === 'sticker' || option === '-sticker') {
+            const sub = (args[1] || '').toLowerCase();
+            if (sub === 'off') {
+                mentionConfig.active = false;
+                mentionConfig.action = '';
+                saveMentionConfig();
+                return reply('╭─❍ *MENTION-STICKER*\n│\n│ ✦ Status : OFF\n╰──────────────────');
+            }
+            const ctx = m.contextInfo || m.msg?.contextInfo || m.message?.extendedTextMessage?.contextInfo || {};
+            const quotedSticker = ctx.quotedMessage?.stickerMessage;
+            if (!quotedSticker) {
+                if (sub === 'on' && fs.existsSync(STICKER_FILE)) {
+                    mentionConfig.active = true;
+                    mentionConfig.action = 'sticker';
+                    mentionConfig.text = '';
+                    saveMentionConfig();
+                    return reply('╭─❍ *MENTION-STICKER*\n│\n│ ✦ Status : ON\n│ 𓄄 Using your saved sticker\n╰──────────────────');
+                }
+                return reply(`╭─❍ *MENTION-STICKER*\n│\n│ ✘ Reply to a sticker with ${prefix}mention -sticker\n│ ⚉ That sticker will be sent whenever you are mentioned\n╰──────────────────`);
+            }
+            try {
+                const { downloadMediaMessage } = require('../../lib/baileys');   // lazy: keeps mention-react/-text loading independent of Baileys
+                const buffer = await downloadMediaMessage({
+                    key: {
+                        remoteJid: m.chat || m.key?.remoteJid,
+                        id: ctx.stanzaId,
+                        fromMe: false,
+                        participant: ctx.participant,
+                    },
+                    message: ctx.quotedMessage,
+                }, 'buffer', {});
+                if (!buffer || !buffer.length) throw new Error('empty download');
+                fs.mkdirSync(path.dirname(STICKER_FILE), { recursive: true });
+                fs.writeFileSync(STICKER_FILE, buffer);
+            } catch (e) {
+                console.error('[MENTION] Sticker save error:', e.message);
+                return reply('╭─❍ *MENTION-STICKER*\n│\n│ ✘ Could not save that sticker. Try replying to it again.\n╰──────────────────');
+            }
+            mentionConfig.active = true;
+            mentionConfig.action = 'sticker';
+            mentionConfig.emoji  = '';
+            mentionConfig.text   = '';
+            saveMentionConfig();
+            return reply('╭─❍ *MENTION-STICKER*\n│\n│ ✦ Status : ON\n│ 𓄄 Action : STICKER\n│ ✧ Sticker saved\n╰──────────────────');
         }
 
         // TEXT
@@ -121,6 +173,9 @@ module.exports = {
             `│ ➫ ${prefix}mention -react <emoji>\n` +
             `│   Set emoji and enable\n` +
             `│   Example: ${prefix}mention -react 💚\n│\n` +
+            `│ ➫ ${prefix}mention -sticker\n` +
+            `│   Reply to a sticker: it is sent when you are mentioned\n` +
+            `│   (${prefix}mention -sticker off to disable)\n│\n` +
             `│ ➫ ${prefix}mention -text <message>\n` +
             `│   Auto-reply when mentioned\n` +
             `│   Example: ${prefix}mention -text Busy, back later\n│\n` +
@@ -132,4 +187,5 @@ module.exports = {
 module.exports.mentionConfig     = mentionConfig;
 module.exports.loadMentionConfig = loadMentionConfig;
 module.exports.norm = norm;
-        
+module.exports.STICKER_FILE = STICKER_FILE;
+
