@@ -1,0 +1,31 @@
+# Render Blueprint for CODEX AI V3 — needs a PAID instance (the free plan sleeps
+# and has no persistent disk). UNTESTED: written from Render's documented
+# schema, not deployed. Check the first deploy's logs.
+services:
+  - type: web
+    name: codex-ai-v3
+    runtime: node
+    plan: starter
+    numInstances: 1            # exactly one instance owns the WhatsApp session
+    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile
+    # The bot keeps its login in ./session and settings in ./database. A Render
+    # disk mounts at ONE path, so both folders are linked into it and survive
+    # deploys. Existing default database files are copied in once (cp -n).
+    startCommand: >-
+      mkdir -p /var/data/session /var/data/database &&
+      cp -n database/*.json /var/data/database/ 2>/dev/null;
+      rm -rf session database &&
+      ln -sfn /var/data/session session &&
+      ln -sfn /var/data/database database &&
+      node index.js
+    healthCheckPath: /live
+    disk:
+      name: codex-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SESSION_ID       # set privately in the Render dashboard
+        sync: false
+        
