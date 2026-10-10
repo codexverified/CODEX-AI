@@ -370,6 +370,24 @@ async function waitUntil(fn, timeoutMs = 2000, stepMs = 10) {
     assert.ok(laterBatchHandled, 'the next upsert batch should proceed after the stuck handler times out');
   });
 
+  await test('alwaysOnline re-sends "available" when the connection opens; off = no presence sent', async () => {
+    for (const [enabled, expectCalls] of [[true, true], [false, false]]) {
+      const bot = makeBot();
+      bot.config.alwaysOnline = enabled;
+      const calls = [];
+      socketQueue.length = 0;
+      const sock = makeFakeSocket();
+      sock.sendPresenceUpdate = async (...a) => { calls.push(a); };
+      socketQueue.push(sock);
+      await connection.startConnection(bot);
+      sock.ev._emit('connection.update', { connection: 'open' });
+      const sent = await waitUntil(() => calls.some((a) => a[0] === 'available' && a.length === 1), 300);
+      assert.strictEqual(sent, expectCalls, `alwaysOnline=${enabled}: presence sent=${sent}`);
+      clearInterval(bot._presenceTimer);
+    }
+  });
+
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);
 })();
+                                 
