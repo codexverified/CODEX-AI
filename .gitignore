@@ -17,10 +17,19 @@ plugins/
 .env
 .env.*
 !.env.example
+config.env
 config.local.json
 
-# Logs
+# Other auth/session locations a host or fork might use
+sessions/
+auth_info*/
+*.sqlite
+*.db
+.codex.lock
+
+# Logs / PM2
 *.log
+.pm2/
 npm-debug.log*
 logs/
 
