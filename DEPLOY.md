@@ -1,0 +1,38 @@
+# Deploying CODEX AI V3 from scratch
+
+Rules for EVERY host: run exactly **one** copy of the bot, use **Node 22+**, keep
+`session/` (WhatsApp login) and `database/` on storage that survives restarts,
+and never commit your session ID — set it as the private `SESSION_ID` variable.
+Check it's healthy: `/live` = process is up, `/ready` = WhatsApp is connected.
+
+## 1) Linux VPS (recommended — PM2 supervises it)
+```bash
+sudo apt update && sudo apt install -y git curl
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs
+sudo npm install -g pnpm pm2
+git clone <your-repo-url> codex-ai && cd codex-ai
+pnpm install --frozen-lockfile
+nano config.json                      # set owner number, prefix, etc.
+export SESSION_ID="<your-session-id>" # or add it to the server's private environment
+npm run pm2:start
+pm2 save && pm2 startup               # run the ONE command it prints, so it starts on reboot
+npm run pm2:logs
+```
+Restart `npm run pm2:restart` · Stop `npm run pm2:stop`.
+Do not also run `node index.js` by hand.
+
+## 2) Render (paid instance + disk)
+Free plans sleep and have no disk, so a free Render service cannot stay up.
+Create a **Blueprint** from this repo (it reads `render.yaml`), then in the dashboard
+set `SESSION_ID`. Do **not** use PM2 on Render. Render restarts the service itself.
+
+## 3) Pterodactyl / bot panel
+Use a Node.js **22** egg. Startup command: `npm start`. Upload the project, run the
+install/`pnpm install`, set `SESSION_ID` in the panel's variables, then Start. The
+panel restarts it; do **not** use PM2. Keep one server per session.
+
+## 4) Heroku / Docker / others
+Heroku's filesystem resets at least daily, so the login and database would be wiped:
+not recommended. For Docker, mount volumes for `/app/session` and `/app/database`,
+use a Node 22 image, set `SESSION_ID`, and run a single container with a restart policy.
+(These two are guidance only; no files are provided or tested.)
