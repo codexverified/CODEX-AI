@@ -9,7 +9,7 @@
   "sudo": [],
   "mode": "public",
   "autoRead": false,
-  "alwaysOnline": false,
+  "alwaysOnline": true,
   "autoTyping": false,
   "autoRecording": false,
   "autoRecordTyping": false,
