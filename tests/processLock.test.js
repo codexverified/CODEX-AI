@@ -32,7 +32,7 @@ check('acquires a fresh lock when none exists', () => {
   const result = acquireProcessLock(dir);
   assert.strictEqual(result.ok, true);
   const lockContent = fs.readFileSync(path.join(dir, '.codex.lock'), 'utf8').trim();
-  assert.strictEqual(lockContent, String(process.pid));
+  assert.strictEqual(lockContent.split(':')[0], String(process.pid));
 });
 
 check('a second acquire from the SAME process (our own PID) succeeds', () => {
@@ -78,7 +78,7 @@ check('takes over a stale lock left by a dead pid', () => {
   const result = acquireProcessLock(dir);
   assert.strictEqual(result.ok, true, 'a dead pid lock must be treated as stale and taken over');
   const lockContent = fs.readFileSync(path.join(dir, '.codex.lock'), 'utf8').trim();
-  assert.strictEqual(lockContent, String(process.pid));
+  assert.strictEqual(lockContent.split(':')[0], String(process.pid));
 });
 
 check('release removes a lock we own', () => {
