@@ -175,6 +175,73 @@ function mkBot(meta, counters = {}) {
     assert.strictEqual(bot.antiSystems._hasActiveFeature(msg('hello')), false);
   });
 
+  await check('antivideo deletes videos/video notes only when enabled; admins exempt', async () => {
+    fs.writeFileSync('./database/antilink.json', '{}');
+    fs.writeFileSync('./database/antivideo.json', JSON.stringify({ [GROUP]: { enabled: true, action: 'delete' } }));
+    const bot = mkBot(meta, {});
+    const vid = msg('', { type: 'videoMessage', msg: { seconds: 5 } });
+    assert.strictEqual(bot.antiSystems._hasActiveFeature(vid), true);
+    assert.strictEqual(await bot.antiSystems.checkAll(vid), true);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'ptvMessage' })), true);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('hello')), false);               // text untouched
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'imageMessage' })), false);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'videoMessage', sender: '2348022222222@s.whatsapp.net' })), false); // admin
+    fs.writeFileSync('./database/antivideo.json', JSON.stringify({ [GROUP]: { enabled: false, action: 'delete' } }));
+    await new Promise((r) => setTimeout(r, 15));
+    fs.writeFileSync('./database/antivideo.json', JSON.stringify({ [GROUP]: { enabled: false, action: 'delete', x: 1 } }));
+    assert.strictEqual(await bot.antiSystems.checkAll(vid), false);
+  });
+
+  await check('antisticker deletes every sticker when enabled; other messages untouched', async () => {
+    fs.writeFileSync('./database/antivideo.json', '{}');
+    fs.writeFileSync('./database/antisticker.json', JSON.stringify({ [GROUP]: { enabled: true, action: 'delete' } }));
+    const bot = mkBot(meta, {});
+    const st = msg('', { type: 'stickerMessage', msg: { fileSha256: Buffer.from('ZZZZ', 'base64') } });
+    assert.strictEqual(await bot.antiSystems.checkAll(st), true);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('hi')), false);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'videoMessage' })), false);
+    assert.strictEqual(await bot.antiSystems.checkAll({ ...st, sender: '2348022222222@s.whatsapp.net' }), false); // admin
+    fs.writeFileSync('./database/antisticker.json', '{}');
+  });
+
+  await check('antivv deletes view-once (all variants) only when enabled; antivn deletes voice notes only', async () => {
+    fs.writeFileSync('./database/antisticker.json', '{}');
+    fs.writeFileSync('./database/antivv.json', JSON.stringify({ [GROUP]: { enabled: true, action: 'delete' } }));
+    let bot = mkBot(meta, {});
+    const vv = (type, extra = {}) => msg('', { type, viewOnce: true, viewOnceType: 'imageMessage', msg: {}, ...extra });
+    for (const t of ['viewOnceMessage', 'viewOnceMessageV2', 'viewOnceMessageV2Extension']) {
+      assert.strictEqual(await bot.antiSystems.checkAll(vv(t)), true, t);
+    }
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'imageMessage', msg: { viewOnce: true } })), true); // newer flag form
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'imageMessage', msg: {} })), false);               // normal photo
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'audioMessage', msg: { ptt: true } })), false);    // voice note untouched by antivv
+    assert.strictEqual(await bot.antiSystems.checkAll(vv('viewOnceMessage', { sender: '2348022222222@s.whatsapp.net' })), false); // admin
+    fs.writeFileSync('./database/antivv.json', '{}');
+
+    fs.writeFileSync('./database/antivn.json', JSON.stringify({ [GROUP]: { enabled: true, action: 'delete' } }));
+    bot = mkBot(meta, {});
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'audioMessage', msg: { ptt: true } })), true);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'audioMessage', msg: { ptt: false } })), false);   // normal audio file/music
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'viewOnceMessageV2', viewOnce: true, viewOnceType: 'audioMessage', msg: { ptt: true } })), true);
+    assert.strictEqual(await bot.antiSystems.checkAll(msg('', { type: 'audioMessage', msg: { ptt: true }, sender: '2348022222222@s.whatsapp.net' })), false);
+    fs.writeFileSync('./database/antivn.json', '{}');
+  });
+
+  await check('antivv / antivn honour warn and kick actions', async () => {
+    for (const [file, mk] of [['antivv', () => msg('', { type: 'viewOnceMessage', viewOnce: true, msg: {} })], ['antivn', () => msg('', { type: 'audioMessage', msg: { ptt: true } })]]) {
+      for (const action of ['warn', 'kick']) {
+        fs.writeFileSync(`./database/${file}.json`, JSON.stringify({ [GROUP]: { enabled: true, action, maxWarns: 3 } }));
+        const calls = []; const c = {};
+        const bot = mkBot(meta, c);
+        bot.sock.groupParticipantsUpdate = async (...a) => { calls.push(a); };
+        assert.strictEqual(await bot.antiSystems.checkAll(mk()), true, `${file}/${action}`);
+        if (action === 'kick') assert.ok(calls.some((a) => a[2] === 'remove'), 'expected a removal call');
+        assert.ok(c.sent >= 1, `${file}/${action}: expected a notice`);
+      }
+      fs.writeFileSync(`./database/${file}.json`, '{}');
+    }
+  });
+
   await check('DMs are ignored', async () => {
     const bot = mkBot(meta, {});
     assert.strictEqual(await bot.antiSystems.checkAll({ isGroup: false }), false);
@@ -183,4 +250,4 @@ function mkBot(meta, counters = {}) {
   console.log(`\n${passed} passed`);
   process.exit(process.exitCode || 0);
 })();
-              
+                       
