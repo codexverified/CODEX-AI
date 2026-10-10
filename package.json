@@ -6,7 +6,16 @@
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js",
-        "test": "node tests/connection.test.js && node tests/sessionCleanup.test.js && node tests/processLock.test.js && node tests/pluginManager.test.js"
+        "test": "node tests/antiSystems.perf.test.js && node tests/healthEndpoints.test.js && node tests/connection.test.js && node tests/sessionCleanup.test.js && node tests/processLock.test.js && node tests/pluginManager.test.js",
+        "bench": "node tests/bench/antiSystems.bench.js",
+        "pm2:start": "pm2 start ecosystem.config.cjs --only codex-ai-v3",
+        "pm2:restart": "pm2 restart codex-ai-v3 --update-env",
+        "pm2:stop": "pm2 stop codex-ai-v3",
+        "pm2:logs": "pm2 logs codex-ai-v3",
+        "pm2:status": "pm2 describe codex-ai-v3"
+    },
+    "engines": {
+        "node": ">=22"
     },
     "keywords": [
         "whatsapp",
@@ -31,7 +40,7 @@
         "canvas": "npm:@napi-rs/canvas@^1.0.2",
         "chalk": "^4.1.2",
         "cheerio": "^1.2.0",
-        "crypto-js": "latest",
+        "crypto-js": "4.2.0",
         "docx": "^9.6.1",
         "dotenv": "^17.3.1",
         "express": "^4.22.1",
