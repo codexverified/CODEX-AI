@@ -139,7 +139,7 @@ CODEX AI runs on **Node.js** and a hardened Baileys fork, with a modular command
    ```
 
 4. Deploy once so Render provides a live service URL.
-5. Generate a session ID from the [pairing site](https://codex-ai.site/session), add it to `config.json`, and redeploy.
+5. Generate a session ID from the [pairing site](https://codex-ai.site/session) and add it as a private `SESSION_ID` environment variable in Render (avoid committing it in `config.json`), then redeploy. Set the health check path to `/live`.
 
 Render's free tier may sleep after inactivity. For consistent 24/7 availability, use a suitable paid instance or another host that supports persistent services.
 
@@ -160,12 +160,27 @@ pnpm install
 # Configure your bot
 nano config.json
 
-# Run persistently with PM2
+# Keep your WhatsApp session ID out of git: export it privately instead of
+# writing it into config.json (the bot reads SESSION_ID first).
+export SESSION_ID="<your-session-id>"   # or put it in your server's private environment
+
+# Run persistently with PM2 (single instance named "codex-ai-v3", see ecosystem.config.cjs)
 sudo npm install -g pm2
-pm2 start index.js --name codex-ai
-pm2 save
-pm2 startup
+npm run pm2:start        # start
+npm run pm2:logs         # view logs (Ctrl+C to leave)
+npm run pm2:restart      # restart
+npm run pm2:stop         # stop
+pm2 save                 # remember the process list
+pm2 startup              # prints ONE command — copy and run it so PM2 starts at boot
 ```
+
+> Run **one** instance only. Never start the bot a second time (another PM2 name,
+> a second copy, `node index.js` in a terminal) against the same `session/` folder —
+> it corrupts the WhatsApp login. On Render, Heroku or a hosting panel the host
+> already supervises the process, so do **not** use PM2 there.
+
+Health endpoints (port `PORT`, default 3000): `/live` returns 200 while the process
+is up; `/ready` returns 200 only while WhatsApp is actually connected (503 otherwise).
 
 ### Deploy on Heroku
 
